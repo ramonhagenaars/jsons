@@ -1,7 +1,20 @@
 from setuptools import setup
 
+with open('README.md', 'r') as fh:
+    long_description = fh.read()
+
 setup(name='jsons',
       version='0.0.1',
+      author='Ramon Hagenaars',
       description='For serializing Python objects to JSON and back',
+      long_description=long_description,
+      long_description_content_type='text/markdown',
+      url='https://github.com/ramonhagenaars/jsons',
       py_modules=['jsons'],
-      zip_safe=False)
+      zip_safe=False,
+      classifiers=(
+          'Programming Language :: Python :: 3',
+          'Licence :: MIT License',
+          'Operating System :: OS Independent'
+      )
+)
