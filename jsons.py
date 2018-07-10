@@ -1,3 +1,49 @@
+"""
+Works with Python 3.5+
+
+JSON (de)serialization (jsons) from and to dicts and plain old Python objects.
+
+Works with dataclasses (Python3.7+).
+
+
+**Example:**
+
+    >>> from dataclasses import dataclass
+    >>> @dataclass
+    >>> class Car:
+    >>>     color: str
+    >>> @dataclass
+    >>> class Person:
+    >>>     car: Car
+    >>>     name: str
+    >>> jsons.dump(Person(Car('Red'), 'John'))
+    {'car': {'color': 'Red'}, 'name': 'John'}
+    >> jsons.load(jsons.dump(Person(Car('Red'), 'John')), Person)
+    Person(car=Car(color='Red'), name='John')
+
+Deserialization will work with older Python classes (Python3.5+) given that
+type hints are present for custom types (i.e. any type that is not set at
+the bottom of this module). Serialization will work with no type hints at
+all.
+
+
+**Example**
+
+
+    >>> class Car:
+    >>>    def __init__(self, color):
+    >>>        self.color = color
+    >>> class Person:
+    >>>     def __init__(self, car: Car, name):
+    >>>         self.car = car
+    >>>         self.name = name
+    >>> jsons.dump(Person(Car('Red'), 'John'))
+    {'car': {'color': 'Red'}, 'name': 'John'}
+    >> jsons.load(jsons.dump(Person(Car('Red'), 'John')), Person)
+    <your_module.Person object at 0x03F9C570>
+
+"""
+
 import inspect
 import json
 import re
@@ -13,6 +59,14 @@ _DESERIALIZERS = dict()
 
 
 def dump(obj: object) -> dict:
+    """
+    Serialize the given ``obj`` to a dict.
+
+    The way objects are serialized can be finetuned by setting serializer
+    functions for the specific type using ``set_serializer``.
+    :param obj: a Python instance of any sort.
+    :return: the serialized obj as a dict.
+    """
     serializer = _SERIALIZERS.get(obj.__class__.__name__, None)
     if not serializer:
         parents = [cls for cls in _CLASSES if isinstance(obj, cls)]
@@ -21,7 +75,42 @@ def dump(obj: object) -> dict:
     return serializer(obj)
 
 
-def load(json_obj: object, cls: type = None) -> object:
+def load(json_obj: dict, cls: type = None) -> object:
+    """
+    Deserialize the given ``json_obj`` to an object of type ``cls``. If the
+    contents of ``json_obj`` do not match the interface of ``cls``, a
+    TypeError is raised.
+
+    If ``json_obj`` contains a value that belongs to a custom class, there must
+    be a type hint present for that value in ``cls`` to let this function know
+    what type it should deserialize that value to.
+
+
+    **Example**:
+
+        ``class Person:``
+            ``# No type hint required for name``
+
+        ``class Person:``
+            ``# No type hint required for name``
+
+            ``def __init__(self, name):``
+                ``self.name = name``
+        ````
+        ``class Family:``
+            ``# Person is a custom class, use a type hint``
+
+            ``def __init__(self, persons: List[Person]):``
+                ``self.persons = persons``
+
+        ``jsons.load(some_dict, Family)``
+
+    If no ``cls`` is given, a dict is simply returned, but contained values
+    (e.g. serialized ``datetime`` values) are still deserialized.
+    :param json_obj: the dict that is to be deserialized.
+    :param cls: a matching class of which an instance should be returned.
+    :return: an instance of ``cls`` if given, a dict otherwise.
+    """
     cls = cls or type(json_obj)
     cls_name = cls.__name__ if hasattr(cls, '__name__') else cls.__origin__.__name__
     deserializer = _DESERIALIZERS.get(cls_name, None)
@@ -32,16 +121,44 @@ def load(json_obj: object, cls: type = None) -> object:
     return deserializer(json_obj, cls)
 
 
-def dumps(obj: object) -> str:
-    return json.dumps(dump(obj))
+def dumps(obj: object, *args, **kwargs) -> str:
+    """
+    Extend ``json.dumps``, allowing any Python instance to be dumped to a
+    string. Any extra (keyword) arguments are passed on to ``json.dumps``.
+
+    :param obj: the object that is to be dumped to a string.
+    :param args: extra arguments for ``json.dumps``.
+    :param kwargs: extra keyword arguments for ``json.dumps``.
+    :return: ``obj`` as a ``str``.
+    """
+    return json.dumps(dump(obj), *args, **kwargs)
 
 
-def loads(s: str, cls: type = None) -> object:
-    obj = json.loads(s)
+def loads(s: str, cls: type = None, *args, **kwargs) -> object:
+    """
+    Extend ``json.loads``, allowing a string to be loaded into a dict or a
+    Python instance of type ``cls``. Any extra (keyword) arguments are passed
+    on to ``json.loads``.
+
+    :param s: the string that is to be loaded.
+    :param cls: a matching class of which an instance should be returned.
+    :param args: extra arguments for ``json.dumps``.
+    :param kwargs: extra keyword arguments for ``json.dumps``.
+    :return: an instance of type ``cls`` or a dict if no ``cls`` is given.
+    """
+    obj = json.loads(s, *args, **kwargs)
     return load(obj, cls) if cls else obj
 
 
 def set_serializer(c: callable, cls: type) -> None:
+    """
+    Set a serializer function for the given type. You may override the default
+    behavior of ``jsons.load`` by setting a custom serializer.
+
+    :param c: the serializer function.
+    :param cls: the type this serializer can handle.
+    :return: None.
+    """
     if cls:
         _CLASSES.insert(0, cls)
         _SERIALIZERS[cls.__name__] = c
@@ -50,6 +167,14 @@ def set_serializer(c: callable, cls: type) -> None:
 
 
 def set_deserializer(c: callable, cls: type) -> None:
+    """
+    Set a deserializer function for the given type. You may override the default
+    behavior of ``jsons.dump`` by setting a custom deserializer.
+
+    :param c: the deserializer function.
+    :param cls: the type this serializer can handle.
+    :return: None.
+    """
     if cls:
         _CLASSES.insert(0, cls)
         _DESERIALIZERS[cls.__name__] = c
@@ -160,6 +285,7 @@ def _default_string_deserializer(obj: str, _: type = None) -> object:
 
 def _default_primitive_deserializer(obj: object, _: type = None) -> object:
     return obj
+
 
 # The order of the below is important.
 set_serializer(_default_object_serializer, object)
