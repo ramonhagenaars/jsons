@@ -2,7 +2,7 @@ import inspect
 import re
 from datetime import datetime, timedelta, timezone
 from enum import Enum, EnumMeta
-from typing import List, GenericMeta
+from typing import List
 
 _JSON_TYPES = (str, int, float, bool)
 _RFC3339_DATETIME_PATTERN = '%Y-%m-%dT%H:%M:%S'
@@ -22,7 +22,8 @@ def dump(obj: object) -> dict:
 
 def load(json_obj: object, cls: type = None) -> object:
     cls = cls or type(json_obj)
-    deserializer = _DESERIALIZERS.get(cls.__name__, None)
+    cls_name = cls.__name__ if hasattr(cls, '__name__') else cls.__origin__.__name__
+    deserializer = _DESERIALIZERS.get(cls_name, None)
     if not deserializer:
         parents = [cls_ for cls_ in _CLASSES if issubclass(cls, cls_)]
         if parents:
@@ -112,9 +113,10 @@ def _default_object_deserializer(obj: dict, cls: type) -> object:
     for signature_key, signature in signature_parameters.items():
         if obj and signature_key is not 'self':
             if signature_key in obj:
-                cls_ = signature.annotation if signature.annotation != inspect._empty else None
+                cls_ = None
+                if signature.annotation != inspect._empty:
+                    cls_ = signature.annotation
                 value = load(obj[signature_key], cls_)
-
                 constructor_args[signature_key] = value
 
     # The constructor arguments are gathered, create an instance.
@@ -128,7 +130,7 @@ def _default_object_deserializer(obj: dict, cls: type) -> object:
     return instance
 
 
-def _default_list_deserializer(obj: List, cls: GenericMeta) -> object:
+def _default_list_deserializer(obj: List, cls) -> object:
     cls_ = None
     if cls and hasattr(cls, '__args__'):
         cls_ = cls.__args__[0]
