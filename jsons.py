@@ -1,4 +1,5 @@
 import inspect
+import json
 import re
 from datetime import datetime, timedelta, timezone
 from enum import Enum, EnumMeta
@@ -29,6 +30,15 @@ def load(json_obj: object, cls: type = None) -> object:
         if parents:
             deserializer = _DESERIALIZERS[parents[0].__name__]
     return deserializer(json_obj, cls)
+
+
+def dumps(obj: object) -> str:
+    return json.dumps(dump(obj))
+
+
+def loads(s: str, cls: type = None) -> object:
+    obj = json.loads(s)
+    return load(obj, cls) if cls else obj
 
 
 def set_serializer(c: callable, cls: type) -> None:
