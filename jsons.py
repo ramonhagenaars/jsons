@@ -1,5 +1,5 @@
 """
-Works with Python 3.5+
+Works with Python3.5+
 
 JSON (de)serialization (jsons) from and to dicts and plain old Python objects.
 
@@ -40,7 +40,7 @@ all.
     >>> jsons.dump(Person(Car('Red'), 'John'))
     {'car': {'color': 'Red'}, 'name': 'John'}
     >> jsons.load(jsons.dump(Person(Car('Red'), 'John')), Person)
-    <your_module.Person object at 0x03F9C570>
+    <__main__.Person object at 0x03F9C570>
 
 """
 
