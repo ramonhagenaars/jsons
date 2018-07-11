@@ -14,7 +14,6 @@ setup(name='jsons',
       zip_safe=False,
       classifiers=(
           'Programming Language :: Python :: 3',
-          'Licence :: MIT License',
           'Operating System :: OS Independent'
       )
 )
