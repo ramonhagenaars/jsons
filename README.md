@@ -1,4 +1,5 @@
 [![Build Status](https://travis-ci.org/ramonhagenaars/geomodels.svg?branch=master)](https://travis-ci.org/ramonhagenaars/jsons)
+[![Maintainability](https://api.codeclimate.com/v1/badges/17d997068b3387c2f2c3/maintainability)](https://codeclimate.com/github/ramonhagenaars/jsons/maintainability)
 
 # jsons
 A Python lib (Python3.5+) for serializing Python objects to dicts or strings and for 
