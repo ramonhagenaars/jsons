@@ -30,6 +30,10 @@ class TestJsons(TestCase):
         d = datetime.datetime(year=2018, month=7, day=8, hour=21, minute=34)
         self.assertEqual('2018-07-08T21:34:00Z', jsons.dump(d))
 
+    def test_dump_datetime_with_microseconds(self):
+        d = datetime.datetime(year=2018, month=7, day=8, hour=21, minute=34, microsecond=123456)
+        self.assertEqual('2018-07-08T21:34:00.123456Z', jsons.dump(d))
+
     def test_dump_enum(self):
         class E(Enum):
             x = 1

@@ -197,10 +197,13 @@ def _default_enum_serializer(obj: EnumMeta) -> dict:
 def _default_datetime_serializer(obj: datetime) -> dict:
     timezone = obj.tzinfo
     offset = 'Z'
+    pattern = _RFC3339_DATETIME_PATTERN
     if timezone:
         if timezone.tzname(None) != 'UTC':
             offset = timezone.tzname(None).split('UTC')[1]
-    return obj.strftime("{}{}".format(_RFC3339_DATETIME_PATTERN, offset))
+    if obj.microsecond:
+        pattern += '.%f'
+    return obj.strftime("{}{}".format(pattern, offset))
 
 
 def _default_primitive_serializer(obj) -> dict:

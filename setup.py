@@ -4,7 +4,7 @@ with open('README.md', 'r') as fh:
     long_description = fh.read()
 
 setup(name='jsons',
-      version='0.0.1',
+      version='0.0.2',
       author='Ramon Hagenaars',
       description='For serializing Python objects to JSON and back',
       long_description=long_description,
