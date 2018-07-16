@@ -193,33 +193,37 @@ def loads(s: str, cls: type = None, *args, **kwargs) -> object:
     return load(obj, cls) if cls else obj
 
 
-def set_serializer(c: callable, cls: type) -> None:
+def set_serializer(c: callable, cls: type, high_prio: bool = True) -> None:
     """
     Set a serializer function for the given type. You may override the default
     behavior of ``jsons.load`` by setting a custom serializer.
 
     :param c: the serializer function.
     :param cls: the type this serializer can handle.
+    :param high_prio: determines the order in which is looked for the callable.
     :return: None.
     """
     if cls:
-        _CLASSES.insert(0, cls)
+        index = 0 if high_prio else len(_CLASSES)
+        _CLASSES.insert(index, cls)
         _SERIALIZERS[cls.__name__] = c
     else:
         _SERIALIZERS['NoneType'] = c
 
 
-def set_deserializer(c: callable, cls: type) -> None:
+def set_deserializer(c: callable, cls: type, high_prio: bool = True) -> None:
     """
     Set a deserializer function for the given type. You may override the
     default behavior of ``jsons.dump`` by setting a custom deserializer.
 
     :param c: the deserializer function.
     :param cls: the type this serializer can handle.
+    :param high_prio: determines the order in which is looked for the callable.
     :return: None.
     """
     if cls:
-        _CLASSES.insert(0, cls)
+        index = 0 if high_prio else len(_CLASSES)
+        _CLASSES.insert(index, cls)
         _DESERIALIZERS[cls.__name__] = c
     else:
         _DESERIALIZERS['NoneType'] = c
@@ -361,8 +365,6 @@ def _default_primitive_deserializer(obj: object, _: type = None) -> object:
     return obj
 
 
-# The order of the below is important.
-set_serializer(_default_object_serializer, object)
 set_serializer(_default_list_serializer, list)
 set_serializer(_default_enum_serializer, Enum)
 set_serializer(_default_datetime_serializer, datetime)
@@ -372,7 +374,7 @@ set_serializer(_default_primitive_serializer, float)
 set_serializer(_default_primitive_serializer, bool)
 set_serializer(_default_primitive_serializer, dict)
 set_serializer(_default_primitive_serializer, None)
-set_deserializer(_default_object_deserializer, object)
+set_serializer(_default_object_serializer, object, False)
 set_deserializer(_default_list_deserializer, list)
 set_deserializer(_default_enum_deserializer, Enum)
 set_deserializer(_default_datetime_deserializer, datetime)
@@ -382,3 +384,4 @@ set_deserializer(_default_primitive_deserializer, float)
 set_deserializer(_default_primitive_deserializer, bool)
 set_deserializer(_default_primitive_deserializer, dict)
 set_deserializer(_default_primitive_deserializer, None)
+set_deserializer(_default_object_deserializer, object, False)
