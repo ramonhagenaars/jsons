@@ -10,16 +10,25 @@ Works with dataclasses (Python3.7+).
 
     >>> from dataclasses import dataclass
     >>> @dataclass
-    >>> class Car:
-    >>>     color: str
+    ... class Car:
+    ...     color: str
     >>> @dataclass
-    >>> class Person:
-    >>>     car: Car
-    >>>     name: str
-    >>> jsons.dump(Person(Car('Red'), 'John'))
-    {'car': {'color': 'Red'}, 'name': 'John'}
-    >> jsons.load(jsons.dump(Person(Car('Red'), 'John')), Person)
-    Person(car=Car(color='Red'), name='John')
+    ... class Person:
+    ...     car: Car
+    ...     name: str
+    >>> c = Car('Red')
+    >>> p = Person(c, 'John')
+    >>> dumped = dump(p)
+    >>> dumped['name']
+    'John'
+    >>> dumped['car']['color']
+    'Red'
+    >>> p_reloaded = load(dumped, Person)
+    >>> p_reloaded.name
+    'John'
+    >>> p_reloaded.car.color
+    'Red'
+
 
 Deserialization will work with older Python classes (Python3.5+) given that
 type hints are present for custom types (i.e. any type that is not set at
@@ -29,18 +38,51 @@ all.
 
 **Example**
 
-
     >>> class Car:
-    >>>    def __init__(self, color):
-    >>>        self.color = color
+    ...     def __init__(self, color):
+    ...         self.color = color
     >>> class Person:
-    >>>     def __init__(self, car: Car, name):
-    >>>         self.car = car
-    >>>         self.name = name
-    >>> jsons.dump(Person(Car('Red'), 'John'))
-    {'car': {'color': 'Red'}, 'name': 'John'}
-    >> jsons.load(jsons.dump(Person(Car('Red'), 'John')), Person)
-    <__main__.Person object at 0x03F9C570>
+    ...     def __init__(self, car: Car, name):
+    ...         self.car = car
+    ...         self.name = name
+    >>> c = Car('Red')
+    >>> p = Person(c, 'John')
+    >>> dumped = dump(p)
+    >>> dumped['name']
+    'John'
+    >>> dumped['car']['color']
+    'Red'
+    >>> p_reloaded = load(dumped, Person)
+    >>> p_reloaded.name
+    'John'
+    >>> p_reloaded.car.color
+    'Red'
+
+
+Alternatively, you can make use of the `JsonSerializable` class.
+
+
+**Example**
+
+    >>> class Car(JsonSerializable):
+    ...     def __init__(self, color):
+    ...         self.color = color
+    >>> class Person(JsonSerializable):
+    ...     def __init__(self, car: Car, name):
+    ...         self.car = car
+    ...         self.name = name
+    >>> c = Car('Red')
+    >>> p = Person(c, 'John')
+    >>> dumped = p.json
+    >>> dumped['name']
+    'John'
+    >>> dumped['car']['color']
+    'Red'
+    >>> p_reloaded = Person.from_json(dumped)
+    >>> p_reloaded.name
+    'John'
+    >>> p_reloaded.car.color
+    'Red'
 
 """
 
@@ -112,7 +154,8 @@ def load(json_obj: dict, cls: type = None) -> object:
     :return: an instance of ``cls`` if given, a dict otherwise.
     """
     cls = cls or type(json_obj)
-    cls_name = cls.__name__ if hasattr(cls, '__name__') else cls.__origin__.__name__
+    cls_name = cls.__name__ if hasattr(cls, '__name__') \
+        else cls.__origin__.__name__
     deserializer = _DESERIALIZERS.get(cls_name, None)
     if not deserializer:
         parents = [cls_ for cls_ in _CLASSES if issubclass(cls, cls_)]
@@ -168,8 +211,8 @@ def set_serializer(c: callable, cls: type) -> None:
 
 def set_deserializer(c: callable, cls: type) -> None:
     """
-    Set a deserializer function for the given type. You may override the default
-    behavior of ``jsons.dump`` by setting a custom deserializer.
+    Set a deserializer function for the given type. You may override the
+    default behavior of ``jsons.dump`` by setting a custom deserializer.
 
     :param c: the deserializer function.
     :param cls: the type this serializer can handle.
@@ -180,6 +223,33 @@ def set_deserializer(c: callable, cls: type) -> None:
         _DESERIALIZERS[cls.__name__] = c
     else:
         _DESERIALIZERS['NoneType'] = c
+
+
+class JsonSerializable:
+    """
+    This class offers an alternative to using the `jsons.load` and `jsons.dump`
+    methods. An instance of a class that inherits from JsonSerializable has the
+    `json` property, which value is equivalent to calling `jsons.dump` on that
+    instance. Furthermore, you can call `from_json` on that class, which is
+    equivalent to calling `json.load` with that class as an argument.
+    """
+    @property
+    def json(self) -> dict:
+        """
+        See `jsons.dump`.
+        :return: this instance in a JSON representation (dict).
+        """
+        return dump(self)
+
+    @classmethod
+    def from_json(cls, json_obj: dict) -> object:
+        """
+        See `jsons.load`.
+        :param json_obj: a JSON representation of an instance of the inheriting
+        class
+        :return: an instance of the inheriting class.
+        """
+        return load(json_obj, cls)
 
 
 #######################
@@ -228,18 +298,18 @@ def _default_datetime_deserializer(obj: str, _: datetime) -> datetime:
         frac = regex_pattern.search(obj).group()
         obj = obj.replace(frac, frac[0:7])
     if obj[-1] == 'Z':
-        datetime_str = obj[0:-1]
-        datetime_obj = datetime.strptime(datetime_str, pattern)
+        dattim_str = obj[0:-1]
+        dattim_obj = datetime.strptime(dattim_str, pattern)
     else:
-        datetime_str, offset = obj.split('+')
-        datetime_obj = datetime.strptime(datetime_str, pattern)
+        dattim_str, offset = obj.split('+')
+        dattim_obj = datetime.strptime(dattim_str, pattern)
         hours, minutes = offset.split(':')
         tz = timezone(offset=timedelta(hours=int(hours), minutes=int(minutes)))
-        datetime_list = [datetime_obj.year, datetime_obj.month, datetime_obj.day,
-                         datetime_obj.hour, datetime_obj.minute, datetime_obj.second,
-                         datetime_obj.microsecond, tz]
-        datetime_obj = datetime(*datetime_list)
-    return datetime_obj
+        datetime_list = [dattim_obj.year, dattim_obj.month, dattim_obj.day,
+                         dattim_obj.hour, dattim_obj.minute, dattim_obj.second,
+                         dattim_obj.microsecond, tz]
+        dattim_obj = datetime(*datetime_list)
+    return dattim_obj
 
 
 def _default_object_deserializer(obj: dict, cls: type) -> object:
@@ -263,7 +333,8 @@ def _default_object_deserializer(obj: dict, cls: type) -> object:
     remaining_attrs = {attr_name: obj[attr_name] for attr_name in obj
                        if attr_name not in constructor_args}
     for attr_name in remaining_attrs:
-        loaded_attr = load(remaining_attrs[attr_name], type(remaining_attrs[attr_name]))
+        loaded_attr = load(remaining_attrs[attr_name],
+                           type(remaining_attrs[attr_name]))
         setattr(instance, attr_name, loaded_attr)
     return instance
 

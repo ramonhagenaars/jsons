@@ -4,6 +4,7 @@ from unittest.case import TestCase
 import datetime
 import jsons
 import json
+from jsons import JsonSerializable
 
 
 class TestJsons(TestCase):
@@ -31,7 +32,8 @@ class TestJsons(TestCase):
         self.assertEqual('2018-07-08T21:34:00Z', jsons.dump(d))
 
     def test_dump_datetime_with_microseconds(self):
-        d = datetime.datetime(year=2018, month=7, day=8, hour=21, minute=34, microsecond=123456)
+        d = datetime.datetime(year=2018, month=7, day=8, hour=21, minute=34,
+                              microsecond=123456)
         self.assertEqual('2018-07-08T21:34:00.123456Z', jsons.dump(d))
 
     def test_dump_enum(self):
@@ -43,7 +45,8 @@ class TestJsons(TestCase):
     def test_dump_list(self):
         d = datetime.datetime(year=2018, month=7, day=8, hour=21, minute=34)
         l = [1, 2, 3, [4, 5, [d]]]
-        self.assertEqual([1, 2, 3, [4, 5, ['2018-07-08T21:34:00Z']]], jsons.dump(l))
+        self.assertEqual([1, 2, 3, [4, 5, ['2018-07-08T21:34:00Z']]],
+                         jsons.dump(l))
 
     def test_dump_object(self):
         class A:
@@ -90,7 +93,8 @@ class TestJsons(TestCase):
     def test_load_list(self):
         d = datetime.datetime(year=2018, month=7, day=8, hour=21, minute=34)
         l = [1, 2, 3, [4, 5, [d]]]
-        self.assertEqual(l, jsons.load([1, 2, 3, [4, 5, ['2018-07-08T21:34:00Z']]]))
+        expectation = [1, 2, 3, [4, 5, ['2018-07-08T21:34:00Z']]]
+        self.assertEqual(l, jsons.load(expectation))
 
     def test_load_object(self):
         class A:
@@ -124,7 +128,8 @@ class TestJsons(TestCase):
                 self.name = 'A'
 
         class B:
-            def __init__(self, list_a: List[A], list_dates: List[datetime.datetime]):
+            def __init__(self, list_a: List[A],
+                         list_dates: List[datetime.datetime]):
                 self.list_a = list_a
                 self.list_dates = list_dates
                 self.name = 'B'
@@ -133,18 +138,25 @@ class TestJsons(TestCase):
             def __init__(self, list_b: List[B]):
                 self.list_b = list_b
 
-        c = C([B([A(), A()], []), B([], [datetime.datetime.now(), datetime.datetime.now()])])
+        c = C([B([A(), A()], []),
+               B([], [datetime.datetime.now(), datetime.datetime.now()])])
         dumped_c = jsons.dump(c)
         loaded_c = jsons.load(dumped_c, C)
         self.assertEqual(loaded_c.list_b[0].name, 'B')
         self.assertEqual(loaded_c.list_b[0].list_a[0].name, 'A')
         self.assertEqual(loaded_c.list_b[0].list_a[1].name, 'A')
-        self.assertEqual(loaded_c.list_b[1].list_dates[0].year, c.list_b[1].list_dates[0].year)
-        self.assertEqual(loaded_c.list_b[1].list_dates[0].month, c.list_b[1].list_dates[0].month)
-        self.assertEqual(loaded_c.list_b[1].list_dates[0].day, c.list_b[1].list_dates[0].day)
-        self.assertEqual(loaded_c.list_b[1].list_dates[0].hour, c.list_b[1].list_dates[0].hour)
-        self.assertEqual(loaded_c.list_b[1].list_dates[0].minute, c.list_b[1].list_dates[0].minute)
-        self.assertEqual(loaded_c.list_b[1].list_dates[0].second, c.list_b[1].list_dates[0].second)
+        self.assertEqual(loaded_c.list_b[1].list_dates[0].year,
+                         c.list_b[1].list_dates[0].year)
+        self.assertEqual(loaded_c.list_b[1].list_dates[0].month,
+                         c.list_b[1].list_dates[0].month)
+        self.assertEqual(loaded_c.list_b[1].list_dates[0].day,
+                         c.list_b[1].list_dates[0].day)
+        self.assertEqual(loaded_c.list_b[1].list_dates[0].hour,
+                         c.list_b[1].list_dates[0].hour)
+        self.assertEqual(loaded_c.list_b[1].list_dates[0].minute,
+                         c.list_b[1].list_dates[0].minute)
+        self.assertEqual(loaded_c.list_b[1].list_dates[0].second,
+                         c.list_b[1].list_dates[0].second)
 
     def test_dumps(self):
         class A:
@@ -178,3 +190,17 @@ class TestJsons(TestCase):
         loaded_obj = jsons.loads(s, B)
         self.assertEqual('B', loaded_obj.name)
         self.assertEqual('A', loaded_obj.a.name)
+
+    def test_jsonserializable(self):
+        class Person(JsonSerializable):
+            def __init__(self, name, age):
+                self.name = name
+                self.age = age
+
+        person = Person('John', 65)
+        person_json = person.json
+        person_loaded = Person.from_json(person_json)
+
+        self.assertEqual(person_json, {'name': 'John', 'age': 65})
+        self.assertEqual(person_loaded.name, 'John')
+        self.assertEqual(person_loaded.age, 65)
