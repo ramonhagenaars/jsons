@@ -242,7 +242,7 @@ class JsonSerializable:
         return dump(self)
 
     @classmethod
-    def from_json(cls, json_obj: dict) -> object:
+    def from_json(cls: type, json_obj: dict) -> object:
         """
         See `jsons.load`.
         :param json_obj: a JSON representation of an instance of the inheriting
