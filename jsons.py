@@ -100,13 +100,14 @@ _SERIALIZERS = dict()
 _DESERIALIZERS = dict()
 
 
-def dump(obj: object) -> dict:
+def dump(obj: object, **kwargs) -> dict:
     """
     Serialize the given ``obj`` to a dict.
 
     The way objects are serialized can be finetuned by setting serializer
     functions for the specific type using ``set_serializer``.
     :param obj: a Python instance of any sort.
+    :param kwargs: the keyword args are passed on to the serializer function.
     :return: the serialized obj as a dict.
     """
     serializer = _SERIALIZERS.get(obj.__class__.__name__, None)
@@ -114,10 +115,10 @@ def dump(obj: object) -> dict:
         parents = [cls for cls in _CLASSES if isinstance(obj, cls)]
         if parents:
             serializer = _SERIALIZERS[parents[0].__name__]
-    return serializer(obj)
+    return serializer(obj, **kwargs)
 
 
-def load(json_obj: dict, cls: type = None) -> object:
+def load(json_obj: dict, cls: type = None, **kwargs) -> object:
     """
     Deserialize the given ``json_obj`` to an object of type ``cls``. If the
     contents of ``json_obj`` do not match the interface of ``cls``, a
@@ -151,6 +152,7 @@ def load(json_obj: dict, cls: type = None) -> object:
     (e.g. serialized ``datetime`` values) are still deserialized.
     :param json_obj: the dict that is to be deserialized.
     :param cls: a matching class of which an instance should be returned.
+    :param kwargs: the keyword args are passed on to the deserializer function.
     :return: an instance of ``cls`` if given, a dict otherwise.
     """
     cls = cls or type(json_obj)
@@ -161,7 +163,7 @@ def load(json_obj: dict, cls: type = None) -> object:
         parents = [cls_ for cls_ in _CLASSES if issubclass(cls, cls_)]
         if parents:
             deserializer = _DESERIALIZERS[parents[0].__name__]
-    return deserializer(json_obj, cls)
+    return deserializer(json_obj, cls, **kwargs)
 
 
 def dumps(obj: object, *args, **kwargs) -> str:
@@ -171,10 +173,11 @@ def dumps(obj: object, *args, **kwargs) -> str:
 
     :param obj: the object that is to be dumped to a string.
     :param args: extra arguments for ``json.dumps``.
-    :param kwargs: extra keyword arguments for ``json.dumps``.
+    :param kwargs: extra keyword arguments for ``json.dumps``. They are also
+    passed on to the serializer function.
     :return: ``obj`` as a ``str``.
     """
-    return json.dumps(dump(obj), *args, **kwargs)
+    return json.dumps(dump(obj, **kwargs), *args, **kwargs)
 
 
 def loads(s: str, cls: type = None, *args, **kwargs) -> object:
@@ -186,11 +189,12 @@ def loads(s: str, cls: type = None, *args, **kwargs) -> object:
     :param s: the string that is to be loaded.
     :param cls: a matching class of which an instance should be returned.
     :param args: extra arguments for ``json.dumps``.
-    :param kwargs: extra keyword arguments for ``json.dumps``.
+    :param kwargs: extra keyword arguments for ``json.dumps``. They are also
+    passed on to the deserializer function.
     :return: an instance of type ``cls`` or a dict if no ``cls`` is given.
     """
     obj = json.loads(s, *args, **kwargs)
-    return load(obj, cls) if cls else obj
+    return load(obj, cls, **kwargs) if cls else obj
 
 
 def set_serializer(c: callable, cls: type, high_prio: bool = True) -> None:
@@ -238,19 +242,23 @@ class JsonSerializable:
     equivalent to calling `json.load` with that class as an argument.
     """
     @property
-    def json(self) -> dict:
+    def json(self, **kwargs) -> dict:
         """
         See `jsons.dump`.
+        :param kwargs: the keyword args are passed on to the serializer
+        function.
         :return: this instance in a JSON representation (dict).
         """
-        return dump(self)
+        return dump(self, **kwargs)
 
     @classmethod
-    def from_json(cls: type, json_obj: dict) -> object:
+    def from_json(cls: type, json_obj: dict, **kwargs) -> object:
         """
         See `jsons.load`.
         :param json_obj: a JSON representation of an instance of the inheriting
         class
+        :param kwargs: the keyword args are passed on to the deserializer
+        function.
         :return: an instance of the inheriting class.
         """
         return load(json_obj, cls)
@@ -260,15 +268,15 @@ class JsonSerializable:
 # DEFAULT SERIALIZERS #
 #######################
 
-def _default_list_serializer(obj: list) -> dict:
-    return [dump(elem) for elem in obj]
+def _default_list_serializer(obj: list, **kwargs) -> dict:
+    return [dump(elem, **kwargs) for elem in obj]
 
 
-def _default_enum_serializer(obj: EnumMeta) -> dict:
+def _default_enum_serializer(obj: EnumMeta, **_) -> dict:
     return obj.name
 
 
-def _default_datetime_serializer(obj: datetime) -> dict:
+def _default_datetime_serializer(obj: datetime, **_) -> dict:
     timezone = obj.tzinfo
     offset = 'Z'
     pattern = _RFC3339_DATETIME_PATTERN
@@ -280,20 +288,20 @@ def _default_datetime_serializer(obj: datetime) -> dict:
     return obj.strftime("{}{}".format(pattern, offset))
 
 
-def _default_primitive_serializer(obj) -> dict:
+def _default_primitive_serializer(obj, **_) -> dict:
     return obj
 
 
-def _default_object_serializer(obj) -> dict:
+def _default_object_serializer(obj, **kwargs) -> dict:
     d = obj.__dict__
-    return {key: dump(d[key]) for key in d}
+    return {key: dump(d[key], **kwargs) for key in d}
 
 
 #########################
 # DEFAULT DESERIALIZERS #
 #########################
 
-def _default_datetime_deserializer(obj: str, _: datetime) -> datetime:
+def _default_datetime_deserializer(obj: str, _: datetime, **__) -> datetime:
     pattern = _RFC3339_DATETIME_PATTERN
     if '.' in obj:
         pattern += '.%f'
@@ -316,7 +324,7 @@ def _default_datetime_deserializer(obj: str, _: datetime) -> datetime:
     return dattim_obj
 
 
-def _default_object_deserializer(obj: dict, cls: type) -> object:
+def _default_object_deserializer(obj: dict, cls: type, **kwargs) -> object:
     signature_parameters = inspect.signature(cls.__init__).parameters
     # Loop through the signature of cls: the type we try to deserialize to. For
     # every required parameter, we try to get the corresponding value from
@@ -328,7 +336,7 @@ def _default_object_deserializer(obj: dict, cls: type) -> object:
                 cls_ = None
                 if signature.annotation != inspect._empty:
                     cls_ = signature.annotation
-                value = load(obj[signature_key], cls_)
+                value = load(obj[signature_key], cls_, **kwargs)
                 constructor_args[signature_key] = value
 
     # The constructor arguments are gathered, create an instance.
@@ -338,30 +346,31 @@ def _default_object_deserializer(obj: dict, cls: type) -> object:
                        if attr_name not in constructor_args}
     for attr_name in remaining_attrs:
         loaded_attr = load(remaining_attrs[attr_name],
-                           type(remaining_attrs[attr_name]))
+                           type(remaining_attrs[attr_name]), **kwargs)
         setattr(instance, attr_name, loaded_attr)
     return instance
 
 
-def _default_list_deserializer(obj: List, cls) -> object:
+def _default_list_deserializer(obj: List, cls, **kwargs) -> object:
     cls_ = None
     if cls and hasattr(cls, '__args__'):
         cls_ = cls.__args__[0]
-    return [load(x, cls_) for x in obj]
+    return [load(x, cls_, **kwargs) for x in obj]
 
 
-def _default_enum_deserializer(obj: Enum, cls: EnumMeta) -> object:
+def _default_enum_deserializer(obj: Enum, cls: EnumMeta, **__) -> object:
     return cls[obj]
 
 
-def _default_string_deserializer(obj: str, _: type = None) -> object:
+def _default_string_deserializer(obj: str, _: type = None, **kwargs) -> object:
     try:
-        return load(obj, datetime)
+        return load(obj, datetime, **kwargs)
     except:
         return obj
 
 
-def _default_primitive_deserializer(obj: object, _: type = None) -> object:
+def _default_primitive_deserializer(obj: object,
+                                    _: type = None, *__) -> object:
     return obj
 
 
