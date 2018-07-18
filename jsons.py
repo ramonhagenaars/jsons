@@ -257,7 +257,7 @@ class JsonSerializable:
 
 
 #######################
-# Default serializers #
+# DEFAULT SERIALIZERS #
 #######################
 
 def _default_list_serializer(obj: list) -> dict:
@@ -290,7 +290,7 @@ def _default_object_serializer(obj) -> dict:
 
 
 #########################
-# Default deserializers #
+# DEFAULT DESERIALIZERS #
 #########################
 
 def _default_datetime_deserializer(obj: str, _: datetime) -> datetime:
