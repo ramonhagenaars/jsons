@@ -38,8 +38,8 @@ from typing import List
 import jsons
 
 
-# You can use dataclasses (since Python3.7). Regular Python classes (Python3.5+) will work as well as long as type hints
-# are present for custom classes.
+# You can use dataclasses (since Python3.7). Regular Python classes (Python3.5+) will work as well as long as 
+# type hints are present for custom classes.
 @dataclass
 class Student:
     name: str
