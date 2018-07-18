@@ -91,3 +91,35 @@ print(loaded_c)
 # <__main__.ClassRoom object at 0x0337F9B0>
 
 ```
+
+## Advanced features
+
+### Overriding the default (de)serialization behavior
+You may alter the behavior of the serialization and deserialization processes yourself by defining your own
+custom serialization/deserialization functions.
+
+```
+jsons.set_serializer(custom_serializer, datetime)  # A custom datetime serializer.
+jsons.set_deserializer(custom_deserializer, str)  # A custom string deserializer.
+```
+
+### Transforming the JSON keys
+You can have the keys transformed by the serialization or deserialization process by providing a transformer 
+function that takes a string and returns a string.
+
+```
+result = jsons.dump(some_obj, jsons.KEY_TRANSFORMER_CAMELCASE)
+# result could be something like: {'thisIsTransformed': 123}
+
+result = jsons.load(some_dict, SomeClass, jsons.KEY_TRANSFORMER_SNAKECASE)
+# result could be something like: {'this_is_transformed': 123}
+```
+
+The following casing styles are supported:
+
+```
+KEY_TRANSFORMER_SNAKECASE   # snake_case
+KEY_TRANSFORMER_CAMELCASE   # camelCase
+KEY_TRANSFORMER_PASCALCASE  # PascalCase
+KEY_TRANSFORMER_LISPCASE    # lisp-case
+```

@@ -96,7 +96,9 @@ from jsons.deserializers import default_list_deserializer, \
     default_object_deserializer
 from jsons.serializers import default_list_serializer, \
     default_enum_serializer, default_datetime_serializer, \
-    default_primitive_serializer, default_object_serializer
+    default_primitive_serializer, default_object_serializer, \
+    KEY_TRANSFORMER_SNAKECASE, KEY_TRANSFORMER_CAMELCASE, \
+    KEY_TRANSFORMER_PASCALCASE, KEY_TRANSFORMER_LISPCASE
 
 dump = dump_impl
 load = load_impl
