@@ -8,7 +8,7 @@ DESERIALIZERS = dict()
 
 
 def dump_impl(obj: object, **kwargs) -> dict:
-    '''
+    """
     Serialize the given ``obj`` to a dict.
 
     The way objects are serialized can be finetuned by setting serializer
@@ -16,7 +16,7 @@ def dump_impl(obj: object, **kwargs) -> dict:
     :param obj: a Python instance of any sort.
     :param kwargs: the keyword args are passed on to the serializer function.
     :return: the serialized obj as a dict.
-    '''
+    """
     serializer = SERIALIZERS.get(obj.__class__.__name__, None)
     if not serializer:
         parents = [cls for cls in CLASSES if isinstance(obj, cls)]
@@ -26,7 +26,7 @@ def dump_impl(obj: object, **kwargs) -> dict:
 
 
 def load_impl(json_obj: dict, cls: type = None, **kwargs) -> object:
-    '''
+    """
     Deserialize the given ``json_obj`` to an object of type ``cls``. If the
     contents of ``json_obj`` do not match the interface of ``cls``, a
     TypeError is raised.
@@ -61,7 +61,7 @@ def load_impl(json_obj: dict, cls: type = None, **kwargs) -> object:
     :param cls: a matching class of which an instance should be returned.
     :param kwargs: the keyword args are passed on to the deserializer function.
     :return: an instance of ``cls`` if given, a dict otherwise.
-    '''
+    """
     cls = cls or type(json_obj)
     cls_name = cls.__name__ if hasattr(cls, '__name__') \
         else cls.__origin__.__name__
