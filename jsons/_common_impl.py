@@ -1,3 +1,7 @@
+"""
+This module contains common implementation details of jsons. This module is
+private, do not import (from) it directly.
+"""
 import re
 
 JSON_TYPES = (str, int, float, bool)

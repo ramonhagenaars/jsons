@@ -1,3 +1,9 @@
+"""
+This module contains default deserializers. You can override the
+deserialization process of a particular type as follows:
+
+`jsons.set_deserializer(custom_deserializer, SomeClass)`
+"""
 import inspect
 import re
 from datetime import datetime, timezone, timedelta
@@ -8,6 +14,13 @@ from jsons._common_impl import RFC3339_DATETIME_PATTERN, load_impl, \
 
 
 def default_datetime_deserializer(obj: str, _: datetime, **__) -> datetime:
+    """
+    Deserialize a string with an RFC3339 pattern to a datetime instance.
+    :param obj:
+    :param _: not used.
+    :param __: not used.
+    :return: a `datetime.datetime` instance.
+    """
     pattern = RFC3339_DATETIME_PATTERN
     if '.' in obj:
         pattern += '.%f'
@@ -31,17 +44,51 @@ def default_datetime_deserializer(obj: str, _: datetime, **__) -> datetime:
 
 
 def default_list_deserializer(obj: List, cls, **kwargs) -> object:
+    """
+    Deserialize a list by deserializing all instances of that list.
+    :param obj: the list that needs deserializing.
+    :param cls: the type with a generic (e.g. List[str]).
+    :param kwargs: any keyword arguments.
+    :return: a deserialized list instance.
+    """
     cls_ = None
     if cls and hasattr(cls, '__args__'):
         cls_ = cls.__args__[0]
     return [load_impl(x, cls_, **kwargs) for x in obj]
 
 
-def default_enum_deserializer(obj: Enum, cls: EnumMeta, **__) -> object:
-    return cls[obj]
+def default_enum_deserializer(obj: str, cls: EnumMeta,
+                              use_enum_name: bool = True, **__) -> object:
+    """
+    Deserialize an enum value to an enum instance. The serialized value must
+    can be the name of the enum element or the value; dependent on
+    `use_enum_name`.
+    :param obj: the serialized enum.
+    :param cls: the enum class.
+    :param use_enum_name: determines whether the name or the value of an enum
+    element should be used.
+    :param __: not used.
+    :return: the corresponding enum element instance.
+    """
+    if use_enum_name:
+        result = cls[obj]
+    else:
+        for elem in cls:
+            if elem.value == obj:
+                result = elem
+                break
+    return result
 
 
 def default_string_deserializer(obj: str, _: type = None, **kwargs) -> object:
+    """
+    Deserialize a string. If the given `obj` can be parsed to a date, a
+    `datetime` instance is returned.
+    :param obj: the string that is to be deserialized.
+    :param _: not used.
+    :param kwargs: any keyword arguments.
+    :return: the deserialized obj.
+    """
     try:
         return load_impl(obj, datetime, **kwargs)
     except:
@@ -50,12 +97,32 @@ def default_string_deserializer(obj: str, _: type = None, **kwargs) -> object:
 
 def default_primitive_deserializer(obj: object,
                                    _: type = None, **__) -> object:
+    """
+    Deserialize a primitive: it simply returns the given primitive.
+    :param obj: the value that is to be deserialized.
+    :param _: not used.
+    :param __: not used.
+    :return: `obj`.
+    """
     return obj
 
 
 def default_object_deserializer(obj: dict, cls: type,
                                 key_transformer: Callable[[str], str] = None,
                                 **kwargs) -> object:
+    """
+    Deserialize `obj` into an instance of type `cls`. If `obj` contains keys
+    with a certain case style (e.g. camelCase) that do not match the style of
+    `cls` (e.g. snake_case), a key_transformer should be used (e.g.
+    KEY_TRANSFORMER_SNAKECASE).
+    :param obj: a serialized instance of `cls`.
+    :param cls: the type to which `obj` should be deserialized.
+    :param key_transformer: a function that transforms the keys in order to
+    match the attribute names of `cls`.
+    :param kwargs: any keyword arguments that may be passed to the
+    deserializers.
+    :return: an instance of type `cls`.
+    """
     if key_transformer:
         obj = {key_transformer(key): obj[key] for key in obj}
     signature_parameters = inspect.signature(cls.__init__).parameters

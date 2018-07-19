@@ -42,6 +42,7 @@ class TestJsons(TestCase):
             x = 1
             y = 2
         self.assertEqual('x', jsons.dump(E.x))
+        self.assertEqual(2, jsons.dump(E.y, use_enum_name=False))
 
     def test_dump_list(self):
         d = datetime.datetime(year=2018, month=7, day=8, hour=21, minute=34)
@@ -90,6 +91,7 @@ class TestJsons(TestCase):
             y = 2
 
         self.assertEqual(E.x, jsons.load('x', E))
+        self.assertEqual(E.y, jsons.load(2, E, use_enum_name=False))
 
     def test_load_list(self):
         d = datetime.datetime(year=2018, month=7, day=8, hour=21, minute=34)
