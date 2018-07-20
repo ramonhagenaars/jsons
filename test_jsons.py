@@ -215,8 +215,11 @@ class TestJsons(TestCase):
         person_loaded = Person.from_json(person_json)
 
         self.assertEqual(person_json, {'name': 'John', 'age': 65})
+        self.assertEqual(person.dump(), {'name': 'John', 'age': 65})
         self.assertEqual(person_loaded.name, 'John')
         self.assertEqual(person_loaded.age, 65)
+        self.assertEqual(Person.load(person_json).name, 'John')
+        self.assertEqual(Person.load(person_json).age, 65)
 
     def test_case_transformers(self):
         camelcase_str = 'camelCase'
