@@ -12,15 +12,16 @@ SERIALIZERS = dict()
 DESERIALIZERS = dict()
 
 
-def dump_impl(obj: object, **kwargs) -> dict:
+def dump_impl(obj: object, **kwargs) -> object:
     """
-    Serialize the given ``obj`` to a dict.
+    Serialize the given ``obj`` to a JSON equivalent type (e.g. dict, list,
+    int, ...).
 
     The way objects are serialized can be finetuned by setting serializer
     functions for the specific type using ``set_serializer``.
     :param obj: a Python instance of any sort.
     :param kwargs: the keyword args are passed on to the serializer function.
-    :return: the serialized obj as a dict.
+    :return: the serialized obj as a JSON type.
     """
     serializer = SERIALIZERS.get(obj.__class__.__name__, None)
     if not serializer:
