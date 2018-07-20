@@ -23,6 +23,17 @@ def default_list_serializer(obj: list, **kwargs) -> list:
     return [dump_impl(elem, **kwargs) for elem in obj]
 
 
+def default_dict_serializer(obj: list, **kwargs) -> dict:
+    """
+    Serialize the given `obj` to a dict of serialized objects.
+    :param obj: the dict that is to be serialized.
+    :param kwargs: any keyword arguments that may be given to the serialization
+    process.
+    :return: a dict of which all elements are serialized.
+    """
+    return {key: dump_impl(obj[key], **kwargs) for key in obj}
+
+
 def default_enum_serializer(obj: EnumMeta, use_enum_name: bool = True,
                             **_) -> str:
     """

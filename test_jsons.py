@@ -23,7 +23,10 @@ class TestJsons(TestCase):
         self.assertEqual(True, jsons.dump(True))
 
     def test_dump_dict(self):
-        self.assertEqual({'a': 123}, jsons.dump({'a': 123}))
+        d = datetime.datetime(year=2018, month=7, day=8, hour=21, minute=34)
+        dict_ = {'a': {'b': {'c': {'d': d}}}}
+        expectation = {'a': {'b': {'c': {'d': '2018-07-08T21:34:00Z'}}}}
+        self.assertEqual(expectation, jsons.dump(dict_))
 
     def test_dump_none(self):
         self.assertEqual(None, jsons.dump(None))
@@ -76,7 +79,14 @@ class TestJsons(TestCase):
         self.assertEqual(True, jsons.load(True))
 
     def test_load_dict(self):
-        self.assertEqual({'a': 123}, jsons.load({'a': 123}))
+        dumped = {'a': {'b': {'c': {'d': '2018-07-08T21:34:00Z'}}}}
+        loaded = jsons.load(dumped)
+        self.assertEqual(loaded['a']['b']['c']['d'].year, 2018)
+        self.assertEqual(loaded['a']['b']['c']['d'].month, 7)
+        self.assertEqual(loaded['a']['b']['c']['d'].day, 8)
+        self.assertEqual(loaded['a']['b']['c']['d'].hour, 21)
+        self.assertEqual(loaded['a']['b']['c']['d'].minute, 34)
+        self.assertEqual(loaded['a']['b']['c']['d'].second, 0)
 
     def test_load_none(self):
         self.assertEqual(None, jsons.load(None))

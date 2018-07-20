@@ -57,6 +57,17 @@ def default_list_deserializer(obj: List, cls, **kwargs) -> object:
     return [load_impl(x, cls_, **kwargs) for x in obj]
 
 
+def default_dict_deserializer(obj: dict, _: type, **kwargs) -> object:
+    """
+    Deserialize a dict by deserializing all instances of that dict.
+    :param obj: the dict that needs deserializing.
+    :param cls: not used.
+    :param kwargs: any keyword arguments.
+    :return: a deserialized dict instance.
+    """
+    return {key: load_impl(obj[key], **kwargs) for key in obj}
+
+
 def default_enum_deserializer(obj: str, cls: EnumMeta,
                               use_enum_name: bool = True, **__) -> object:
     """
