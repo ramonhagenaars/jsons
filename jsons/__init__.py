@@ -120,29 +120,29 @@ def dumps(obj: object, *args, **kwargs) -> str:
     return json.dumps(dump(obj, **kwargs), *args, **kwargs)
 
 
-def loads(s: str, cls: type = None, *args, **kwargs) -> object:
+def loads(str_: str, cls: type = None, *args, **kwargs) -> object:
     """
     Extend ``json.loads``, allowing a string to be loaded into a dict or a
     Python instance of type ``cls``. Any extra (keyword) arguments are passed
     on to ``json.loads``.
 
-    :param s: the string that is to be loaded.
+    :param str_: the string that is to be loaded.
     :param cls: a matching class of which an instance should be returned.
     :param args: extra arguments for ``json.dumps``.
     :param kwargs: extra keyword arguments for ``json.dumps``. They are also
     passed on to the deserializer function.
     :return: an instance of type ``cls`` or a dict if no ``cls`` is given.
     """
-    obj = json.loads(s, *args, **kwargs)
+    obj = json.loads(str_, *args, **kwargs)
     return load(obj, cls, **kwargs) if cls else obj
 
 
-def set_serializer(c: callable, cls: type, high_prio: bool = True) -> None:
+def set_serializer(func: callable, cls: type, high_prio: bool = True) -> None:
     """
     Set a serializer function for the given type. You may override the default
     behavior of ``jsons.load`` by setting a custom serializer.
 
-    :param c: the serializer function.
+    :param func: the serializer function.
     :param cls: the type this serializer can handle.
     :param high_prio: determines the order in which is looked for the callable.
     :return: None.
@@ -150,17 +150,17 @@ def set_serializer(c: callable, cls: type, high_prio: bool = True) -> None:
     if cls:
         index = 0 if high_prio else len(CLASSES_SERIALIZERS)
         CLASSES_SERIALIZERS.insert(index, cls)
-        SERIALIZERS[cls.__name__.lower()] = c
+        SERIALIZERS[cls.__name__.lower()] = func
     else:
-        SERIALIZERS['nonetype'] = c
+        SERIALIZERS['nonetype'] = func
 
 
-def set_deserializer(c: callable, cls: type, high_prio: bool = True) -> None:
+def set_deserializer(func: callable, cls: type, high_prio: bool = True) -> None:
     """
     Set a deserializer function for the given type. You may override the
     default behavior of ``jsons.dump`` by setting a custom deserializer.
 
-    :param c: the deserializer function.
+    :param func: the deserializer function.
     :param cls: the type this serializer can handle.
     :param high_prio: determines the order in which is looked for the callable.
     :return: None.
@@ -168,9 +168,9 @@ def set_deserializer(c: callable, cls: type, high_prio: bool = True) -> None:
     if cls:
         index = 0 if high_prio else len(CLASSES_DESERIALIZERS)
         CLASSES_DESERIALIZERS.insert(index, cls)
-        DESERIALIZERS[cls.__name__.lower()] = c
+        DESERIALIZERS[cls.__name__.lower()] = func
     else:
-        DESERIALIZERS['nonetype'] = c
+        DESERIALIZERS['nonetype'] = func
 
 
 class JsonSerializable:

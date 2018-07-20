@@ -80,44 +80,44 @@ def load_impl(json_obj: dict, cls: type = None, **kwargs) -> object:
     return deserializer(json_obj, cls, **kwargs)
 
 
-def camelcase(s: str) -> str:
+def camelcase(str_: str) -> str:
     """
     Return `s` in camelCase.
-    :param s: the string that is to be transformed.
+    :param str_: the string that is to be transformed.
     :return: a string in camelCase.
     """
-    s = s.replace('-', '_')
-    splitted = s.split('_')
+    str_ = str_.replace('-', '_')
+    splitted = str_.split('_')
     if len(splitted) > 1:
-        s = ''.join([x.title() for x in splitted])
-    return s[0].lower() + s[1:]
+        str_ = ''.join([x.title() for x in splitted])
+    return str_[0].lower() + str_[1:]
 
 
-def snakecase(s: str) -> str:
+def snakecase(str_: str) -> str:
     """
     Return `s` in snake_case.
-    :param s: the string that is to be transformed.
+    :param str_: the string that is to be transformed.
     :return: a string in snake_case.
     """
-    s = s.replace('-', '_')
-    s = s[0].lower() + s[1:]
-    return re.sub(r'([a-z])([A-Z])', '\\1_\\2', s).lower()
+    str_ = str_.replace('-', '_')
+    str_ = str_[0].lower() + str_[1:]
+    return re.sub(r'([a-z])([A-Z])', '\\1_\\2', str_).lower()
 
 
-def pascalcase(s: str) -> str:
+def pascalcase(str_: str) -> str:
     """
     Return `s` in PascalCase.
-    :param s: the string that is to be transformed.
+    :param str_: the string that is to be transformed.
     :return: a string in PascalCase.
     """
-    camelcase_str = camelcase(s)
+    camelcase_str = camelcase(str_)
     return camelcase_str[0].upper() + camelcase_str[1:]
 
 
-def lispcase(s: str) -> str:
+def lispcase(str_: str) -> str:
     """
     Return `s` in lisp-case.
-    :param s: the string that is to be transformed.
+    :param str_: the string that is to be transformed.
     :return: a string in lisp-case.
     """
-    return snakecase(s).replace('_', '-')
+    return snakecase(str_).replace('_', '-')
