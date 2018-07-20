@@ -23,6 +23,17 @@ def default_list_serializer(obj: list, **kwargs) -> list:
     return [dump_impl(elem, **kwargs) for elem in obj]
 
 
+def default_tuple_serializer(obj: tuple, **kwargs) -> list:
+    """
+    Serialize the given `obj` to a list of serialized objects.
+    :param obj: the tuple that is to be serialized.
+    :param kwargs: any keyword arguments that may be given to the serialization
+    process.
+    :return: a list of which all elements are serialized.
+    """
+    return dump_impl(list(obj), **kwargs)
+
+
 def default_dict_serializer(obj: list, **kwargs) -> dict:
     """
     Serialize the given `obj` to a dict of serialized objects.

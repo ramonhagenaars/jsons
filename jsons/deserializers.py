@@ -45,7 +45,7 @@ def default_datetime_deserializer(obj: str, _: datetime, **__) -> datetime:
 
 def default_list_deserializer(obj: List, cls, **kwargs) -> object:
     """
-    Deserialize a list by deserializing all instances of that list.
+    Deserialize a list by deserializing all items of that list.
     :param obj: the list that needs deserializing.
     :param cls: the type with a generic (e.g. List[str]).
     :param kwargs: any keyword arguments.
@@ -55,6 +55,21 @@ def default_list_deserializer(obj: List, cls, **kwargs) -> object:
     if cls and hasattr(cls, '__args__'):
         cls_ = cls.__args__[0]
     return [load_impl(x, cls_, **kwargs) for x in obj]
+
+
+def default_tuple_deserializer(obj: List, cls, **kwargs) -> object:
+    """
+    Deserialize a (JSON) list into a tuple by deserializing all items of that
+    list.
+    :param obj: the list that needs deserializing.
+    :param cls: the type with a generic (e.g. Tuple[str, int]).
+    :param kwargs: any keyword arguments.
+    :return: a deserialized tuple instance.
+    """
+    tuple_types = cls.__args__
+    list_ = [load_impl(obj[i], tuple_types[i], **kwargs)
+             for i in range(len(obj))]
+    return tuple(list_)
 
 
 def default_dict_deserializer(obj: dict, _: type, **kwargs) -> object:

@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import List
+from typing import List, Tuple
 from unittest.case import TestCase
 import datetime
 import jsons
@@ -53,6 +53,12 @@ class TestJsons(TestCase):
         self.assertEqual([1, 2, 3, [4, 5, ['2018-07-08T21:34:00Z']]],
                          jsons.dump(l))
 
+    def test_dump_tuple(self):
+        dat = datetime.datetime(year=2018, month=7, day=8, hour=21, minute=34)
+        tup = (1, 2, 3, [4, 5, (dat,)])
+        self.assertEqual([1, 2, 3, [4, 5, ['2018-07-08T21:34:00Z']]],
+                         jsons.dump(tup))
+
     def test_dump_object(self):
         class A:
             def __init__(self):
@@ -92,8 +98,8 @@ class TestJsons(TestCase):
         self.assertEqual(None, jsons.load(None))
 
     def test_load_datetime(self):
-        d = datetime.datetime(year=2018, month=7, day=8, hour=21, minute=34)
-        self.assertEqual(d, jsons.load('2018-07-08T21:34:00Z'))
+        dat = datetime.datetime(year=2018, month=7, day=8, hour=21, minute=34)
+        self.assertEqual(dat, jsons.load('2018-07-08T21:34:00Z'))
 
     def test_load_enum(self):
         class E(Enum):
@@ -104,10 +110,17 @@ class TestJsons(TestCase):
         self.assertEqual(E.y, jsons.load(2, E, use_enum_name=False))
 
     def test_load_list(self):
-        d = datetime.datetime(year=2018, month=7, day=8, hour=21, minute=34)
-        l = [1, 2, 3, [4, 5, [d]]]
+        dat = datetime.datetime(year=2018, month=7, day=8, hour=21, minute=34)
+        list_ = [1, 2, 3, [4, 5, [dat]]]
         expectation = [1, 2, 3, [4, 5, ['2018-07-08T21:34:00Z']]]
-        self.assertEqual(l, jsons.load(expectation))
+        self.assertEqual(list_, jsons.load(expectation))
+
+    def test_load_tuple(self):
+        dat = datetime.datetime(year=2018, month=7, day=8, hour=21, minute=34)
+        tup = (1, ([dat],))
+        expectation = (1, (['2018-07-08T21:34:00Z'],))
+        cls = Tuple[int, Tuple[List[datetime.datetime]]]
+        self.assertEqual(tup, jsons.load(expectation, cls))
 
     def test_load_object(self):
         class A:
