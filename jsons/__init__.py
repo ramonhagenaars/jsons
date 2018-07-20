@@ -186,7 +186,7 @@ class JsonSerializable:
         See `jsons.dump`.
         :return: this instance in a JSON representation (dict).
         """
-        return dump(self)
+        return self.dump()
 
     @classmethod
     def from_json(cls: type, json_obj: dict, **kwargs) -> object:
@@ -198,7 +198,7 @@ class JsonSerializable:
         function.
         :return: an instance of the inheriting class.
         """
-        return load(json_obj, cls, **kwargs)
+        return cls.load(json_obj, **kwargs)
 
     def dump(self, **kwargs) -> dict:
         """
