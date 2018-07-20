@@ -142,7 +142,7 @@ def default_object_deserializer(obj: dict, cls: type,
     # json_obj.
     constructor_args = dict()
     for signature_key, signature in signature_parameters.items():
-        if obj and signature_key is not 'self':
+        if obj and signature_key != 'self':
             if signature_key in obj:
                 cls_ = None
                 if signature.annotation != inspect._empty:
