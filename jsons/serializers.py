@@ -104,11 +104,11 @@ def default_object_serializer(obj: object,
     serializer functions.
     :return: a Python dict holding the values of `obj`.
     """
-    d = obj.__dict__
+    dict_ = obj.__dict__
     key_transformer_ = key_transformer or (lambda key: key)
-    return {key_transformer_(key): dump_impl(d[key],
+    return {key_transformer_(key): dump_impl(dict_[key],
                                              key_transformer=key_transformer,
-                                             **kwargs) for key in d}
+                                             **kwargs) for key in dict_}
 
 
 # The following default key transformers can be used with the
