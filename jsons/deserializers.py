@@ -7,7 +7,7 @@ deserialization process of a particular type as follows:
 import inspect
 import re
 from datetime import datetime, timezone, timedelta
-from enum import Enum, EnumMeta
+from enum import EnumMeta
 from typing import List, Callable
 from jsons._common_impl import RFC3339_DATETIME_PATTERN, load_impl, \
     snakecase, camelcase, pascalcase, lispcase

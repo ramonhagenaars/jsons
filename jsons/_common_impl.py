@@ -6,7 +6,8 @@ import re
 
 JSON_TYPES = (str, int, float, bool)
 RFC3339_DATETIME_PATTERN = '%Y-%m-%dT%H:%M:%S'
-CLASSES = list()
+CLASSES_SERIALIZERS = list()
+CLASSES_DESERIALIZERS = list()
 SERIALIZERS = dict()
 DESERIALIZERS = dict()
 
@@ -23,7 +24,7 @@ def dump_impl(obj: object, **kwargs) -> dict:
     """
     serializer = SERIALIZERS.get(obj.__class__.__name__, None)
     if not serializer:
-        parents = [cls for cls in CLASSES if isinstance(obj, cls)]
+        parents = [cls for cls in CLASSES_SERIALIZERS if isinstance(obj, cls)]
         if parents:
             serializer = SERIALIZERS[parents[0].__name__]
     return serializer(obj, **kwargs)
@@ -71,7 +72,8 @@ def load_impl(json_obj: dict, cls: type = None, **kwargs) -> object:
         else cls.__origin__.__name__
     deserializer = DESERIALIZERS.get(cls_name, None)
     if not deserializer:
-        parents = [cls_ for cls_ in CLASSES if issubclass(cls, cls_)]
+        parents = [cls_ for cls_ in CLASSES_DESERIALIZERS
+                   if issubclass(cls, cls_)]
         if parents:
             deserializer = DESERIALIZERS[parents[0].__name__]
     return deserializer(json_obj, cls, **kwargs)

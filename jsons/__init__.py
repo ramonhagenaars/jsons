@@ -88,8 +88,8 @@ Alternatively, you can make use of the `JsonSerializable` class.
 import json
 from datetime import datetime
 from enum import Enum
-from jsons._common_impl import dump_impl, load_impl, CLASSES, SERIALIZERS, \
-    DESERIALIZERS
+from jsons._common_impl import dump_impl, load_impl, CLASSES_SERIALIZERS, \
+    CLASSES_DESERIALIZERS, SERIALIZERS, DESERIALIZERS
 from jsons.deserializers import default_list_deserializer, \
     default_enum_deserializer, default_datetime_deserializer, \
     default_string_deserializer, default_primitive_deserializer, \
@@ -147,8 +147,8 @@ def set_serializer(c: callable, cls: type, high_prio: bool = True) -> None:
     :return: None.
     """
     if cls:
-        index = 0 if high_prio else len(CLASSES)
-        CLASSES.insert(index, cls)
+        index = 0 if high_prio else len(CLASSES_SERIALIZERS)
+        CLASSES_SERIALIZERS.insert(index, cls)
         SERIALIZERS[cls.__name__] = c
     else:
         SERIALIZERS['NoneType'] = c
@@ -165,8 +165,8 @@ def set_deserializer(c: callable, cls: type, high_prio: bool = True) -> None:
     :return: None.
     """
     if cls:
-        index = 0 if high_prio else len(CLASSES)
-        CLASSES.insert(index, cls)
+        index = 0 if high_prio else len(CLASSES_DESERIALIZERS)
+        CLASSES_DESERIALIZERS.insert(index, cls)
         DESERIALIZERS[cls.__name__] = c
     else:
         DESERIALIZERS['NoneType'] = c
