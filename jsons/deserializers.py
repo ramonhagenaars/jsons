@@ -66,7 +66,11 @@ def default_tuple_deserializer(obj: List, cls, **kwargs) -> object:
     :param kwargs: any keyword arguments.
     :return: a deserialized tuple instance.
     """
-    tuple_types = cls.__args__
+
+    if hasattr(cls, '__tuple_params__'):
+        tuple_types = cls.__tuple_params__
+    else:
+        tuple_types = cls.__args__
     list_ = [load_impl(obj[i], tuple_types[i], **kwargs)
              for i in range(len(obj))]
     return tuple(list_)

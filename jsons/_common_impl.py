@@ -23,11 +23,11 @@ def dump_impl(obj: object, **kwargs) -> object:
     :param kwargs: the keyword args are passed on to the serializer function.
     :return: the serialized obj as a JSON type.
     """
-    serializer = SERIALIZERS.get(obj.__class__.__name__, None)
+    serializer = SERIALIZERS.get(obj.__class__.__name__.lower(), None)
     if not serializer:
         parents = [cls for cls in CLASSES_SERIALIZERS if isinstance(obj, cls)]
         if parents:
-            serializer = SERIALIZERS[parents[0].__name__]
+            serializer = SERIALIZERS[parents[0].__name__.lower()]
     return serializer(obj, **kwargs)
 
 
@@ -71,12 +71,12 @@ def load_impl(json_obj: dict, cls: type = None, **kwargs) -> object:
     cls = cls or type(json_obj)
     cls_name = cls.__name__ if hasattr(cls, '__name__') \
         else cls.__origin__.__name__
-    deserializer = DESERIALIZERS.get(cls_name, None)
+    deserializer = DESERIALIZERS.get(cls_name.lower(), None)
     if not deserializer:
         parents = [cls_ for cls_ in CLASSES_DESERIALIZERS
                    if issubclass(cls, cls_)]
         if parents:
-            deserializer = DESERIALIZERS[parents[0].__name__]
+            deserializer = DESERIALIZERS[parents[0].__name__.lower()]
     return deserializer(json_obj, cls, **kwargs)
 
 

@@ -150,9 +150,9 @@ def set_serializer(c: callable, cls: type, high_prio: bool = True) -> None:
     if cls:
         index = 0 if high_prio else len(CLASSES_SERIALIZERS)
         CLASSES_SERIALIZERS.insert(index, cls)
-        SERIALIZERS[cls.__name__] = c
+        SERIALIZERS[cls.__name__.lower()] = c
     else:
-        SERIALIZERS['NoneType'] = c
+        SERIALIZERS['nonetype'] = c
 
 
 def set_deserializer(c: callable, cls: type, high_prio: bool = True) -> None:
@@ -168,9 +168,9 @@ def set_deserializer(c: callable, cls: type, high_prio: bool = True) -> None:
     if cls:
         index = 0 if high_prio else len(CLASSES_DESERIALIZERS)
         CLASSES_DESERIALIZERS.insert(index, cls)
-        DESERIALIZERS[cls.__name__] = c
+        DESERIALIZERS[cls.__name__.lower()] = c
     else:
-        DESERIALIZERS['NoneType'] = c
+        DESERIALIZERS['nonetype'] = c
 
 
 class JsonSerializable:
