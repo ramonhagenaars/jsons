@@ -30,6 +30,7 @@ some_dict = jsons.dump(some_instance)  # Serialization
 * ``loads(s: str, cls: type = None, *args, **kwargs) -> object`` deserializes a string to an object of type ``cls``.
 * ``set_serializer(c: callable, cls: type) -> None``: sets a custom serialization function for type ``cls``.
 * ``set_deserializer(c: callable, cls: type) -> None``: sets a custom deserialization function for type ``cls``.
+* ``JsonSerializable``: a base class that allows for convenient use of the jsons features.
 
 ## Example with dataclasses
 ```
@@ -91,6 +92,25 @@ print(loaded_c)
 # <__main__.ClassRoom object at 0x0337F9B0>
 
 ```
+## Example with JsonSerializable
+```
+from jsons import JsonSerializable
+
+
+class Car(JsonSerializable):
+    def __init__(self, color):
+        self.color = color
+
+c = Car('red')
+cj = c.json  # You can also do 'c.dump(**kwargs)'
+print(cj)
+# Prints:
+# {'color': 'red'}
+c2 = Car.from_json(cj)  # You can also do 'Car.load(cj, **kwargs)'
+print(c2.color)
+# Prints:
+# 'red'
+```
 
 ## Advanced features
 
@@ -108,10 +128,10 @@ You can have the keys transformed by the serialization or deserialization proces
 function that takes a string and returns a string.
 
 ```
-result = jsons.dump(some_obj, jsons.KEY_TRANSFORMER_CAMELCASE)
+result = jsons.dump(some_obj, key_transformer=jsons.KEY_TRANSFORMER_CAMELCASE)
 # result could be something like: {'thisIsTransformed': 123}
 
-result = jsons.load(some_dict, SomeClass, jsons.KEY_TRANSFORMER_SNAKECASE)
+result = jsons.load(some_dict, SomeClass, key_transformer=jsons.KEY_TRANSFORMER_SNAKECASE)
 # result could be something like: {'this_is_transformed': 123}
 ```
 
@@ -122,4 +142,27 @@ KEY_TRANSFORMER_SNAKECASE   # snake_case
 KEY_TRANSFORMER_CAMELCASE   # camelCase
 KEY_TRANSFORMER_PASCALCASE  # PascalCase
 KEY_TRANSFORMER_LISPCASE    # lisp-case
+```
+
+### Customizing JsonSerializable
+If you're using jsons to (de)serialize on multiple locations in your code using 
+the same ``kwargs`` every time, you might want to use the `JsonSerializable` 
+class. You can extract a dynamic class from `JsonSerializable` with the 
+serializing and deserializing methods (`dump`, `load`, ...) overridden, to make
+them behave as if these methods are called with your ``kwargs``.
+
+```
+custom_serializable = JsonSerializable\
+    .with_dump(key_transformer=KEY_TRANSFORMER_CAMELCASE)\
+    .with_load(key_transformer=KEY_TRANSFORMER_SNAKE_CASE)
+    
+class Person(custom_serializable):
+    def __init__(self, my_name):
+        self.my_name = my_name
+        
+p = Person('John')
+p.json  # {'myName': 'John'}  <-- note the camelCase
+
+p2 = Person.from_json({'myName': 'Mary'})
+p2.my_name  # 'Mary'  <-- note the snake_case in my_name
 ```

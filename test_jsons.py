@@ -4,8 +4,9 @@ from unittest.case import TestCase
 import datetime
 import jsons
 import json
-from jsons import JsonSerializable
+from jsons import JsonSerializable, KEY_TRANSFORMER_CAMELCASE
 from jsons._common_impl import snakecase, camelcase, pascalcase, lispcase
+from jsons.deserializers import KEY_TRANSFORMER_SNAKECASE
 
 
 class TestJsons(TestCase):
@@ -233,6 +234,22 @@ class TestJsons(TestCase):
         self.assertEqual(person_loaded.age, 65)
         self.assertEqual(Person.load(person_json).name, 'John')
         self.assertEqual(Person.load(person_json).age, 65)
+
+    def test_jsonserializable_with_kwargs(self):
+        custom_serializable = JsonSerializable\
+            .with_dump(key_transformer=KEY_TRANSFORMER_CAMELCASE)\
+            .with_load(key_transformer=KEY_TRANSFORMER_SNAKECASE)
+
+        class Person(custom_serializable):
+            def __init__(self, my_name):
+                self.my_name = my_name
+
+        person = Person('John')
+        person_json = person.json  # should have camelCase
+        person_loaded = Person.from_json(person_json)  # should have snake_case
+
+        self.assertEqual(person_json, {'myName': 'John'})
+        self.assertEqual(person_loaded.my_name, 'John')
 
     def test_case_transformers(self):
         camelcase_str = 'camelCase'

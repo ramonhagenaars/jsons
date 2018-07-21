@@ -181,6 +181,65 @@ class JsonSerializable:
     instance. Furthermore, you can call `from_json` on that class, which is
     equivalent to calling `json.load` with that class as an argument.
     """
+    @classmethod
+    def with_dump(cls, **kwargs) -> type:
+        """
+        Return a class (`type`) that is based on JsonSerializable with the
+        `dump` method being automatically provided the given `kwargs`.
+
+        **Example:**
+
+        >>> custom_serializable = JsonSerializable\
+                .with_dump(key_transformer=KEY_TRANSFORMER_CAMELCASE)
+        >>> class Person(custom_serializable):
+        ...     def __init__(self, my_name):
+        ...         self.my_name = my_name
+        >>> p = Person('John')
+        >>> p.json
+        {'myName': 'John'}
+
+        :param kwargs: the keyword args that are automatically provided to the
+        `dump` method.
+        :return: a class with customized behavior.
+        """
+        original_dump = cls.dump
+
+        def _wrapper(inst, **kwargs_):
+            return original_dump(inst, **{**kwargs_, **kwargs})
+        t = type(JsonSerializable.__name__, (cls,), {})
+        t.dump =_wrapper
+        return t
+
+    @classmethod
+    def with_load(cls, **kwargs) -> type:
+        """
+        Return a class (`type`) that is based on JsonSerializable with the
+        `load` method being automatically provided the given `kwargs`.
+
+        **Example:**
+
+        >>> custom_serializable = JsonSerializable\
+                .with_load(key_transformer=KEY_TRANSFORMER_SNAKECASE)
+        >>> class Person(custom_serializable):
+        ...     def __init__(self, my_name):
+        ...         self.my_name = my_name
+        >>> p_json = {'myName': 'John'}
+        >>> p = Person.from_json(p_json)
+        >>> p.my_name
+        'John'
+
+        :param kwargs: the keyword args that are automatically provided to the
+        `load` method.
+        :return: a class with customized behavior.
+        """
+        original_load = cls.load
+
+        def _wrapper(inst, **kwargs_):
+            return original_load(inst, **{**kwargs_, **kwargs})
+        t = type(JsonSerializable.__name__, (cls,), {})
+        t.load =_wrapper
+        return t
+
     @property
     def json(self) -> dict:
         """
