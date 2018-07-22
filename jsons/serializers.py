@@ -12,6 +12,17 @@ from jsons._common_impl import RFC3339_DATETIME_PATTERN, snakecase, \
     camelcase, pascalcase, lispcase
 
 
+def default_iterable_serializer(obj, **kwargs) -> list:
+    """
+    Serialize the given `obj` to a list of serialized objects.
+    :param obj: the iterable that is to be serialized.
+    :param kwargs: any keyword arguments that may be given to the serialization
+    process.
+    :return: a list of which all elements are serialized.
+    """
+    return [dump_impl(elem, **kwargs) for elem in obj]
+
+
 def default_list_serializer(obj: list, **kwargs) -> list:
     """
     Serialize the given `obj` to a list of serialized objects.
@@ -20,7 +31,7 @@ def default_list_serializer(obj: list, **kwargs) -> list:
     process.
     :return: a list of which all elements are serialized.
     """
-    return [dump_impl(elem, **kwargs) for elem in obj]
+    return default_iterable_serializer(obj, **kwargs)
 
 
 def default_tuple_serializer(obj: tuple, **kwargs) -> list:
@@ -31,18 +42,32 @@ def default_tuple_serializer(obj: tuple, **kwargs) -> list:
     process.
     :return: a list of which all elements are serialized.
     """
-    return dump_impl(list(obj), **kwargs)
+    return default_iterable_serializer(obj, **kwargs)
 
 
-def default_dict_serializer(obj: list, **kwargs) -> dict:
+def default_dict_serializer(obj: dict, strip_nulls: bool = False,
+                            key_transformer: Callable[[str], str] = None,
+                            **kwargs) -> dict:
     """
     Serialize the given `obj` to a dict of serialized objects.
     :param obj: the dict that is to be serialized.
+    :param key_transformer: a function that will be applied to all keys in the
+    resulting dict.
+    :param strip_nulls: if `True` the resulting dict will not contain null
+    values.
     :param kwargs: any keyword arguments that may be given to the serialization
     process.
     :return: a dict of which all elements are serialized.
     """
-    return {key: dump_impl(obj[key], **kwargs) for key in obj}
+    result = dict()
+    for key in obj:
+        dumped_elem = dump_impl(obj[key], key_transformer=key_transformer,
+                                strip_nulls=strip_nulls, **kwargs)
+        if not (strip_nulls and dumped_elem is None):
+            if key_transformer:
+                key = key_transformer(key)
+            result[key] = dumped_elem
+    return result
 
 
 def default_enum_serializer(obj: EnumMeta, use_enum_name: bool = True,
@@ -92,7 +117,7 @@ def default_primitive_serializer(obj, **_) -> object:
 
 def default_object_serializer(obj: object,
                               key_transformer: Callable[[str], str] = None,
-                              **kwargs) -> dict:
+                              strip_nulls: bool = False, **kwargs) -> dict:
     """
     Serialize the given `obj` to a dict. All values within `obj` are also
     serialized. If `key_transformer` is given, it will be used to transform the
@@ -100,19 +125,19 @@ def default_object_serializer(obj: object,
     :param obj: the object that is to be serialized.
     :param key_transformer: a function that will be applied to all keys in the
     resulting dict.
+    :param strip_nulls: if `True` the resulting dict will not contain null
+    values.
     :param kwargs: any keyword arguments that are to be passed to the
     serializer functions.
     :return: a Python dict holding the values of `obj`.
     """
-    dict_ = obj.__dict__
-    key_transformer_ = key_transformer or (lambda key: key)
-    return {key_transformer_(key): dump_impl(dict_[key],
-                                             key_transformer=key_transformer,
-                                             **kwargs) for key in dict_}
+    return default_dict_serializer(obj.__dict__,
+                                   key_transformer=key_transformer,
+                                   strip_nulls=strip_nulls, **kwargs)
 
 
 # The following default key transformers can be used with the
-# default_object_serializer.
+# default_object_serializer and default_dict_serializer.
 KEY_TRANSFORMER_SNAKECASE = snakecase
 KEY_TRANSFORMER_CAMELCASE = camelcase
 KEY_TRANSFORMER_PASCALCASE = pascalcase
