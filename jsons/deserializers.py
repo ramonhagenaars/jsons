@@ -120,6 +120,8 @@ def default_string_deserializer(obj: str, _: type = None, **kwargs) -> object:
     :return: the deserialized obj.
     """
     try:
+        # Use load_impl instead of default_datetime_deserializer to allow the
+        # datetime deserializer to be overridden.
         return load_impl(obj, datetime, **kwargs)
     except:
         return obj
