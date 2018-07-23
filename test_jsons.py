@@ -298,22 +298,32 @@ class TestJsons(TestCase):
 
     def test_serialize_and_deserialize_with_case_transformer(self):
         class A:
-            def __init__(self, snake_case_str):
+            def __init__(self, snake_case_str, some_dict):
                 self.snake_case_str = snake_case_str
+                self.some_dict = some_dict
 
         class B:
             def __init__(self, a_obj: A, camel_case_str):
                 self.a_obj = a_obj
                 self.camel_case_str = camel_case_str
 
-        b = B(A('one_two'), 'theeFour')
+        b = B(A('one_two', {'some_key': 'some_value'}), 'theeFour')
         dumped_pascalcase = \
             jsons.dump(b, key_transformer=jsons.KEY_TRANSFORMER_PASCALCASE)
         loaded_snakecase = \
             jsons.load(dumped_pascalcase, B,
                        key_transformer=jsons.KEY_TRANSFORMER_SNAKECASE)
-        expected_dump = {'AObj': {'SnakeCaseStr': 'one_two'},
-                    'CamelCaseStr': 'theeFour'}
+        expected_dump = {
+            'AObj': {
+                'SnakeCaseStr': 'one_two',
+                'SomeDict': {
+                    'SomeKey': 'some_value'
+                }
+            },
+            'CamelCaseStr': 'theeFour'
+        }
         self.assertEqual(expected_dump, dumped_pascalcase)
-        self.assertEqual(loaded_snakecase.a_obj.snake_case_str, 'one_two')
         self.assertEqual(loaded_snakecase.camel_case_str, 'theeFour')
+        self.assertEqual(loaded_snakecase.a_obj.snake_case_str, 'one_two')
+        self.assertEqual(loaded_snakecase.a_obj.some_dict['some_key'],
+                         'some_value')

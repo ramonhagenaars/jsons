@@ -66,7 +66,6 @@ def default_tuple_deserializer(obj: List, cls, **kwargs) -> object:
     :param kwargs: any keyword arguments.
     :return: a deserialized tuple instance.
     """
-
     if hasattr(cls, '__tuple_params__'):
         tuple_types = cls.__tuple_params__
     else:
@@ -76,15 +75,22 @@ def default_tuple_deserializer(obj: List, cls, **kwargs) -> object:
     return tuple(list_)
 
 
-def default_dict_deserializer(obj: dict, _: type, **kwargs) -> object:
+def default_dict_deserializer(obj: dict, _: type,
+                              key_transformer: Callable[[str], str] = None,
+                              **kwargs) -> object:
     """
     Deserialize a dict by deserializing all instances of that dict.
     :param obj: the dict that needs deserializing.
+    :param key_transformer: a function that transforms the keys to a different
+    style (e.g. PascalCase).
     :param cls: not used.
     :param kwargs: any keyword arguments.
     :return: a deserialized dict instance.
     """
-    return {key: load_impl(obj[key], **kwargs) for key in obj}
+    key_transformer = key_transformer or (lambda key: key)
+    new_kwargs = {**{'key_transformer': key_transformer}, **kwargs}
+    return {key_transformer(key): load_impl(obj[key], **new_kwargs)
+            for key in obj}
 
 
 def default_enum_deserializer(obj: str, cls: EnumMeta,
