@@ -154,7 +154,7 @@ them behave as if these methods are called with your ``kwargs``.
 ```
 custom_serializable = JsonSerializable\
     .with_dump(key_transformer=KEY_TRANSFORMER_CAMELCASE)\
-    .with_load(key_transformer=KEY_TRANSFORMER_SNAKE_CASE)
+    .with_load(key_transformer=KEY_TRANSFORMER_SNAKECASE)
     
 class Person(custom_serializable):
     def __init__(self, my_name):
