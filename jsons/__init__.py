@@ -206,9 +206,9 @@ class JsonSerializable:
 
         def _wrapper(inst, **kwargs_):
             return original_dump(inst, **{**kwargs_, **kwargs})
-        t = type(JsonSerializable.__name__, (cls,), {})
-        t.dump =_wrapper
-        return t
+        type_ = type(JsonSerializable.__name__, (cls,), {})
+        type_.dump = _wrapper
+        return type_
 
     @classmethod
     def with_load(cls, **kwargs) -> type:
@@ -236,9 +236,9 @@ class JsonSerializable:
 
         def _wrapper(inst, **kwargs_):
             return original_load(inst, **{**kwargs_, **kwargs})
-        t = type(JsonSerializable.__name__, (cls,), {})
-        t.load =_wrapper
-        return t
+        type_ = type(JsonSerializable.__name__, (cls,), {})
+        type_.load = _wrapper
+        return type_
 
     @property
     def json(self) -> dict:
