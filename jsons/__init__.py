@@ -202,10 +202,9 @@ class JsonSerializable:
         `dump` method.
         :return: a class with customized behavior.
         """
-        original_dump = cls.dump
-
         def _wrapper(inst, **kwargs_):
-            return original_dump(inst, **{**kwargs_, **kwargs})
+            return dump(inst, **{**kwargs_, **kwargs})
+
         type_ = type(JsonSerializable.__name__, (cls,), {})
         type_.dump = _wrapper
         return type_
@@ -232,10 +231,9 @@ class JsonSerializable:
         `load` method.
         :return: a class with customized behavior.
         """
-        original_load = cls.load
-
-        def _wrapper(inst, **kwargs_):
-            return original_load(inst, **{**kwargs_, **kwargs})
+        @classmethod
+        def _wrapper(cls_, inst, **kwargs_):
+            return load(inst, cls_, **{**kwargs_, **kwargs})
         type_ = type(JsonSerializable.__name__, (cls,), {})
         type_.load = _wrapper
         return type_
