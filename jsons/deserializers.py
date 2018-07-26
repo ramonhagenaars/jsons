@@ -2,7 +2,7 @@
 This module contains default deserializers. You can override the
 deserialization process of a particular type as follows:
 
-`jsons.set_deserializer(custom_deserializer, SomeClass)`
+``jsons.set_deserializer(custom_deserializer, SomeClass)``
 """
 import inspect
 import re
@@ -19,7 +19,7 @@ def default_datetime_deserializer(obj: str, _: datetime, **__) -> datetime:
     :param obj:
     :param _: not used.
     :param __: not used.
-    :return: a `datetime.datetime` instance.
+    :return: a ``datetime.datetime`` instance.
     """
     pattern = RFC3339_DATETIME_PATTERN
     if '.' in obj:
@@ -98,7 +98,7 @@ def default_enum_deserializer(obj: str, cls: EnumMeta,
     """
     Deserialize an enum value to an enum instance. The serialized value must
     can be the name of the enum element or the value; dependent on
-    `use_enum_name`.
+    ``use_enum_name``.
     :param obj: the serialized enum.
     :param cls: the enum class.
     :param use_enum_name: determines whether the name or the value of an enum
@@ -118,8 +118,8 @@ def default_enum_deserializer(obj: str, cls: EnumMeta,
 
 def default_string_deserializer(obj: str, _: type = None, **kwargs) -> object:
     """
-    Deserialize a string. If the given `obj` can be parsed to a date, a
-    `datetime` instance is returned.
+    Deserialize a string. If the given ``obj`` can be parsed to a date, a
+    ``datetime`` instance is returned.
     :param obj: the string that is to be deserialized.
     :param _: not used.
     :param kwargs: any keyword arguments.
@@ -140,7 +140,7 @@ def default_primitive_deserializer(obj: object,
     :param obj: the value that is to be deserialized.
     :param _: not used.
     :param __: not used.
-    :return: `obj`.
+    :return: ``obj``.
     """
     return obj
 
@@ -149,17 +149,17 @@ def default_object_deserializer(obj: dict, cls: type,
                                 key_transformer: Callable[[str], str] = None,
                                 **kwargs) -> object:
     """
-    Deserialize `obj` into an instance of type `cls`. If `obj` contains keys
-    with a certain case style (e.g. camelCase) that do not match the style of
-    `cls` (e.g. snake_case), a key_transformer should be used (e.g.
+    Deserialize ``obj`` into an instance of type ``cls``. If ``obj`` contains
+    keys with a certain case style (e.g. camelCase) that do not match the style
+    of ``cls`` (e.g. snake_case), a key_transformer should be used (e.g.
     KEY_TRANSFORMER_SNAKECASE).
-    :param obj: a serialized instance of `cls`.
-    :param cls: the type to which `obj` should be deserialized.
+    :param obj: a serialized instance of ``cls``.
+    :param cls: the type to which ``obj`` should be deserialized.
     :param key_transformer: a function that transforms the keys in order to
-    match the attribute names of `cls`.
+    match the attribute names of ``cls``.
     :param kwargs: any keyword arguments that may be passed to the
     deserializers.
-    :return: an instance of type `cls`.
+    :return: an instance of type ``cls``.
     """
     if key_transformer:
         obj = {key_transformer(key): obj[key] for key in obj}

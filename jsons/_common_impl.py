@@ -44,22 +44,19 @@ def load_impl(json_obj: dict, cls: type = None, **kwargs) -> object:
 
     **Example**:
 
-        ``class Person:``
-            ``# No type hint required for name``
-
-        ``class Person:``
-            ``# No type hint required for name``
-
-            ``def __init__(self, name):``
-                ``self.name = name``
-        ````
-        ``class Family:``
-            ``# Person is a custom class, use a type hint``
-
-            ``def __init__(self, persons: List[Person]):``
-                ``self.persons = persons``
-
-        ``jsons.load(some_dict, Family)``
+    >>> from typing import List
+    >>> import jsons
+    >>> class Person:
+    ...     # No type hint required for name
+    ...     def __init__(self, name):
+    ...         self.name = name
+    >>> class Family:
+    ...     # Person is a custom class, use a type hint
+    ...         def __init__(self, persons: List[Person]):
+    ...             self.persons = persons
+    >>> loaded = jsons.load({'persons': [{'name': 'John'}]}, Family)
+    >>> loaded.persons[0].name
+    'John'
 
     If no ``cls`` is given, a dict is simply returned, but contained values
     (e.g. serialized ``datetime`` values) are still deserialized.
@@ -82,7 +79,7 @@ def load_impl(json_obj: dict, cls: type = None, **kwargs) -> object:
 
 def camelcase(str_: str) -> str:
     """
-    Return `s` in camelCase.
+    Return ``s`` in camelCase.
     :param str_: the string that is to be transformed.
     :return: a string in camelCase.
     """
@@ -95,7 +92,7 @@ def camelcase(str_: str) -> str:
 
 def snakecase(str_: str) -> str:
     """
-    Return `s` in snake_case.
+    Return ``s`` in snake_case.
     :param str_: the string that is to be transformed.
     :return: a string in snake_case.
     """
@@ -106,7 +103,7 @@ def snakecase(str_: str) -> str:
 
 def pascalcase(str_: str) -> str:
     """
-    Return `s` in PascalCase.
+    Return ``s`` in PascalCase.
     :param str_: the string that is to be transformed.
     :return: a string in PascalCase.
     """
@@ -116,7 +113,7 @@ def pascalcase(str_: str) -> str:
 
 def lispcase(str_: str) -> str:
     """
-    Return `s` in lisp-case.
+    Return ``s`` in lisp-case.
     :param str_: the string that is to be transformed.
     :return: a string in lisp-case.
     """

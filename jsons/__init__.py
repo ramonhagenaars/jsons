@@ -142,6 +142,14 @@ def set_serializer(func: callable, cls: type, high_prio: bool = True) -> None:
     Set a serializer function for the given type. You may override the default
     behavior of ``jsons.load`` by setting a custom serializer.
 
+    The ``func`` argument must take one argument (i.e. the object that is to be
+    serialized) and also a ``kwargs`` parameter. For example:
+
+    >>> def func(obj, **kwargs):
+    ...    return dict()
+
+    You may ask additional arguments between ``cls`` and ``kwargs``.
+
     :param func: the serializer function.
     :param cls: the type this serializer can handle.
     :param high_prio: determines the order in which is looked for the callable.
@@ -160,6 +168,15 @@ def set_deserializer(func: callable, cls: type, high_prio: bool = True) -> None:
     Set a deserializer function for the given type. You may override the
     default behavior of ``jsons.dump`` by setting a custom deserializer.
 
+    The ``func`` argument must take two arguments (i.e. the dict containing the
+    serialized values and the type that the values should be deserialized into)
+    and also a ``kwargs`` parameter. For example:
+
+    >>> def func(dict_, cls, **kwargs):
+    ...    return cls()
+
+    You may ask additional arguments between ``cls`` and ``kwargs``.
+
     :param func: the deserializer function.
     :param cls: the type this serializer can handle.
     :param high_prio: determines the order in which is looked for the callable.
@@ -175,17 +192,18 @@ def set_deserializer(func: callable, cls: type, high_prio: bool = True) -> None:
 
 class JsonSerializable:
     """
-    This class offers an alternative to using the `jsons.load` and `jsons.dump`
-    methods. An instance of a class that inherits from JsonSerializable has the
-    `json` property, which value is equivalent to calling `jsons.dump` on that
-    instance. Furthermore, you can call `from_json` on that class, which is
-    equivalent to calling `json.load` with that class as an argument.
+    This class offers an alternative to using the ``jsons.load`` and
+    ``jsons.dump`` methods. An instance of a class that inherits from
+    ``JsonSerializable`` has the ``json`` property, which value is equivalent
+    to calling ``jsons.dump`` on that instance. Furthermore, you can call
+    ``from_json`` on that class, which is equivalent to calling ``json.load``
+    with that class as an argument.
     """
     @classmethod
     def with_dump(cls, **kwargs) -> type:
         """
-        Return a class (`type`) that is based on JsonSerializable with the
-        `dump` method being automatically provided the given `kwargs`.
+        Return a class (``type``) that is based on JsonSerializable with the
+        ``dump`` method being automatically provided the given ``kwargs``.
 
         **Example:**
 
@@ -199,7 +217,7 @@ class JsonSerializable:
         {'myName': 'John'}
 
         :param kwargs: the keyword args that are automatically provided to the
-        `dump` method.
+        ``dump`` method.
         :return: a class with customized behavior.
         """
         def _wrapper(inst, **kwargs_):
@@ -212,8 +230,8 @@ class JsonSerializable:
     @classmethod
     def with_load(cls, **kwargs) -> type:
         """
-        Return a class (`type`) that is based on JsonSerializable with the
-        `load` method being automatically provided the given `kwargs`.
+        Return a class (``type``) that is based on JsonSerializable with the
+        ``load`` method being automatically provided the given ``kwargs``.
 
         **Example:**
 
@@ -228,7 +246,7 @@ class JsonSerializable:
         'John'
 
         :param kwargs: the keyword args that are automatically provided to the
-        `load` method.
+        ``load`` method.
         :return: a class with customized behavior.
         """
         @classmethod
@@ -241,7 +259,7 @@ class JsonSerializable:
     @property
     def json(self) -> dict:
         """
-        See `jsons.dump`.
+        See ``jsons.dump``.
         :return: this instance in a JSON representation (dict).
         """
         return self.dump()
@@ -249,7 +267,7 @@ class JsonSerializable:
     @classmethod
     def from_json(cls: type, json_obj: dict, **kwargs) -> object:
         """
-        See `jsons.load`.
+        See ``jsons.load``.
         :param json_obj: a JSON representation of an instance of the inheriting
         class
         :param kwargs: the keyword args are passed on to the deserializer
@@ -260,7 +278,7 @@ class JsonSerializable:
 
     def dump(self, **kwargs) -> dict:
         """
-        See `jsons.dump`.
+        See ``jsons.dump``.
         :param kwargs: the keyword args are passed on to the serializer
         function.
         :return: this instance in a JSON representation (dict).
@@ -270,7 +288,7 @@ class JsonSerializable:
     @classmethod
     def load(cls: type, json_obj: dict, **kwargs) -> object:
         """
-        See `jsons.load`.
+        See ``jsons.load``.
         :param kwargs: the keyword args are passed on to the serializer
         function.
         :return: this instance in a JSON representation (dict).

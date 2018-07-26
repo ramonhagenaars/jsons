@@ -2,7 +2,7 @@
 This module contains default serializers. You can override the serialization
 process of a particular type as follows:
 
-`jsons.set_serializer(custom_deserializer, SomeClass)`
+``jsons.set_serializer(custom_deserializer, SomeClass)``
 """
 from datetime import datetime
 from enum import EnumMeta
@@ -14,7 +14,7 @@ from jsons._common_impl import RFC3339_DATETIME_PATTERN, snakecase, \
 
 def default_iterable_serializer(obj, **kwargs) -> list:
     """
-    Serialize the given `obj` to a list of serialized objects.
+    Serialize the given ``obj`` to a list of serialized objects.
     :param obj: the iterable that is to be serialized.
     :param kwargs: any keyword arguments that may be given to the serialization
     process.
@@ -25,7 +25,7 @@ def default_iterable_serializer(obj, **kwargs) -> list:
 
 def default_list_serializer(obj: list, **kwargs) -> list:
     """
-    Serialize the given `obj` to a list of serialized objects.
+    Serialize the given ``obj`` to a list of serialized objects.
     :param obj: the list that is to be serialized.
     :param kwargs: any keyword arguments that may be given to the serialization
     process.
@@ -36,7 +36,7 @@ def default_list_serializer(obj: list, **kwargs) -> list:
 
 def default_tuple_serializer(obj: tuple, **kwargs) -> list:
     """
-    Serialize the given `obj` to a list of serialized objects.
+    Serialize the given ``obj`` to a list of serialized objects.
     :param obj: the tuple that is to be serialized.
     :param kwargs: any keyword arguments that may be given to the serialization
     process.
@@ -49,11 +49,11 @@ def default_dict_serializer(obj: dict, strip_nulls: bool = False,
                             key_transformer: Callable[[str], str] = None,
                             **kwargs) -> dict:
     """
-    Serialize the given `obj` to a dict of serialized objects.
+    Serialize the given ``obj`` to a dict of serialized objects.
     :param obj: the dict that is to be serialized.
     :param key_transformer: a function that will be applied to all keys in the
     resulting dict.
-    :param strip_nulls: if `True` the resulting dict will not contain null
+    :param strip_nulls: if ``True`` the resulting dict will not contain null
     values.
     :param kwargs: any keyword arguments that may be given to the serialization
     process.
@@ -79,7 +79,7 @@ def default_enum_serializer(obj: EnumMeta, use_enum_name: bool = True,
     :param use_enum_name: determines whether the name or the value should be
     used for serialization.
     :param _: not used.
-    :return: `obj` serialized as a string.
+    :return: ``obj`` serialized as a string.
     """
     attr = 'name' if use_enum_name else 'value'
     return getattr(obj, attr)
@@ -92,7 +92,7 @@ def default_datetime_serializer(obj: datetime, **_) -> str:
     in UTC, the result is suffixed with a 'Z'.
     :param obj: the datetime instance that is to be serialized.
     :param _: not used.
-    :return: `datetime` as an RFC3339 string.
+    :return: ``datetime`` as an RFC3339 string.
     """
     timezone = obj.tzinfo
     offset = 'Z'
@@ -107,10 +107,10 @@ def default_datetime_serializer(obj: datetime, **_) -> str:
 
 def default_primitive_serializer(obj, **_) -> object:
     """
-    Serialize a primitive; simply return the given `obj`.
+    Serialize a primitive; simply return the given ``obj``.
     :param obj:
     :param _: not used.
-    :return: `obj`.
+    :return: ``obj``.
     """
     return obj
 
@@ -120,19 +120,19 @@ def default_object_serializer(obj: object,
                               strip_nulls: bool = False,
                               strip_privates: bool = False, **kwargs) -> dict:
     """
-    Serialize the given `obj` to a dict. All values within `obj` are also
-    serialized. If `key_transformer` is given, it will be used to transform the
-    casing (e.g. snake_case) to a different format (e.g. camelCase).
+    Serialize the given ``obj`` to a dict. All values within ``obj`` are also
+    serialized. If ``key_transformer`` is given, it will be used to transform
+    the casing (e.g. snake_case) to a different format (e.g. camelCase).
     :param obj: the object that is to be serialized.
     :param key_transformer: a function that will be applied to all keys in the
     resulting dict.
-    :param strip_nulls: if `True` the resulting dict will not contain null
+    :param strip_nulls: if ``True`` the resulting dict will not contain null
     values.
-    :param strip_privates: if `True` the resulting dict will not contain
+    :param strip_privates: if ``True`` the resulting dict will not contain
     private attributes (i.e. attributes that start with an underscore).
     :param kwargs: any keyword arguments that are to be passed to the
     serializer functions.
-    :return: a Python dict holding the values of `obj`.
+    :return: a Python dict holding the values of ``obj``.
     """
     obj_dict = {attr: obj.__getattribute__(attr) for attr in dir(obj)
                 if not attr.startswith('__')
