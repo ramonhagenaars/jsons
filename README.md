@@ -5,11 +5,27 @@
 
 
 # jsons
-A Python lib (Python3.5+) for deeply serializing Python objects to dicts or strings and for 
-deserializing dicts or strings to Python objects.
+A Python (3.5+) lib for deeply serializing Python objects to dicts or strings and for 
+deserializing dicts or strings to Python objects using type hints.
+
+With `jsons`, you can serialize/deserialize most objects already. You can also easily
+extend `jsons` yourself by defining a custom serializer/deserializer for a certain type.
+Furthermore, any default serializer/deserializer can be overridden. Some 
+serializers/deserializers accept extra parameters to allow you to tune the 
+serialization/deserialization process to your need.
+
+`jsons` generates human-readable dicts or JSON strings that are not polluted with
+metadata. 
+
+##### Why not use `__dict__` for serialization?
+* The `__dict__` attribute only creates a *shallow* dict of an instance. Any contained 
+  object is not serialized to a dict.
+* The `__dict__` does not take `@property` methods in account.
+* Not all objects have a `__dict__` attribute (e.g. `datetime` does not).
+* The serialization process of `__dict__` cannot easily be tuned.
+* There is no means to deserialize with `__dict__`.
 
 ## Installation
-
 ```
 pip install jsons
 ```
