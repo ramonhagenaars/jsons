@@ -5,7 +5,7 @@
 
 
 # jsons
-A Python lib (Python3.5+) for serializing Python objects to dicts or strings and for 
+A Python lib (Python3.5+) for deeply serializing Python objects to dicts or strings and for 
 deserializing dicts or strings to Python objects.
 
 ## Installation
