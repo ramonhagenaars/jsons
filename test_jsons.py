@@ -99,6 +99,20 @@ class TestJsons(TestCase):
         dumped = jsons.dump(b, strip_nulls=True)
         self.assertEqual({'name': 'B', 'a': {}}, dumped)
 
+    def test_dump_object_strip_privates(self):
+        class A:
+            def __init__(self):
+                self._name = 'A'  # This will be stripped.
+
+        class B:
+            def __init__(self, a):
+                self.a = a
+                self._name = 'B'  # This will be stripped.
+
+        b = B(A())
+        dumped = jsons.dump(b, strip_privates=True)
+        self.assertEqual({'a': {}}, dumped)
+
     def test_load_str(self):
         self.assertEqual('some string', jsons.load('some string'))
 
