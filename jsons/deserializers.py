@@ -161,37 +161,43 @@ def default_object_deserializer(obj: dict, cls: type,
     deserializers.
     :return: an instance of type ``cls``.
     """
+    concat_kwargs = kwargs
     if key_transformer:
         obj = {key_transformer(key): obj[key] for key in obj}
+        concat_kwargs = {**kwargs, 'key_transformer': key_transformer}
     signature_parameters = inspect.signature(cls.__init__).parameters
+    constructor_args = _get_constructor_args(obj, signature_parameters,
+                                             **concat_kwargs)
+    remaining_attrs = {attr_name: obj[attr_name] for attr_name in obj
+                       if attr_name not in constructor_args}
+    instance = cls(**constructor_args)
+    _set_remaining_attrs(instance, remaining_attrs, **kwargs)
+    return instance
+
+
+def _get_constructor_args(obj, signature_parameters, **kwargs):
     # Loop through the signature of cls: the type we try to deserialize to. For
     # every required parameter, we try to get the corresponding value from
     # json_obj.
     constructor_args = dict()
-    for signature_key, signature in signature_parameters.items():
-        if obj and signature_key != 'self':
-            if signature_key in obj:
-                cls_ = None
-                if signature.annotation != inspect._empty:
-                    cls_ = signature.annotation
-                value = load_impl(obj[signature_key], cls_,
-                                  key_transformer=key_transformer, **kwargs)
-                constructor_args[signature_key] = value
+    sigs = [(sig_key, sig) for sig_key, sig in signature_parameters.items()
+            if obj and sig_key != 'self' and sig_key in obj]
+    for sig_key, sig in sigs:
+        cls = sig.annotation if sig.annotation != inspect._empty else None
+        value = load_impl(obj[sig_key], cls, **kwargs)
+        constructor_args[sig_key] = value
+    return constructor_args
 
-    # The constructor arguments are gathered, create an instance.
-    instance = cls(**constructor_args)
+
+def _set_remaining_attrs(instance, remaining_attrs, **kwargs):
     # Set any remaining attributes on the newly created instance.
-    remaining_attrs = {attr_name: obj[attr_name] for attr_name in obj
-                       if attr_name not in constructor_args}
     for attr_name in remaining_attrs:
         loaded_attr = load_impl(remaining_attrs[attr_name],
-                                type(remaining_attrs[attr_name]),
-                                key_transformer=key_transformer, **kwargs)
+                                type(remaining_attrs[attr_name]), **kwargs)
         try:
             setattr(instance, attr_name, loaded_attr)
         except AttributeError:
             pass  # This is raised when a @property does not have a setter.
-    return instance
 
 
 # The following default key transformers can be used with the
