@@ -118,7 +118,9 @@ def default_primitive_serializer(obj, **_) -> object:
 def default_object_serializer(obj: object,
                               key_transformer: Callable[[str], str] = None,
                               strip_nulls: bool = False,
-                              strip_privates: bool = False, **kwargs) -> dict:
+                              strip_privates: bool = False,
+                              strip_properties: bool = False,
+                              **kwargs) -> dict:
     """
     Serialize the given ``obj`` to a dict. All values within ``obj`` are also
     serialized. If ``key_transformer`` is given, it will be used to transform
@@ -130,15 +132,20 @@ def default_object_serializer(obj: object,
     values.
     :param strip_privates: if ``True`` the resulting dict will not contain
     private attributes (i.e. attributes that start with an underscore).
+    :param strip_properties: if ``True`` the resulting dict will not contain
+    values from @properties.
     :param kwargs: any keyword arguments that are to be passed to the
     serializer functions.
     :return: a Python dict holding the values of ``obj``.
     """
-    obj_dict = {attr: obj.__getattribute__(attr) for attr in dir(obj)
-                if not attr.startswith('__')
-                and not (strip_privates and attr.startswith('_'))
-                and attr != 'json'
-                and not isinstance(obj.__getattribute__(attr), Callable)}
+    if strip_properties:
+        obj_dict = obj.__dict__
+    else:
+        obj_dict = {attr: obj.__getattribute__(attr) for attr in dir(obj)
+                    if not attr.startswith('__')
+                    and not (strip_privates and attr.startswith('_'))
+                    and attr != 'json'
+                    and not isinstance(obj.__getattribute__(attr), Callable)}
 
     return default_dict_serializer(obj_dict, key_transformer=key_transformer,
                                    strip_nulls=strip_nulls,

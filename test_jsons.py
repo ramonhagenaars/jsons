@@ -84,6 +84,7 @@ class TestJsons(TestCase):
 
         a = A()
         self.assertEqual({'x': 123}, jsons.dump(a))
+        self.assertEqual({}, jsons.dump(a, strip_properties=True))
 
     def test_dump_object_strip_nulls(self):
         class A:
