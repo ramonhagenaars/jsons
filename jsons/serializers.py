@@ -131,8 +131,12 @@ def default_object_serializer(obj: object,
     serializer functions.
     :return: a Python dict holding the values of `obj`.
     """
-    return default_dict_serializer(obj.__dict__,
-                                   key_transformer=key_transformer,
+    obj_dict = {attr: obj.__getattribute__(attr) for attr in dir(obj)
+                if not attr.startswith('__')
+                and attr != 'json'
+                and not isinstance(obj.__getattribute__(attr), Callable)}
+
+    return default_dict_serializer(obj_dict, key_transformer=key_transformer,
                                    strip_nulls=strip_nulls, **kwargs)
 
 

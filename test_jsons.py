@@ -73,6 +73,18 @@ class TestJsons(TestCase):
         b = B(A())
         self.assertEqual({'name': 'B', 'a': {'name': 'A'}}, jsons.dump(b))
 
+    def test_dump_object_properties(self):
+        class A:
+            @property
+            def x(self):
+                return 123
+
+            def y(self):
+                return 456  # Not to be serialized.
+
+        a = A()
+        self.assertEqual({'x': 123}, jsons.dump(a))
+
     def test_dump_object_strip_nulls(self):
         class A:
             def __init__(self):
@@ -198,6 +210,29 @@ class TestJsons(TestCase):
                          c.list_b[1].list_dates[0].minute)
         self.assertEqual(loaded_c.list_b[1].list_dates[0].second,
                          c.list_b[1].list_dates[0].second)
+
+    def test_load_object_properties(self):
+        class WithoutSetter:
+            @property
+            def x(self):
+                return 123
+
+        class WithSetter:
+            def __init__(self):
+                self.__x = 123
+            @property
+            def x(self):
+                return self.__x
+
+            @x.setter
+            def x(self, x):
+                self.__x = x
+
+        loaded1 = jsons.load({'x': 123}, WithoutSetter)
+        self.assertEqual(loaded1.x, 123)
+
+        loaded2 = jsons.load({'x': 456}, WithSetter)
+        self.assertEqual(loaded2.x, 456)
 
     def test_dumps(self):
         class A:

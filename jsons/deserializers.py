@@ -187,7 +187,10 @@ def default_object_deserializer(obj: dict, cls: type,
         loaded_attr = load_impl(remaining_attrs[attr_name],
                                 type(remaining_attrs[attr_name]),
                                 key_transformer=key_transformer, **kwargs)
-        setattr(instance, attr_name, loaded_attr)
+        try:
+            setattr(instance, attr_name, loaded_attr)
+        except AttributeError:
+            pass  # This is raised when a @property does not have a setter.
     return instance
 
 
