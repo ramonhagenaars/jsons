@@ -66,7 +66,7 @@ API overview
 Example with dataclasses
 ''''''''''''''''''''''''
 
-::
+.. code:: python
 
    from dataclasses import dataclass
    from typing import List
@@ -98,7 +98,7 @@ Example with dataclasses
 Example with regular classes
 ''''''''''''''''''''''''''''
 
-::
+.. code:: python
 
    from typing import List
    import jsons
@@ -129,7 +129,7 @@ Example with regular classes
 Example with JsonSerializable
 '''''''''''''''''''''''''''''
 
-::
+.. code:: python
 
    from jsons import JsonSerializable
 
@@ -157,7 +157,7 @@ Overriding the default (de)serialization behavior
 You may alter the behavior of the serialization and deserialization processes yourself by defining your own
 custom serialization/deserialization functions.
 
-::
+.. code:: python
 
    jsons.set_serializer(custom_serializer, datetime)  # A custom datetime serializer.
    jsons.set_deserializer(custom_deserializer, str)  # A custom string deserializer.
@@ -167,7 +167,7 @@ Transforming the JSON keys
 You can have the keys transformed by the serialization or deserialization process by providing a transformer 
 function that takes a string and returns a string.
 
-::
+.. code:: python
 
    result = jsons.dump(some_obj, key_transformer=jsons.KEY_TRANSFORMER_CAMELCASE)
    # result could be something like: {'thisIsTransformed': 123}
@@ -177,7 +177,7 @@ function that takes a string and returns a string.
 
 The following casing styles are supported:
 
-::
+.. code:: python
 
    KEY_TRANSFORMER_SNAKECASE   # snake_case
    KEY_TRANSFORMER_CAMELCASE   # camelCase
@@ -192,7 +192,7 @@ class. You can extract a dynamic class from `JsonSerializable` with the
 serializing and deserializing methods (`dump`, `load`, ...) overridden, to make
 them behave as if these methods are called with your ``kwargs``.
 
-::
+.. code:: python
 
    custom_serializable = JsonSerializable\
        .with_dump(key_transformer=KEY_TRANSFORMER_CAMELCASE)\
@@ -207,6 +207,7 @@ them behave as if these methods are called with your ``kwargs``.
 
    p2 = Person.from_json({'myName': 'Mary'})
    p2.my_name  # 'Mary'  <-- note the snake_case in my_name
+
 
 .. |PyPI version| image:: https://badge.fury.io/py/jsons.svg
    :target: https://badge.fury.io/py/jsons
