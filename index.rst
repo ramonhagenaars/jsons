@@ -36,8 +36,6 @@ Installation
 
    pip install jsons
 
-::
-
 Usage
 '''''
 
@@ -47,8 +45,6 @@ Usage
 
    some_instance = jsons.load(some_dict, SomeClass)  # Deserialization
    some_dict = jsons.dump(some_instance)  # Serialization
-
-::
 
 API overview
 ''''''''''''
@@ -99,10 +95,6 @@ Example with dataclasses
    # Prints:
    # ClassRoom(students=[Student(name='John'), Student(name='Mary'), Student(name='Greg'), Student(name='Susan')])
 
-::
-
-
-
 Example with regular classes
 ''''''''''''''''''''''''''''
 
@@ -134,8 +126,6 @@ Example with regular classes
    # Prints:
    # <__main__.ClassRoom object at 0x0337F9B0>
 
-::
-
 Example with JsonSerializable
 '''''''''''''''''''''''''''''
 
@@ -158,8 +148,6 @@ Example with JsonSerializable
    # Prints:
    # 'red'
 
-::
-
 Advanced features
 '''''''''''''''''
 
@@ -173,9 +161,6 @@ custom serialization/deserialization functions.
 
    jsons.set_serializer(custom_serializer, datetime)  # A custom datetime serializer.
    jsons.set_deserializer(custom_deserializer, str)  # A custom string deserializer.
-   
-::
-
 
 Transforming the JSON keys
 --------------------------
@@ -190,8 +175,6 @@ function that takes a string and returns a string.
    result = jsons.load(some_dict, SomeClass, key_transformer=jsons.KEY_TRANSFORMER_SNAKECASE)
    # result could be something like: {'this_is_transformed': 123}
 
-::
-
 The following casing styles are supported:
 
 ::
@@ -200,8 +183,6 @@ The following casing styles are supported:
    KEY_TRANSFORMER_CAMELCASE   # camelCase
    KEY_TRANSFORMER_PASCALCASE  # PascalCase
    KEY_TRANSFORMER_LISPCASE    # lisp-case
-
-::
 
 Customizing JsonSerializable
 ----------------------------
@@ -226,9 +207,6 @@ them behave as if these methods are called with your ``kwargs``.
 
    p2 = Person.from_json({'myName': 'Mary'})
    p2.my_name  # 'Mary'  <-- note the snake_case in my_name
-   
-::
-
 
 .. |PyPI version| image:: https://badge.fury.io/py/jsons.svg
    :target: https://badge.fury.io/py/jsons
