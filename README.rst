@@ -1,4 +1,4 @@
-|PyPI version| |Build Status| |Scrutinizer Code Quality|
+|PyPI version| |Docs| |Build Status| |Scrutinizer Code Quality|
 |Maintainability|
 
 jsons
@@ -214,6 +214,11 @@ them behave as if these methods are called with your ``kwargs``.
 
 .. |PyPI version| image:: https://badge.fury.io/py/jsons.svg
    :target: https://badge.fury.io/py/jsons
+
+.. |Docs| image:: https://readthedocs.org/projects/jsons/badge/?version=latest
+   :target: https://jsons.readthedocs.io/en/latest/?badge=latest
+   :alt: Documentation Status
+
 .. |Build Status| image:: https://travis-ci.org/ramonhagenaars/geomodels.svg?branch=master
    :target: https://travis-ci.org/ramonhagenaars/jsons
 .. |Scrutinizer Code Quality| image:: https://scrutinizer-ci.com/g/ramonhagenaars/jsons/badges/quality-score.png?b=master
