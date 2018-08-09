@@ -30,7 +30,7 @@ Why not use ``__dict__`` for serialization?
 -  There is no means to deserialize with ``__dict__``.
 
 Installation
-------------
+''''''''''''
 
 ::
 
