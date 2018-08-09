@@ -167,8 +167,10 @@ You may alter the behavior of the serialization and deserialization processes yo
 custom serialization/deserialization functions.
 
 ::
+
    jsons.set_serializer(custom_serializer, datetime)  # A custom datetime serializer.
    jsons.set_deserializer(custom_deserializer, str)  # A custom string deserializer.
+   
 ::
 
 
