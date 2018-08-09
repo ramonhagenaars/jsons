@@ -63,8 +63,11 @@ API overview
 -  ``JsonSerializable``: a base class that allows for convenient use of
    the jsons features.
 
+Examples
+''''''''
+
 Example with dataclasses
-''''''''''''''''''''''''
+------------------------
 
 .. code:: python
 
@@ -96,7 +99,7 @@ Example with dataclasses
    # ClassRoom(students=[Student(name='John'), Student(name='Mary'), Student(name='Greg'), Student(name='Susan')])
 
 Example with regular classes
-''''''''''''''''''''''''''''
+----------------------------
 
 .. code:: python
 
@@ -127,7 +130,7 @@ Example with regular classes
    # <__main__.ClassRoom object at 0x0337F9B0>
 
 Example with JsonSerializable
-'''''''''''''''''''''''''''''
+-----------------------------
 
 .. code:: python
 
