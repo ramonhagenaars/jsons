@@ -36,6 +36,8 @@ Installation
 
    pip install jsons
 
+::
+
 Usage
 '''''
 
@@ -43,9 +45,10 @@ Usage
 
    import jsons
 
-
    some_instance = jsons.load(some_dict, SomeClass)  # Deserialization
    some_dict = jsons.dump(some_instance)  # Serialization
+
+::
 
 API overview
 ''''''''''''
