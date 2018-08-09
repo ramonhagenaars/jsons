@@ -67,8 +67,36 @@ API overview
 Example with dataclasses
 ------------------------
 
-\``\` from dataclasses import dataclass from typing import List import
-jsons
+::
+
+   from dataclasses import dataclass
+   from typing import List
+   import jsons
+
+
+   # You can use dataclasses (since Python3.7). Regular Python classes (Python3.5+) will work as well as long as 
+   # type hints are present for custom classes.
+   @dataclass
+   class Student:
+       name: str
+
+
+   @dataclass
+   class ClassRoom:
+       students: List[Student]
+
+
+   c = ClassRoom([Student('John'), Student('Mary'), Student('Greg'), Student('Susan')])
+   dumped_c = jsons.dump(c)
+   print(dumped_c)
+   # Prints:
+   # {'students': [{'name': 'John'}, {'name': 'Mary'}, {'name': 'Greg'}, {'name': 'Susan'}]}
+   loaded_c = jsons.load(dumped_c, ClassRoom)
+   print(loaded_c)
+   # Prints:
+   # ClassRoom(students=[Student(name='John'), Student(name='Mary'), Student(name='Greg'), Student(name='Susan')])
+
+::
 
 You can use dataclasses (since Python3.7). Regular Python classes (Python3.5+) will work as well as long as
 ===========================================================================================================
