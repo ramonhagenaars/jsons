@@ -39,7 +39,7 @@ Installation
 Usage
 '''''
 
-::
+.. code:: python
 
    import jsons
 
