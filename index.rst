@@ -98,18 +98,77 @@ Example with dataclasses
 
 ::
 
-You can use dataclasses (since Python3.7). Regular Python classes (Python3.5+) will work as well as long as
-===========================================================================================================
 
-type hints are present for custom classes.
-==========================================
 
-@dataclass class Student: name: str
+Example with regular classes
+----------------------------
 
-@dataclass class ClassRoom: students: List[Student]
+::
 
-c = ClassRoom([Student(‘John’), Student(‘Mary’), Student(‘Greg’),
-Student(‘Susan’)]) dumped_c = jsons.dump(c)
+   from typing import List
+   import jsons
+
+
+   class Student:
+       # Since ``name`` is expected to be a string, no type hint is required.
+       def __init__(self, name):
+           self.name = name
+
+
+   class ClassRoom:
+       # Since ``Student`` is a custom class, a type hint must be given.
+       def __init__(self, students: List[Student]):
+           self.students = students
+
+
+   c = ClassRoom([Student('John'), Student('Mary'), Student('Greg'), Student('Susan')])
+   dumped_c = jsons.dump(c)
+   print(dumped_c)
+   # Prints:
+   # {'students': [{'name': 'John'}, {'name': 'Mary'}, {'name': 'Greg'}, {'name': 'Susan'}]}
+   loaded_c = jsons.load(dumped_c, ClassRoom)
+   print(loaded_c)
+   # Prints:
+   # <__main__.ClassRoom object at 0x0337F9B0>
+
+::
+
+Example with JsonSerializable
+-----------------------------
+
+::
+
+   from jsons import JsonSerializable
+
+
+   class Car(JsonSerializable):
+       def __init__(self, color):
+           self.color = color
+
+   c = Car('red')
+   cj = c.json  # You can also do 'c.dump(**kwargs)'
+   print(cj)
+   # Prints:
+   # {'color': 'red'}
+   c2 = Car.from_json(cj)  # You can also do 'Car.load(cj, **kwargs)'
+   print(c2.color)
+   # Prints:
+   # 'red'
+
+::
+
+Advanced features
+-----------------
+
+Overriding the default (de)serialization behavior
+
+You may alter the behavior of the serialization and deserialization processes yourself by defining your own
+custom serialization/deserialization functions.
+
+::
+   jsons.set_serializer(custom_serializer, datetime)  # A custom datetime serializer.
+   jsons.set_deserializer(custom_deserializer, str)  # A custom string deserializer.
+::
 
 .. |PyPI version| image:: https://badge.fury.io/py/jsons.svg
    :target: https://badge.fury.io/py/jsons
