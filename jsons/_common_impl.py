@@ -12,7 +12,7 @@ SERIALIZERS = dict()
 DESERIALIZERS = dict()
 
 
-def dump_impl(obj: object, **kwargs) -> object:
+def dump(obj: object, **kwargs) -> object:
     """
     Serialize the given ``obj`` to a JSON equivalent type (e.g. dict, list,
     int, ...).
@@ -31,7 +31,7 @@ def dump_impl(obj: object, **kwargs) -> object:
     return serializer(obj, **kwargs)
 
 
-def load_impl(json_obj: dict, cls: type = None, **kwargs) -> object:
+def load(json_obj: dict, cls: type = None, **kwargs) -> object:
     """
     Deserialize the given ``json_obj`` to an object of type ``cls``. If the
     contents of ``json_obj`` do not match the interface of ``cls``, a

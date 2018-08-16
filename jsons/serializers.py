@@ -7,7 +7,7 @@ process of a particular type as follows:
 from datetime import datetime
 from enum import EnumMeta
 from typing import Callable
-from jsons import dump_impl
+from jsons import _common_impl
 from jsons._common_impl import RFC3339_DATETIME_PATTERN, snakecase, \
     camelcase, pascalcase, lispcase
 
@@ -20,7 +20,7 @@ def default_iterable_serializer(obj, **kwargs) -> list:
     process.
     :return: a list of which all elements are serialized.
     """
-    return [dump_impl(elem, **kwargs) for elem in obj]
+    return [_common_impl.dump(elem, **kwargs) for elem in obj]
 
 
 def default_list_serializer(obj: list, **kwargs) -> list:
@@ -61,8 +61,9 @@ def default_dict_serializer(obj: dict, strip_nulls: bool = False,
     """
     result = dict()
     for key in obj:
-        dumped_elem = dump_impl(obj[key], key_transformer=key_transformer,
-                                strip_nulls=strip_nulls, **kwargs)
+        dumped_elem = _common_impl.dump(obj[key],
+                                        key_transformer=key_transformer,
+                                        strip_nulls=strip_nulls, **kwargs)
         if not (strip_nulls and dumped_elem is None):
             if key_transformer:
                 key = key_transformer(key)

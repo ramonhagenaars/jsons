@@ -88,8 +88,9 @@ Alternatively, you can make use of the `JsonSerializable` class.
 import json
 from datetime import datetime
 from enum import Enum
-from jsons._common_impl import dump_impl, load_impl, CLASSES_SERIALIZERS, \
-    CLASSES_DESERIALIZERS, SERIALIZERS, DESERIALIZERS
+from jsons import _common_impl
+from jsons._common_impl import CLASSES_SERIALIZERS, CLASSES_DESERIALIZERS, \
+    SERIALIZERS, DESERIALIZERS
 from jsons.deserializers import default_list_deserializer, \
     default_enum_deserializer, default_datetime_deserializer, \
     default_string_deserializer, default_primitive_deserializer, \
@@ -102,8 +103,8 @@ from jsons.serializers import default_list_serializer, \
     KEY_TRANSFORMER_PASCALCASE, KEY_TRANSFORMER_LISPCASE, \
     default_dict_serializer, default_tuple_serializer
 
-dump = dump_impl
-load = load_impl
+dump = _common_impl.dump
+load = _common_impl.load
 
 
 def dumps(obj: object, *args, **kwargs) -> str:
