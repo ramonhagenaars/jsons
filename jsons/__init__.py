@@ -105,6 +105,7 @@ from jsons.serializers import default_list_serializer, \
 
 dump = _common_impl.dump
 load = _common_impl.load
+JsonSerializable = _common_impl.JsonSerializable
 
 
 def dumps(obj: object, *args, **kwargs) -> str:
@@ -189,112 +190,6 @@ def set_deserializer(func: callable, cls: type, high_prio: bool = True) -> None:
         DESERIALIZERS[cls.__name__.lower()] = func
     else:
         DESERIALIZERS['nonetype'] = func
-
-
-class JsonSerializable:
-    """
-    This class offers an alternative to using the ``jsons.load`` and
-    ``jsons.dump`` methods. An instance of a class that inherits from
-    ``JsonSerializable`` has the ``json`` property, which value is equivalent
-    to calling ``jsons.dump`` on that instance. Furthermore, you can call
-    ``from_json`` on that class, which is equivalent to calling ``json.load``
-    with that class as an argument.
-    """
-    @classmethod
-    def with_dump(cls, **kwargs) -> type:
-        """
-        Return a class (``type``) that is based on JsonSerializable with the
-        ``dump`` method being automatically provided the given ``kwargs``.
-
-        **Example:**
-
-        >>> custom_serializable = JsonSerializable\
-                .with_dump(key_transformer=KEY_TRANSFORMER_CAMELCASE)
-        >>> class Person(custom_serializable):
-        ...     def __init__(self, my_name):
-        ...         self.my_name = my_name
-        >>> p = Person('John')
-        >>> p.json
-        {'myName': 'John'}
-
-        :param kwargs: the keyword args that are automatically provided to the
-        ``dump`` method.
-        :return: a class with customized behavior.
-        """
-        def _wrapper(inst, **kwargs_):
-            return dump(inst, **{**kwargs_, **kwargs})
-
-        type_ = type(JsonSerializable.__name__, (cls,), {})
-        type_.dump = _wrapper
-        return type_
-
-    @classmethod
-    def with_load(cls, **kwargs) -> type:
-        """
-        Return a class (``type``) that is based on JsonSerializable with the
-        ``load`` method being automatically provided the given ``kwargs``.
-
-        **Example:**
-
-        >>> custom_serializable = JsonSerializable\
-                .with_load(key_transformer=KEY_TRANSFORMER_SNAKECASE)
-        >>> class Person(custom_serializable):
-        ...     def __init__(self, my_name):
-        ...         self.my_name = my_name
-        >>> p_json = {'myName': 'John'}
-        >>> p = Person.from_json(p_json)
-        >>> p.my_name
-        'John'
-
-        :param kwargs: the keyword args that are automatically provided to the
-        ``load`` method.
-        :return: a class with customized behavior.
-        """
-        @classmethod
-        def _wrapper(cls_, inst, **kwargs_):
-            return load(inst, cls_, **{**kwargs_, **kwargs})
-        type_ = type(JsonSerializable.__name__, (cls,), {})
-        type_.load = _wrapper
-        return type_
-
-    @property
-    def json(self) -> dict:
-        """
-        See ``jsons.dump``.
-        :return: this instance in a JSON representation (dict).
-        """
-        return self.dump()
-
-    @classmethod
-    def from_json(cls: type, json_obj: dict, **kwargs) -> object:
-        """
-        See ``jsons.load``.
-        :param json_obj: a JSON representation of an instance of the inheriting
-        class
-        :param kwargs: the keyword args are passed on to the deserializer
-        function.
-        :return: an instance of the inheriting class.
-        """
-        return cls.load(json_obj, **kwargs)
-
-    def dump(self, **kwargs) -> dict:
-        """
-        See ``jsons.dump``.
-        :param kwargs: the keyword args are passed on to the serializer
-        function.
-        :return: this instance in a JSON representation (dict).
-        """
-        return dump(self, **kwargs)
-
-    @classmethod
-    def load(cls: type, json_obj: dict, **kwargs) -> object:
-        """
-        See ``jsons.load``.
-        :param kwargs: the keyword args are passed on to the serializer
-        function.
-        :return: this instance in a JSON representation (dict).
-        """
-        return load(json_obj, cls, **kwargs)
 
 
 set_serializer(default_list_serializer, list)
