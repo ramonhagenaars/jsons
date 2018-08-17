@@ -4,8 +4,9 @@ process of a particular type as follows:
 
 ``jsons.set_serializer(custom_deserializer, SomeClass)``
 """
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 from enum import EnumMeta
+from time import gmtime
 from typing import Callable
 from jsons import _common_impl
 from jsons._common_impl import RFC3339_DATETIME_PATTERN, snakecase, \
@@ -95,12 +96,14 @@ def default_datetime_serializer(obj: datetime, **_) -> str:
     :param _: not used.
     :return: ``datetime`` as an RFC3339 string.
     """
-    timezone = obj.tzinfo
-    offset = 'Z'
     pattern = RFC3339_DATETIME_PATTERN
-    if timezone:
-        if timezone.tzname(None) != 'UTC':
-            offset = timezone.tzname(None).split('UTC')[1]
+    tzone = obj.tzinfo
+    if not tzone:
+        hrs_delta = datetime.now().hour - gmtime().tm_hour
+        tzone = timezone(timedelta(hours=hrs_delta))
+    offset = 'Z'
+    if tzone.tzname(None) != 'UTC':
+        offset = tzone.tzname(None).split('UTC')[1]
     if obj.microsecond:
         pattern += '.%f'
     return obj.strftime("{}{}".format(pattern, offset))

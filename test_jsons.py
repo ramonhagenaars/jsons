@@ -24,7 +24,8 @@ class TestJsons(TestCase):
         self.assertEqual(True, jsons.dump(True))
 
     def test_dump_dict(self):
-        d = datetime.datetime(year=2018, month=7, day=8, hour=21, minute=34)
+        d = datetime.datetime(year=2018, month=7, day=8, hour=21, minute=34,
+                              tzinfo=datetime.timezone.utc)
         dict_ = {'a': {'b': {'c': {'d': d}}}}
         expectation = {'a': {'b': {'c': {'d': '2018-07-08T21:34:00Z'}}}}
         self.assertEqual(expectation, jsons.dump(dict_))
@@ -32,13 +33,14 @@ class TestJsons(TestCase):
     def test_dump_none(self):
         self.assertEqual(None, jsons.dump(None))
 
-    def test_dump_datetime(self):
+    def test_dump_naive_datetime(self):
         d = datetime.datetime(year=2018, month=7, day=8, hour=21, minute=34)
-        self.assertEqual('2018-07-08T21:34:00Z', jsons.dump(d))
+        self.assertTrue(jsons.dump(d).startswith('2018-07-08T21:34:00'))
+        self.assertTrue(not jsons.dump(d).endswith('Z'))
 
     def test_dump_datetime_with_microseconds(self):
         d = datetime.datetime(year=2018, month=7, day=8, hour=21, minute=34,
-                              microsecond=123456)
+                              microsecond=123456, tzinfo=datetime.timezone.utc)
         self.assertEqual('2018-07-08T21:34:00.123456Z', jsons.dump(d))
 
     def test_dump_enum(self):
@@ -49,13 +51,15 @@ class TestJsons(TestCase):
         self.assertEqual(2, jsons.dump(E.y, use_enum_name=False))
 
     def test_dump_list(self):
-        d = datetime.datetime(year=2018, month=7, day=8, hour=21, minute=34)
+        d = datetime.datetime(year=2018, month=7, day=8, hour=21, minute=34,
+                              tzinfo=datetime.timezone.utc)
         l = [1, 2, 3, [4, 5, [d]]]
         self.assertEqual([1, 2, 3, [4, 5, ['2018-07-08T21:34:00Z']]],
                          jsons.dump(l))
 
     def test_dump_tuple(self):
-        dat = datetime.datetime(year=2018, month=7, day=8, hour=21, minute=34)
+        dat = datetime.datetime(year=2018, month=7, day=8, hour=21, minute=34,
+                                tzinfo=datetime.timezone.utc)
         tup = (1, 2, 3, [4, 5, (dat,)])
         self.assertEqual([1, 2, 3, [4, 5, ['2018-07-08T21:34:00Z']]],
                          jsons.dump(tup))
@@ -140,7 +144,8 @@ class TestJsons(TestCase):
         self.assertEqual(None, jsons.load(None))
 
     def test_load_datetime(self):
-        dat = datetime.datetime(year=2018, month=7, day=8, hour=21, minute=34)
+        dat = datetime.datetime(year=2018, month=7, day=8, hour=21, minute=34,
+                                tzinfo=datetime.timezone.utc)
         self.assertEqual(dat, jsons.load('2018-07-08T21:34:00Z'))
 
     def test_load_enum(self):
@@ -152,13 +157,15 @@ class TestJsons(TestCase):
         self.assertEqual(E.y, jsons.load(2, E, use_enum_name=False))
 
     def test_load_list(self):
-        dat = datetime.datetime(year=2018, month=7, day=8, hour=21, minute=34)
+        dat = datetime.datetime(year=2018, month=7, day=8, hour=21, minute=34,
+                                tzinfo=datetime.timezone.utc)
         list_ = [1, 2, 3, [4, 5, [dat]]]
         expectation = [1, 2, 3, [4, 5, ['2018-07-08T21:34:00Z']]]
         self.assertEqual(list_, jsons.load(expectation))
 
     def test_load_tuple(self):
-        dat = datetime.datetime(year=2018, month=7, day=8, hour=21, minute=34)
+        dat = datetime.datetime(year=2018, month=7, day=8, hour=21, minute=34,
+                                tzinfo=datetime.timezone.utc)
         tup = (1, ([dat],))
         expectation = (1, (['2018-07-08T21:34:00Z'],))
         cls = Tuple[int, Tuple[List[datetime.datetime]]]

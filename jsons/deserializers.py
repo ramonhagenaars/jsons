@@ -32,6 +32,10 @@ def default_datetime_deserializer(obj: str, _: datetime, **__) -> datetime:
     if obj[-1] == 'Z':
         dattim_str = obj[0:-1]
         dattim_obj = datetime.strptime(dattim_str, pattern)
+        dattim_obj = datetime(dattim_obj.year, dattim_obj.month,
+                              dattim_obj.day, dattim_obj.hour,
+                              dattim_obj.minute, dattim_obj.second,
+                              dattim_obj.microsecond, timezone.utc)
     else:
         dattim_str, offset = obj.split('+')
         dattim_obj = datetime.strptime(dattim_str, pattern)
