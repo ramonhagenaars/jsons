@@ -143,18 +143,19 @@ def default_object_serializer(obj: object,
     :return: a Python dict holding the values of ``obj``.
     """
     obj_dict = obj.__dict__ if strip_properties and hasattr(obj, '__dict__') \
-        else _get_dict_from_obj(obj, strip_privates)
+        else _get_dict_from_obj(obj, strip_privates, **kwargs)
     return default_dict_serializer(obj_dict, key_transformer=key_transformer,
                                    strip_nulls=strip_nulls,
                                    strip_privates=strip_privates, **kwargs)
 
 
-def _get_dict_from_obj(obj, strip_privates):
+def _get_dict_from_obj(obj, strip_privates, cls=None):
     return {attr: obj.__getattribute__(attr) for attr in dir(obj)
             if not attr.startswith('__')
             and not (strip_privates and attr.startswith('_'))
             and attr != 'json'
-            and not isinstance(obj.__getattribute__(attr), Callable)}
+            and not isinstance(obj.__getattribute__(attr), Callable)
+            and (not cls or attr in cls.__slots__)}
 
 
 # The following default key transformers can be used with the

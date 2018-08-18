@@ -126,6 +126,25 @@ class TestJsons(TestCase):
         dumped = jsons.dump(b, strip_privates=True)
         self.assertEqual({'a': {}}, dumped)
 
+    def test_dump_as_parent_type(self):
+        class Parent:
+            __slots__ = ['parent_name']
+
+            def __init__(self, pname):
+                self.parent_name = pname
+
+        class Child(Parent):
+            def __init__(self, cname, pname):
+                Parent.__init__(self, pname)
+                self.child_name = cname
+
+        c = Child('John', 'William')
+        dumped1 = jsons.dump(c)
+        dumped2 = jsons.dump(c, Parent)
+        self.assertEqual(dumped1, {'child_name': 'John',
+                                   'parent_name': 'William'})
+        self.assertEqual(dumped2, {'parent_name': 'William'})
+
     def test_load_str(self):
         self.assertEqual('some string', jsons.load('some string'))
 

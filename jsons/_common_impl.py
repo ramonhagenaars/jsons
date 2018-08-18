@@ -12,23 +12,36 @@ SERIALIZERS = dict()
 DESERIALIZERS = dict()
 
 
-def dump(obj: object, **kwargs) -> object:
+def dump(obj: object, cls: type = None, **kwargs) -> object:
     """
     Serialize the given ``obj`` to a JSON equivalent type (e.g. dict, list,
     int, ...).
 
     The way objects are serialized can be finetuned by setting serializer
     functions for the specific type using ``set_serializer``.
+
+    You can also provide ``cls`` to specify that ``obj`` needs to be serialized
+    as if it was of type ``cls`` (meaning to only take into account attributes
+    from ``cls``). The type ``cls`` must have a ``__slots__`` defined. Any type
+    will do, but in most cases you may want ``cls`` to be a base class of
+    ``obj``.
     :param obj: a Python instance of any sort.
+    :param cls: if given, ``obj`` will be dumped as if it is of type ``type``.
     :param kwargs: the keyword args are passed on to the serializer function.
     :return: the serialized obj as a JSON type.
     """
-    serializer = SERIALIZERS.get(obj.__class__.__name__.lower(), None)
+    if cls and not hasattr(cls, '__slots__'):
+        raise KeyError('Invalid type: "{}", only types that have a __slots__ '
+                       'defined are allowed.'.format(cls.__name__))
+    cls_ = cls or obj.__class__
+    cls_name = cls_.__name__.lower()
+    serializer = SERIALIZERS.get(cls_name, None)
     if not serializer:
-        parents = [cls for cls in CLASSES_SERIALIZERS if isinstance(obj, cls)]
+        parents = [cls_ser for cls_ser in CLASSES_SERIALIZERS
+                   if isinstance(obj, cls_ser)]
         if parents:
             serializer = SERIALIZERS[parents[0].__name__.lower()]
-    return serializer(obj, **kwargs)
+    return serializer(obj, cls=cls, **kwargs)
 
 
 def load(json_obj: dict, cls: type = None, strict: bool = False,
