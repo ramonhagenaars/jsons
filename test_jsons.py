@@ -38,10 +38,18 @@ class TestJsons(TestCase):
         self.assertTrue(jsons.dump(d).startswith('2018-07-08T21:34:00'))
         self.assertTrue(not jsons.dump(d).endswith('Z'))
 
+    def test_dump_datetime_with_stripped_microseconds(self):
+        d = datetime.datetime(year=2018, month=7, day=8, hour=21, minute=34,
+                              second=10, microsecond=123456,
+                              tzinfo=datetime.timezone.utc)
+        dumped = jsons.dump(d)
+        self.assertEqual('2018-07-08T21:34:10Z', dumped)
+
     def test_dump_datetime_with_microseconds(self):
         d = datetime.datetime(year=2018, month=7, day=8, hour=21, minute=34,
                               microsecond=123456, tzinfo=datetime.timezone.utc)
-        self.assertEqual('2018-07-08T21:34:00.123456Z', jsons.dump(d))
+        dumped = jsons.dump(d, strip_microseconds=False)
+        self.assertEqual('2018-07-08T21:34:00.123456Z', dumped)
 
     def test_dump_enum(self):
         class E(Enum):
