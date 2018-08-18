@@ -95,7 +95,7 @@ from jsons.deserializers import default_list_deserializer, \
     default_enum_deserializer, default_datetime_deserializer, \
     default_string_deserializer, default_primitive_deserializer, \
     default_object_deserializer, default_dict_deserializer, \
-    default_tuple_deserializer
+    default_tuple_deserializer, default_set_deserializer
 from jsons.serializers import default_list_serializer, \
     default_enum_serializer, default_datetime_serializer, \
     default_primitive_serializer, default_object_serializer, \
@@ -193,6 +193,7 @@ def set_deserializer(func: callable, cls: type, high_prio: bool = True) -> None:
 
 
 set_serializer(default_list_serializer, list)
+set_serializer(default_list_serializer, set)
 set_serializer(default_tuple_serializer, tuple)
 set_serializer(default_dict_serializer, dict)
 set_serializer(default_enum_serializer, Enum)
@@ -205,6 +206,7 @@ set_serializer(default_primitive_serializer, None)
 set_serializer(default_object_serializer, object, False)
 set_deserializer(default_list_deserializer, list)
 set_deserializer(default_tuple_deserializer, tuple)
+set_deserializer(default_set_deserializer, set)
 set_deserializer(default_dict_deserializer, dict)
 set_deserializer(default_enum_deserializer, Enum)
 set_deserializer(default_datetime_deserializer, datetime)

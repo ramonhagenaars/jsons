@@ -52,7 +52,7 @@ def default_list_deserializer(obj: List, cls, **kwargs) -> object:
     """
     Deserialize a list by deserializing all items of that list.
     :param obj: the list that needs deserializing.
-    :param cls: the type with a generic (e.g. List[str]).
+    :param cls: the type optionally with a generic (e.g. List[str]).
     :param kwargs: any keyword arguments.
     :return: a deserialized list instance.
     """
@@ -67,7 +67,7 @@ def default_tuple_deserializer(obj: List, cls, **kwargs) -> object:
     Deserialize a (JSON) list into a tuple by deserializing all items of that
     list.
     :param obj: the list that needs deserializing.
-    :param cls: the type with a generic (e.g. Tuple[str, int]).
+    :param cls: the type optionally with a generic (e.g. Tuple[str, int]).
     :param kwargs: any keyword arguments.
     :return: a deserialized tuple instance.
     """
@@ -78,6 +78,22 @@ def default_tuple_deserializer(obj: List, cls, **kwargs) -> object:
     list_ = [_common_impl.load(obj[i], tuple_types[i], **kwargs)
              for i in range(len(obj))]
     return tuple(list_)
+
+
+def default_set_deserializer(obj: List, cls, **kwargs) -> object:
+    """
+    Deserialize a (JSON) list into a set by deserializing all items of that
+    list.
+    :param obj: the list that needs deserializing.
+    :param cls: the type optionally with a generic (e.g. Set[str]).
+    :param kwargs: any keyword arguments.
+    :return: a deserialized set instance.
+    """
+    cls_ = list
+    if hasattr(cls, '__args__'):
+        cls_ = List[cls.__args__[0]]
+    list_ = default_list_deserializer(obj, cls_, **kwargs)
+    return set(list_)
 
 
 def default_dict_deserializer(obj: dict, _: type,
