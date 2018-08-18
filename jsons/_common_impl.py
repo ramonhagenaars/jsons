@@ -60,11 +60,17 @@ def load(json_obj: dict, cls: type = None, **kwargs) -> object:
 
     If no ``cls`` is given, a dict is simply returned, but contained values
     (e.g. serialized ``datetime`` values) are still deserialized.
+
+    If the type of `json_obj` exactly matches `cls` then `json_obj` is simply
+    returned.
+
     :param json_obj: the dict that is to be deserialized.
     :param cls: a matching class of which an instance should be returned.
     :param kwargs: the keyword args are passed on to the deserializer function.
     :return: an instance of ``cls`` if given, a dict otherwise.
     """
+    if type(json_obj) == cls:
+        return json_obj
     cls = cls or type(json_obj)
     cls_name = cls.__name__ if hasattr(cls, '__name__') \
         else cls.__origin__.__name__

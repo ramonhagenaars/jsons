@@ -140,6 +140,18 @@ class TestJsons(TestCase):
         self.assertEqual(loaded['a']['b']['c']['d'].minute, 34)
         self.assertEqual(loaded['a']['b']['c']['d'].second, 0)
 
+    def test_load_partially_deserialized_dict(self):
+        class C:
+            def __init__(self, d: datetime.datetime):
+                self.d = d
+
+        dat = datetime.datetime(year=2018, month=7, day=8, hour=21, minute=34,
+                                tzinfo=datetime.timezone.utc)
+        dumped = {'d': dat}
+        loaded = jsons.load(dumped, C)
+
+        self.assertEqual(loaded.d, dat)
+
     def test_load_none(self):
         self.assertEqual(None, jsons.load(None))
 
