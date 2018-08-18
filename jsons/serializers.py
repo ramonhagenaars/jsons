@@ -4,7 +4,7 @@ process of a particular type as follows:
 
 ``jsons.set_serializer(custom_deserializer, SomeClass)``
 """
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, time, timedelta, timezone
 from enum import EnumMeta
 from time import gmtime
 from typing import Callable
@@ -103,7 +103,15 @@ def default_datetime_serializer(obj: datetime, **_) -> str:
         tzone = timezone(timedelta(hours=hrs_delta))
     offset = 'Z'
     if tzone.tzname(None) not in ('UTC', 'UTC+00:00'):
-        offset = tzone.tzname(None).split('UTC')[1]
+        tdelta = tzone.utcoffset(None)
+        if not tdelta:
+            tdelta = tzone.adjusted_offset
+        offset_s = tdelta.total_seconds()
+        offset_h = int(offset_s / 3600)
+        offset_m = int((offset_s / 60) % 60)
+        offset_t = time(offset_h, offset_m)
+        operator = '+' if offset_s > 0 else '-'
+        offset = offset_t.strftime('{}%H:%M'.format(operator))
     if obj.microsecond:
         pattern += '.%f'
     return obj.strftime("{}{}".format(pattern, offset))
