@@ -75,9 +75,10 @@ def load(json_obj: dict, cls: type = None, strict: bool = False,
     if not strict and type(json_obj) == cls:
         return json_obj
     if type(json_obj) not in VALID_TYPES:
-        raise KeyError(f'Invalid type: "{type(json_obj).__name__}", only '
-                       f'arguments of the following types are allowed: '
-                       f'{", ".join(typ.__name__ for typ in VALID_TYPES)}')
+        raise KeyError('Invalid type: "{}", only arguments of the following '
+                       'types are allowed: {}'
+                       .format(type(json_obj).__name__,
+                               ", ".join(typ.__name__ for typ in VALID_TYPES)))
     cls = cls or type(json_obj)
     deserializer = _get_deserializer(cls)
     return deserializer(json_obj, cls, strict=strict, **kwargs)

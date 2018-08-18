@@ -102,7 +102,7 @@ def default_datetime_serializer(obj: datetime, **_) -> str:
         hrs_delta = datetime.now().hour - gmtime().tm_hour
         tzone = timezone(timedelta(hours=hrs_delta))
     offset = 'Z'
-    if tzone.tzname(None) != 'UTC':
+    if tzone.tzname(None) not in ('UTC', 'UTC+00:00'):
         offset = tzone.tzname(None).split('UTC')[1]
     if obj.microsecond:
         pattern += '.%f'
