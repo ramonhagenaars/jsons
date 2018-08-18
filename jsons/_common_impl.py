@@ -4,7 +4,7 @@ private, do not import (from) it directly.
 """
 import re
 
-JSON_TYPES = (str, int, float, bool)
+VALID_TYPES = (str, int, float, bool, list, tuple, set, dict, type(None))
 RFC3339_DATETIME_PATTERN = '%Y-%m-%dT%H:%M:%S'
 CLASSES_SERIALIZERS = list()
 CLASSES_DESERIALIZERS = list()
@@ -31,7 +31,8 @@ def dump(obj: object, **kwargs) -> object:
     return serializer(obj, **kwargs)
 
 
-def load(json_obj: dict, cls: type = None, **kwargs) -> object:
+def load(json_obj: dict, cls: type = None, strict: bool = False,
+         **kwargs) -> object:
     """
     Deserialize the given ``json_obj`` to an object of type ``cls``. If the
     contents of ``json_obj`` do not match the interface of ``cls``, a
@@ -61,17 +62,28 @@ def load(json_obj: dict, cls: type = None, **kwargs) -> object:
     If no ``cls`` is given, a dict is simply returned, but contained values
     (e.g. serialized ``datetime`` values) are still deserialized.
 
-    If the type of `json_obj` exactly matches `cls` then `json_obj` is simply
-    returned.
+    If `strict` mode is off and the type of `json_obj` exactly matches `cls`
+    then `json_obj` is simply returned.
 
     :param json_obj: the dict that is to be deserialized.
     :param cls: a matching class of which an instance should be returned.
+    :param strict: a bool to determine if a partially deserialized `json_obj`
+    is tolerated.
     :param kwargs: the keyword args are passed on to the deserializer function.
     :return: an instance of ``cls`` if given, a dict otherwise.
     """
-    if type(json_obj) == cls:
+    if not strict and type(json_obj) == cls:
         return json_obj
+    if type(json_obj) not in VALID_TYPES:
+        raise KeyError(f'Invalid type: "{type(json_obj).__name__}", only '
+                       f'arguments of the following types are allowed: '
+                       f'{", ".join(typ.__name__ for typ in VALID_TYPES)}')
     cls = cls or type(json_obj)
+    deserializer = _get_deserializer(cls)
+    return deserializer(json_obj, cls, strict=strict, **kwargs)
+
+
+def _get_deserializer(cls: type):
     cls_name = cls.__name__ if hasattr(cls, '__name__') \
         else cls.__origin__.__name__
     deserializer = DESERIALIZERS.get(cls_name.lower(), None)
@@ -80,7 +92,7 @@ def load(json_obj: dict, cls: type = None, **kwargs) -> object:
                    if issubclass(cls, cls_)]
         if parents:
             deserializer = DESERIALIZERS[parents[0].__name__.lower()]
-    return deserializer(json_obj, cls, **kwargs)
+    return deserializer
 
 
 class JsonSerializable:

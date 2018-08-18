@@ -152,6 +152,17 @@ class TestJsons(TestCase):
 
         self.assertEqual(loaded.d, dat)
 
+    def test_load_partially_deserialized_dict_in_strict_mode(self):
+        class C:
+            def __init__(self, d: datetime.datetime):
+                self.d = d
+
+        dat = datetime.datetime(year=2018, month=7, day=8, hour=21, minute=34,
+                                tzinfo=datetime.timezone.utc)
+        dumped = {'d': dat}
+        with self.assertRaises(KeyError):
+            jsons.load(dumped, C, strict=True)
+
     def test_load_none(self):
         self.assertEqual(None, jsons.load(None))
 
