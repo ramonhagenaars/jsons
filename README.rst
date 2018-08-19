@@ -94,11 +94,13 @@ Example with dataclasses
    dumped_c = jsons.dump(c)
    print(dumped_c)
    # Prints:
-   # {'students': [{'name': 'John'}, {'name': 'Mary'}, {'name': 'Greg'}, {'name': 'Susan'}]}
+   # {'students': [{'name': 'John'}, {'name': 'Mary'},
+   # {'name': 'Greg'}, {'name': 'Susan'}]}
    loaded_c = jsons.load(dumped_c, ClassRoom)
    print(loaded_c)
    # Prints:
-   # ClassRoom(students=[Student(name='John'), Student(name='Mary'), Student(name='Greg'), Student(name='Susan')])
+   # ClassRoom(students=[Student(name='John'), Student(name='Mary'),
+   #           Student(name='Greg'), Student(name='Susan')])
 
 Example with regular classes
 ----------------------------
@@ -126,7 +128,8 @@ Example with regular classes
    dumped_c = jsons.dump(c)
    print(dumped_c)
    # Prints:
-   # {'students': [{'name': 'John'}, {'name': 'Mary'}, {'name': 'Greg'}, {'name': 'Susan'}]}
+   # {'students': [{'name': 'John'}, {'name': 'Mary'},
+   # {'name': 'Greg'}, {'name': 'Susan'}]}
    loaded_c = jsons.load(dumped_c, ClassRoom)
    print(loaded_c)
    # Prints:
@@ -160,25 +163,50 @@ Advanced features
 Overriding the default (de)serialization behavior
 -------------------------------------------------
 
-You may alter the behavior of the serialization and deserialization processes yourself by defining your own
-custom serialization/deserialization functions.
+You may alter the behavior of the serialization and deserialization processes
+yourself by defining your own custom serialization/deserialization functions.
 
 .. code:: python
 
    jsons.set_serializer(custom_serializer, datetime)  # A custom datetime serializer.
    jsons.set_deserializer(custom_deserializer, str)  # A custom string deserializer.
 
+A custom serializer must have the following form:
+
+.. code:: python
+
+   def someclass_serializer(obj: SomeClass, **kwargs) -> dict:
+       # obj is the instance that needs to be serialized.
+       # Make sure to return a type with a JSON equivalent, one of:
+       # (str, int, float, bool, list, dict, None)
+       return obj.__dict__
+
+A custom deserializer must have the following form:
+
+.. code:: python
+
+   def someclass_serializer(obj: object, cls: type = None, **kwargs) -> object:
+       # obj is the instance that needs to be deserialized.
+       # cls is the type that is to be returned. In most cases, this is the
+       # type of the object before it was serialized.
+       return SomeClass(some_arg=obj['some_arg'])
+
+Note that in both cases, if you choose to call any other (de)serializer within
+your own, you should also pass the ``**kwargs`` upon calling.
+
 Transforming the JSON keys
 --------------------------
-You can have the keys transformed by the serialization or deserialization process by providing a transformer 
-function that takes a string and returns a string.
+You can have the keys transformed by the serialization or deserialization
+process by providing a transformer function that takes a string and returns a
+string.
 
 .. code:: python
 
    result = jsons.dump(some_obj, key_transformer=jsons.KEY_TRANSFORMER_CAMELCASE)
    # result could be something like: {'thisIsTransformed': 123}
 
-   result = jsons.load(some_dict, SomeClass, key_transformer=jsons.KEY_TRANSFORMER_SNAKECASE)
+   result = jsons.load(some_dict, SomeClass,
+                       key_transformer=jsons.KEY_TRANSFORMER_SNAKECASE)
    # result could be something like: {'this_is_transformed': 123}
 
 The following casing styles are supported:
@@ -192,11 +220,36 @@ The following casing styles are supported:
 
 Customizing JsonSerializable
 ----------------------------
-If you're using jsons to (de)serialize on multiple locations in your code using 
-the same ``kwargs`` every time, you might want to use the `JsonSerializable` 
-class. You can extract a dynamic class from `JsonSerializable` with the 
-serializing and deserializing methods (`dump`, `load`, ...) overridden, to make
-them behave as if these methods are called with your ``kwargs``.
+You can customize the behavior of the ``JsonSerializable`` class or extract a
+new class from it. This can be useful if you are using ``jsons`` extensively
+throughout your project, especially if you wish to have different
+(de)serialization styles in different occasions.
+
+.. code:: python
+
+   forked = JsonSerializable.fork()
+   forked.set_serializer(custom_serializer, datetime)  # A custom serializer.
+
+   class Person(forked):
+       def __init__(self, dt: datetime):
+           self.dt = dt
+
+   p = Person('John')
+   p.json  # Will contain a serialized dt using 'custom_serializer'.
+
+   jsons.dump(datetime.now())  # Still uses the default datetime serializer.
+
+In the above example, a custom serializer is set to a fork of
+``JsonSerializable``. The regular ``jsons.dump`` does not have this custom
+serializer and will therefore behave as it used to.
+
+You can also create a fork of a fork. All serializers and deserializers of the
+type that was forked, are copied.
+
+You can also define default ``kwargs`` which are then automatically passed as
+arguments to the serializing and deserializing methods (``dump``, ``load``,
+...). You can use ``with_dump`` and ``with_load`` to set default ``kwargs`` to
+the serialization and deserialization process respectively.
 
 .. code:: python
 
@@ -213,6 +266,10 @@ them behave as if these methods are called with your ``kwargs``.
 
    p2 = Person.from_json({'myName': 'Mary'})
    p2.my_name  # 'Mary'  <-- note the snake_case in my_name
+
+You can, of course, also do this with a fork of ``JsonSerializable`` or you
+can create a fork in the process by setting ``fork=True`` in ``with_dump`` or
+``with_load``.
 
 
 .. |PyPI version| image:: https://badge.fury.io/py/jsons.svg
