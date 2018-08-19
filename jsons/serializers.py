@@ -160,7 +160,7 @@ def default_object_serializer(obj: object,
                                    strip_privates=strip_privates, **kwargs)
 
 
-def _get_dict_from_obj(obj, strip_privates, cls=None):
+def _get_dict_from_obj(obj, strip_privates, cls=None, *_, **__):
     excluded_elems = dir(JsonSerializable)
     return {attr: obj.__getattribute__(attr) for attr in dir(obj)
             if not attr.startswith('__')

@@ -76,8 +76,9 @@ Example with dataclasses
    import jsons
 
 
-   # You can use dataclasses (since Python3.7). Regular Python classes (Python3.5+) will work as well as long as 
-   # type hints are present for custom classes.
+   # You can use dataclasses (since Python3.7). Regular Python classes
+   # (Python3.5+) will work as well as long as type hints are present for
+   # custom classes.
    @dataclass
    class Student:
        name: str
@@ -88,7 +89,8 @@ Example with dataclasses
        students: List[Student]
 
 
-   c = ClassRoom([Student('John'), Student('Mary'), Student('Greg'), Student('Susan')])
+   c = ClassRoom([Student('John'), Student('Mary'),
+                 Student('Greg'), Student('Susan')])
    dumped_c = jsons.dump(c)
    print(dumped_c)
    # Prints:
@@ -119,7 +121,8 @@ Example with regular classes
            self.students = students
 
 
-   c = ClassRoom([Student('John'), Student('Mary'), Student('Greg'), Student('Susan')])
+   c = ClassRoom([Student('John'), Student('Mary'),
+                 Student('Greg'), Student('Susan')])
    dumped_c = jsons.dump(c)
    print(dumped_c)
    # Prints:

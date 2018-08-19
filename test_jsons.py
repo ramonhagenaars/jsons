@@ -389,6 +389,54 @@ class TestJsons(TestCase):
         self.assertEqual(person_loaded.my_name, 'John')
         self.assertTrue(isinstance(person_loaded, Person))
 
+    def test_jsonserializable_fork(self):
+        f1 = JsonSerializable.fork()
+        f2 = JsonSerializable.fork()
+
+        self.assertNotEqual(f1, f2)
+        self.assertNotEqual(f1.__name__, f2.__name__)
+
+        f1.set_serializer(lambda *_, **__: 'f1', str)
+        f2.set_serializer(lambda *_, **__: 'f2', str)
+
+        class C1(f1):
+            def __init__(self):
+                self.x = 'some string'
+
+        class C2(f2):
+            def __init__(self):
+                self.x = 'some string'
+
+        c1 = C1()
+        c2 = C2()
+
+        self.assertEqual(c1.json, {'x': 'f1'})
+        self.assertEqual(c2.json, {'x': 'f2'})
+        self.assertEqual(jsons.dump(c1.x), 'some string')
+        self.assertEqual(jsons.dump(c1.x, fork_inst=f1), 'f1')
+        self.assertEqual(jsons.dump(c1.x, fork_inst=f2), 'f2')  # Note: c1.x!
+
+    def test_jsonserializable_fork_of_forks(self):
+        f1 = JsonSerializable.fork()
+        f1.set_serializer(lambda *_, **__: 'f1', str)
+
+        f2 = f1.fork()
+        f2.set_serializer(lambda *_, **__: 'f2', str)
+        f2.set_serializer(lambda *_, **__: 999, int)
+
+        f3 = f2.fork('custom_fork_name')
+        f3.set_serializer(lambda *_, **__: 'f3', str)
+
+        self.assertEqual(jsons.dump('some string', fork_inst=f1), 'f1')
+        self.assertEqual(jsons.dump(123, fork_inst=f1), 123)
+
+        self.assertEqual(jsons.dump('some string', fork_inst=f2), 'f2')
+        self.assertEqual(jsons.dump(123, fork_inst=f2), 999)
+
+        self.assertEqual(jsons.dump('some string', fork_inst=f3), 'f3')
+        self.assertEqual(jsons.dump(123, fork_inst=f3), 999)
+        self.assertEqual(f3.__name__, 'custom_fork_name')
+
     def test_case_transformers(self):
         camelcase_str = 'camelCase'
         snakecase_str = 'snake_case'

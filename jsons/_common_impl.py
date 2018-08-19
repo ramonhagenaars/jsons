@@ -9,7 +9,8 @@ VALID_TYPES = (str, int, float, bool, list, tuple, set, dict, type(None))
 RFC3339_DATETIME_PATTERN = '%Y-%m-%dT%H:%M:%S'
 
 
-def dump(obj: object, cls: type = None, **kwargs) -> object:
+def dump(obj: object, cls: type = None, fork_inst: type = None,
+         **kwargs) -> object:
     """
     Serialize the given ``obj`` to a JSON equivalent type (e.g. dict, list,
     int, ...).
@@ -24,6 +25,7 @@ def dump(obj: object, cls: type = None, **kwargs) -> object:
     ``obj``.
     :param obj: a Python instance of any sort.
     :param cls: if given, ``obj`` will be dumped as if it is of type ``type``.
+    :param fork_inst: if given, it uses this fork of ``JsonSerializable``.
     :param kwargs: the keyword args are passed on to the serializer function.
     :return: the serialized obj as a JSON type.
     """
@@ -32,18 +34,20 @@ def dump(obj: object, cls: type = None, **kwargs) -> object:
                        'defined are allowed.'.format(cls.__name__))
     cls_ = cls or obj.__class__
     cls_name = cls_.__name__.lower()
-    serializer = JsonSerializable._serializers.get(cls_name, None)
+    fork_inst = fork_inst or JsonSerializable
+    serializer = fork_inst._serializers.get(cls_name, None)
     if not serializer:
-        parents = [cls_ser for cls_ser in JsonSerializable._classes_serializers
+        parents = [cls_ser for cls_ser in fork_inst._classes_serializers
                    if isinstance(obj, cls_ser)]
         if parents:
             pname = parents[0].__name__.lower()
-            serializer = JsonSerializable._serializers[pname]
-    return serializer(obj, cls=cls, **kwargs)
+            serializer = fork_inst._serializers[pname]
+    kwargs_ = {'fork_inst': fork_inst, **kwargs}
+    return serializer(obj, cls=cls, **kwargs_)
 
 
 def load(json_obj: dict, cls: type = None, strict: bool = False,
-         **kwargs) -> object:
+         fork_inst: type = None, **kwargs) -> object:
     """
     Deserialize the given ``json_obj`` to an object of type ``cls``. If the
     contents of ``json_obj`` do not match the interface of ``cls``, a
@@ -80,6 +84,7 @@ def load(json_obj: dict, cls: type = None, strict: bool = False,
     :param cls: a matching class of which an instance should be returned.
     :param strict: a bool to determine if a partially deserialized `json_obj`
     is tolerated.
+    :param fork_inst: if given, it uses this fork of ``JsonSerializable``.
     :param kwargs: the keyword args are passed on to the deserializer function.
     :return: an instance of ``cls`` if given, a dict otherwise.
     """
@@ -92,20 +97,22 @@ def load(json_obj: dict, cls: type = None, strict: bool = False,
                                ", ".join(typ.__name__ for typ
                                          in VALID_TYPES)))
     cls = cls or type(json_obj)
-    deserializer = _get_deserializer(cls)
-    return deserializer(json_obj, cls, strict=strict, **kwargs)
+    deserializer = _get_deserializer(cls, fork_inst)
+    kwargs_ = {'strict': strict, 'fork_inst': fork_inst, **kwargs}
+    return deserializer(json_obj, cls, **kwargs_)
 
 
-def _get_deserializer(cls: type):
+def _get_deserializer(cls: type, fork_inst: type = None):
+    fork_inst = fork_inst or JsonSerializable
     cls_name = cls.__name__ if hasattr(cls, '__name__') \
         else cls.__origin__.__name__
-    deserializer = JsonSerializable._deserializers.get(cls_name.lower(), None)
+    deserializer = fork_inst._deserializers.get(cls_name.lower(), None)
     if not deserializer:
-        parents = [cls_ for cls_ in JsonSerializable._classes_deserializers
+        parents = [cls_ for cls_ in fork_inst._classes_deserializers
                    if issubclass(cls, cls_)]
         if parents:
             pname = parents[0].__name__.lower()
-            deserializer = JsonSerializable._deserializers[pname]
+            deserializer = fork_inst._deserializers[pname]
     return deserializer
 
 
@@ -122,6 +129,26 @@ class JsonSerializable:
     _classes_deserializers = list()
     _serializers = dict()
     _deserializers = dict()
+    _fork_counter = 0
+
+    @classmethod
+    def fork(cls, name: str = None) -> type:
+        """
+        Create a 'fork' of ``JsonSerializable``: a new ``type`` with a separate
+        configuration of serializers and deserializers.
+        :param name: the ``__name__`` of the new ``type``.
+        :return: a new ``type`` based on ``JsonSerializable``.
+        """
+        cls._fork_counter += 1
+        class_name = name or '{}_fork{}'.format(cls.__name__,
+                                                cls._fork_counter)
+        result = type(class_name, (cls,), {})
+        result._classes_serializers = cls._classes_serializers.copy()
+        result._classes_deserializers = cls._classes_deserializers.copy()
+        result._serializers = cls._serializers.copy()
+        result._deserializers = cls._deserializers.copy()
+        result._fork_counter = 0
+        return result
 
     @classmethod
     def with_dump(cls, **kwargs) -> type:
@@ -147,7 +174,7 @@ class JsonSerializable:
         def _wrapper(inst, **kwargs_):
             return dump(inst, **{**kwargs_, **kwargs})
 
-        type_ = type(JsonSerializable.__name__, (cls,), {})
+        type_ = cls.fork()
         type_.dump = _wrapper
         return type_
 
@@ -176,7 +203,7 @@ class JsonSerializable:
         @classmethod
         def _wrapper(cls_, inst, **kwargs_):
             return load(inst, cls_, **{**kwargs_, **kwargs})
-        type_ = type(JsonSerializable.__name__, (cls,), {})
+        type_ = cls.fork()
         type_.load = _wrapper
         return type_
 
@@ -207,7 +234,7 @@ class JsonSerializable:
         function.
         :return: this instance in a JSON representation (dict).
         """
-        return dump(self, **kwargs)
+        return dump(self, fork_inst=self.__class__, **kwargs)
 
     @classmethod
     def load(cls: type, json_obj: dict, **kwargs) -> object:
@@ -217,7 +244,33 @@ class JsonSerializable:
         function.
         :return: this instance in a JSON representation (dict).
         """
-        return load(json_obj, cls, **kwargs)
+        return load(json_obj, cls, fork_inst=cls, **kwargs)
+
+    @classmethod
+    def set_serializer(cls: type, func: callable, cls_: type,
+                       high_prio: bool = True) -> None:
+        """
+        See ``jsons.set_serializer``.
+        :param func: the serializer function.
+        :param cls: the type this serializer can handle.
+        :param high_prio: determines the order in which is looked for the
+        callable.
+        :return: None.
+        """
+        set_serializer(func, cls_, high_prio, cls)
+
+    @classmethod
+    def set_deserializer(cls: type, func: callable, cls_: type,
+                         high_prio: bool = True) -> None:
+        """
+        See ``jsons.set_deserializer``.
+        :param func: the deserializer function.
+        :param cls: the type this serializer can handle.
+        :param high_prio: determines the order in which is looked for the
+        callable.
+        :return: None.
+        """
+        set_deserializer(func, cls_, high_prio, cls)
 
 
 def dumps(obj: object, *args, **kwargs) -> str:
@@ -251,7 +304,8 @@ def loads(str_: str, cls: type = None, *args, **kwargs) -> object:
     return load(obj, cls, **kwargs) if cls else obj
 
 
-def set_serializer(func: callable, cls: type, high_prio: bool = True) -> None:
+def set_serializer(func: callable, cls: type, high_prio: bool = True,
+                   fork_inst: type = JsonSerializable) -> None:
     """
     Set a serializer function for the given type. You may override the default
     behavior of ``jsons.load`` by setting a custom serializer.
@@ -267,18 +321,19 @@ def set_serializer(func: callable, cls: type, high_prio: bool = True) -> None:
     :param func: the serializer function.
     :param cls: the type this serializer can handle.
     :param high_prio: determines the order in which is looked for the callable.
+    :param fork_inst: if given, it uses this fork of ``JsonSerializable``.
     :return: None.
     """
     if cls:
-        index = 0 if high_prio else len(JsonSerializable._classes_serializers)
-        JsonSerializable._classes_serializers.insert(index, cls)
-        JsonSerializable._serializers[cls.__name__.lower()] = func
+        index = 0 if high_prio else len(fork_inst._classes_serializers)
+        fork_inst._classes_serializers.insert(index, cls)
+        fork_inst._serializers[cls.__name__.lower()] = func
     else:
-        JsonSerializable._serializers['nonetype'] = func
+        fork_inst._serializers['nonetype'] = func
 
 
-def set_deserializer(func: callable, cls: type,
-                     high_prio: bool = True) -> None:
+def set_deserializer(func: callable, cls: type, high_prio: bool = True,
+                     fork_inst: type = JsonSerializable) -> None:
     """
     Set a deserializer function for the given type. You may override the
     default behavior of ``jsons.dump`` by setting a custom deserializer.
@@ -295,14 +350,15 @@ def set_deserializer(func: callable, cls: type,
     :param func: the deserializer function.
     :param cls: the type this serializer can handle.
     :param high_prio: determines the order in which is looked for the callable.
+    :param fork_inst: if given, it uses this fork of ``JsonSerializable``.
     :return: None.
     """
     if cls:
-        index = 0 if high_prio else len(JsonSerializable._classes_deserializers)
-        JsonSerializable._classes_deserializers.insert(index, cls)
-        JsonSerializable._deserializers[cls.__name__.lower()] = func
+        index = 0 if high_prio else len(fork_inst._classes_deserializers)
+        fork_inst._classes_deserializers.insert(index, cls)
+        fork_inst._deserializers[cls.__name__.lower()] = func
     else:
-        JsonSerializable._deserializers['nonetype'] = func
+        fork_inst._deserializers['nonetype'] = func
 
 
 def camelcase(str_: str) -> str:
