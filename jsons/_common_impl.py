@@ -151,7 +151,7 @@ class JsonSerializable:
         return result
 
     @classmethod
-    def with_dump(cls, **kwargs) -> type:
+    def with_dump(cls, fork: bool = False, **kwargs) -> type:
         """
         Return a class (``type``) that is based on JsonSerializable with the
         ``dump`` method being automatically provided the given ``kwargs``.
@@ -169,17 +169,18 @@ class JsonSerializable:
 
         :param kwargs: the keyword args that are automatically provided to the
         ``dump`` method.
+        :param fork: determines that a new fork is to be created.
         :return: a class with customized behavior.
         """
         def _wrapper(inst, **kwargs_):
             return dump(inst, **{**kwargs_, **kwargs})
 
-        type_ = cls.fork()
+        type_ = cls.fork() if fork else cls
         type_.dump = _wrapper
         return type_
 
     @classmethod
-    def with_load(cls, **kwargs) -> type:
+    def with_load(cls, fork: bool = False, **kwargs) -> type:
         """
         Return a class (``type``) that is based on JsonSerializable with the
         ``load`` method being automatically provided the given ``kwargs``.
@@ -198,12 +199,13 @@ class JsonSerializable:
 
         :param kwargs: the keyword args that are automatically provided to the
         ``load`` method.
+        :param fork: determines that a new fork is to be created.
         :return: a class with customized behavior.
         """
         @classmethod
         def _wrapper(cls_, inst, **kwargs_):
             return load(inst, cls_, **{**kwargs_, **kwargs})
-        type_ = cls.fork()
+        type_ = cls.fork() if fork else cls
         type_.load = _wrapper
         return type_
 
@@ -248,29 +250,35 @@ class JsonSerializable:
 
     @classmethod
     def set_serializer(cls: type, func: callable, cls_: type,
-                       high_prio: bool = True) -> None:
+                       high_prio: bool = True, fork: bool = False) -> type:
         """
         See ``jsons.set_serializer``.
         :param func: the serializer function.
-        :param cls: the type this serializer can handle.
+        :param cls_: the type this serializer can handle.
         :param high_prio: determines the order in which is looked for the
         callable.
-        :return: None.
+        :param fork: determines that a new fork is to be created.
+        :return: the type on which this method is invoked or its fork.
         """
-        set_serializer(func, cls_, high_prio, cls)
+        type_ = cls.fork() if fork else cls
+        set_serializer(func, cls_, high_prio, type_)
+        return type_
 
     @classmethod
     def set_deserializer(cls: type, func: callable, cls_: type,
-                         high_prio: bool = True) -> None:
+                         high_prio: bool = True, fork: bool = False) -> type:
         """
         See ``jsons.set_deserializer``.
         :param func: the deserializer function.
-        :param cls: the type this serializer can handle.
+        :param cls_: the type this serializer can handle.
         :param high_prio: determines the order in which is looked for the
         callable.
-        :return: None.
+        :param fork: determines that a new fork is to be created.
+        :return: the type on which this method is invoked or its fork.
         """
-        set_deserializer(func, cls_, high_prio, cls)
+        type_ = cls.fork() if fork else cls
+        set_deserializer(func, cls_, high_prio, type_)
+        return type_
 
 
 def dumps(obj: object, *args, **kwargs) -> str:

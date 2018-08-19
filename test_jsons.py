@@ -373,11 +373,11 @@ class TestJsons(TestCase):
         self.assertEqual(Person.load(person_json).age, 65)
 
     def test_jsonserializable_with_kwargs(self):
-        custom_serializable = JsonSerializable\
-            .with_dump(key_transformer=KEY_TRANSFORMER_CAMELCASE)\
-            .with_load(key_transformer=KEY_TRANSFORMER_SNAKECASE)
+        forked = JsonSerializable\
+            .with_dump(fork=True, key_transformer=KEY_TRANSFORMER_CAMELCASE)
+        forked.with_load(key_transformer=KEY_TRANSFORMER_SNAKECASE)
 
-        class Person(custom_serializable):
+        class Person(forked):
             def __init__(self, my_name):
                 self.my_name = my_name
 
