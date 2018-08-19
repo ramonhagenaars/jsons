@@ -10,7 +10,7 @@ from time import gmtime
 from typing import Callable
 from jsons import _common_impl
 from jsons._common_impl import RFC3339_DATETIME_PATTERN, snakecase, \
-    camelcase, pascalcase, lispcase
+    camelcase, pascalcase, lispcase, JsonSerializable
 
 
 def default_iterable_serializer(obj, **kwargs) -> list:
@@ -161,12 +161,14 @@ def default_object_serializer(obj: object,
 
 
 def _get_dict_from_obj(obj, strip_privates, cls=None):
+    excluded_elems = dir(JsonSerializable)
     return {attr: obj.__getattribute__(attr) for attr in dir(obj)
             if not attr.startswith('__')
             and not (strip_privates and attr.startswith('_'))
             and attr != 'json'
             and not isinstance(obj.__getattribute__(attr), Callable)
-            and (not cls or attr in cls.__slots__)}
+            and (not cls or attr in cls.__slots__)
+            and attr not in excluded_elems}
 
 
 # The following default key transformers can be used with the

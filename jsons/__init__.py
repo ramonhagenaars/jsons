@@ -88,8 +88,6 @@ Alternatively, you can make use of the `JsonSerializable` class.
 from datetime import datetime
 from enum import Enum
 from jsons import _common_impl
-from jsons._common_impl import CLASSES_SERIALIZERS, CLASSES_DESERIALIZERS, \
-    SERIALIZERS, DESERIALIZERS
 from jsons.deserializers import default_list_deserializer, \
     default_enum_deserializer, default_datetime_deserializer, \
     default_string_deserializer, default_primitive_deserializer, \

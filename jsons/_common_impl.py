@@ -7,10 +7,6 @@ import re
 
 VALID_TYPES = (str, int, float, bool, list, tuple, set, dict, type(None))
 RFC3339_DATETIME_PATTERN = '%Y-%m-%dT%H:%M:%S'
-CLASSES_SERIALIZERS = list()
-CLASSES_DESERIALIZERS = list()
-SERIALIZERS = dict()
-DESERIALIZERS = dict()
 
 
 def dump(obj: object, cls: type = None, **kwargs) -> object:
@@ -36,12 +32,13 @@ def dump(obj: object, cls: type = None, **kwargs) -> object:
                        'defined are allowed.'.format(cls.__name__))
     cls_ = cls or obj.__class__
     cls_name = cls_.__name__.lower()
-    serializer = SERIALIZERS.get(cls_name, None)
+    serializer = JsonSerializable._serializers.get(cls_name, None)
     if not serializer:
-        parents = [cls_ser for cls_ser in CLASSES_SERIALIZERS
+        parents = [cls_ser for cls_ser in JsonSerializable._classes_serializers
                    if isinstance(obj, cls_ser)]
         if parents:
-            serializer = SERIALIZERS[parents[0].__name__.lower()]
+            pname = parents[0].__name__.lower()
+            serializer = JsonSerializable._serializers[pname]
     return serializer(obj, cls=cls, **kwargs)
 
 
@@ -92,7 +89,8 @@ def load(json_obj: dict, cls: type = None, strict: bool = False,
         raise KeyError('Invalid type: "{}", only arguments of the following '
                        'types are allowed: {}'
                        .format(type(json_obj).__name__,
-                               ", ".join(typ.__name__ for typ in VALID_TYPES)))
+                               ", ".join(typ.__name__ for typ
+                                         in VALID_TYPES)))
     cls = cls or type(json_obj)
     deserializer = _get_deserializer(cls)
     return deserializer(json_obj, cls, strict=strict, **kwargs)
@@ -101,12 +99,13 @@ def load(json_obj: dict, cls: type = None, strict: bool = False,
 def _get_deserializer(cls: type):
     cls_name = cls.__name__ if hasattr(cls, '__name__') \
         else cls.__origin__.__name__
-    deserializer = DESERIALIZERS.get(cls_name.lower(), None)
+    deserializer = JsonSerializable._deserializers.get(cls_name.lower(), None)
     if not deserializer:
-        parents = [cls_ for cls_ in CLASSES_DESERIALIZERS
+        parents = [cls_ for cls_ in JsonSerializable._classes_deserializers
                    if issubclass(cls, cls_)]
         if parents:
-            deserializer = DESERIALIZERS[parents[0].__name__.lower()]
+            pname = parents[0].__name__.lower()
+            deserializer = JsonSerializable._deserializers[pname]
     return deserializer
 
 
@@ -119,6 +118,11 @@ class JsonSerializable:
     ``from_json`` on that class, which is equivalent to calling ``json.load``
     with that class as an argument.
     """
+    _classes_serializers = list()
+    _classes_deserializers = list()
+    _serializers = dict()
+    _deserializers = dict()
+
     @classmethod
     def with_dump(cls, **kwargs) -> type:
         """
@@ -266,14 +270,15 @@ def set_serializer(func: callable, cls: type, high_prio: bool = True) -> None:
     :return: None.
     """
     if cls:
-        index = 0 if high_prio else len(CLASSES_SERIALIZERS)
-        CLASSES_SERIALIZERS.insert(index, cls)
-        SERIALIZERS[cls.__name__.lower()] = func
+        index = 0 if high_prio else len(JsonSerializable._classes_serializers)
+        JsonSerializable._classes_serializers.insert(index, cls)
+        JsonSerializable._serializers[cls.__name__.lower()] = func
     else:
-        SERIALIZERS['nonetype'] = func
+        JsonSerializable._serializers['nonetype'] = func
 
 
-def set_deserializer(func: callable, cls: type, high_prio: bool = True) -> None:
+def set_deserializer(func: callable, cls: type,
+                     high_prio: bool = True) -> None:
     """
     Set a deserializer function for the given type. You may override the
     default behavior of ``jsons.dump`` by setting a custom deserializer.
@@ -293,11 +298,11 @@ def set_deserializer(func: callable, cls: type, high_prio: bool = True) -> None:
     :return: None.
     """
     if cls:
-        index = 0 if high_prio else len(CLASSES_DESERIALIZERS)
-        CLASSES_DESERIALIZERS.insert(index, cls)
-        DESERIALIZERS[cls.__name__.lower()] = func
+        index = 0 if high_prio else len(JsonSerializable._classes_deserializers)
+        JsonSerializable._classes_deserializers.insert(index, cls)
+        JsonSerializable._deserializers[cls.__name__.lower()] = func
     else:
-        DESERIALIZERS['nonetype'] = func
+        JsonSerializable._deserializers['nonetype'] = func
 
 
 def camelcase(str_: str) -> str:

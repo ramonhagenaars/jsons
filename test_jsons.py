@@ -451,3 +451,13 @@ class TestJsons(TestCase):
         self.assertEqual(loaded_snakecase.a_obj.snake_case_str, 'one_two')
         self.assertEqual(loaded_snakecase.a_obj.some_dict['some_key'],
                          'some_value')
+
+    def test_set_custom_functions(self):
+        jsons.set_serializer(lambda *_, **__: 'custom_serializer', str)
+        jsons.set_deserializer(lambda *_, **__: 'custom_deserializer', str)
+
+        dumped = jsons.dump('serialize me')
+        loaded = jsons.load(dumped)
+
+        self.assertEqual(dumped, 'custom_serializer')
+        self.assertEqual(loaded, 'custom_deserializer')
