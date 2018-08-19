@@ -85,7 +85,6 @@ Alternatively, you can make use of the `JsonSerializable` class.
     'Red'
 
 """
-import json
 from datetime import datetime
 from enum import Enum
 from jsons import _common_impl
@@ -106,91 +105,10 @@ from jsons.serializers import default_list_serializer, \
 dump = _common_impl.dump
 load = _common_impl.load
 JsonSerializable = _common_impl.JsonSerializable
-
-
-def dumps(obj: object, *args, **kwargs) -> str:
-    """
-    Extend ``json.dumps``, allowing any Python instance to be dumped to a
-    string. Any extra (keyword) arguments are passed on to ``json.dumps``.
-
-    :param obj: the object that is to be dumped to a string.
-    :param args: extra arguments for ``json.dumps``.
-    :param kwargs: extra keyword arguments for ``json.dumps``. They are also
-    passed on to the serializer function.
-    :return: ``obj`` as a ``str``.
-    """
-    return json.dumps(dump(obj, **kwargs), *args, **kwargs)
-
-
-def loads(str_: str, cls: type = None, *args, **kwargs) -> object:
-    """
-    Extend ``json.loads``, allowing a string to be loaded into a dict or a
-    Python instance of type ``cls``. Any extra (keyword) arguments are passed
-    on to ``json.loads``.
-
-    :param str_: the string that is to be loaded.
-    :param cls: a matching class of which an instance should be returned.
-    :param args: extra arguments for ``json.dumps``.
-    :param kwargs: extra keyword arguments for ``json.dumps``. They are also
-    passed on to the deserializer function.
-    :return: an instance of type ``cls`` or a dict if no ``cls`` is given.
-    """
-    obj = json.loads(str_, *args, **kwargs)
-    return load(obj, cls, **kwargs) if cls else obj
-
-
-def set_serializer(func: callable, cls: type, high_prio: bool = True) -> None:
-    """
-    Set a serializer function for the given type. You may override the default
-    behavior of ``jsons.load`` by setting a custom serializer.
-
-    The ``func`` argument must take one argument (i.e. the object that is to be
-    serialized) and also a ``kwargs`` parameter. For example:
-
-    >>> def func(obj, **kwargs):
-    ...    return dict()
-
-    You may ask additional arguments between ``cls`` and ``kwargs``.
-
-    :param func: the serializer function.
-    :param cls: the type this serializer can handle.
-    :param high_prio: determines the order in which is looked for the callable.
-    :return: None.
-    """
-    if cls:
-        index = 0 if high_prio else len(CLASSES_SERIALIZERS)
-        CLASSES_SERIALIZERS.insert(index, cls)
-        SERIALIZERS[cls.__name__.lower()] = func
-    else:
-        SERIALIZERS['nonetype'] = func
-
-
-def set_deserializer(func: callable, cls: type, high_prio: bool = True) -> None:
-    """
-    Set a deserializer function for the given type. You may override the
-    default behavior of ``jsons.dump`` by setting a custom deserializer.
-
-    The ``func`` argument must take two arguments (i.e. the dict containing the
-    serialized values and the type that the values should be deserialized into)
-    and also a ``kwargs`` parameter. For example:
-
-    >>> def func(dict_, cls, **kwargs):
-    ...    return cls()
-
-    You may ask additional arguments between ``cls`` and ``kwargs``.
-
-    :param func: the deserializer function.
-    :param cls: the type this serializer can handle.
-    :param high_prio: determines the order in which is looked for the callable.
-    :return: None.
-    """
-    if cls:
-        index = 0 if high_prio else len(CLASSES_DESERIALIZERS)
-        CLASSES_DESERIALIZERS.insert(index, cls)
-        DESERIALIZERS[cls.__name__.lower()] = func
-    else:
-        DESERIALIZERS['nonetype'] = func
-
+dumps = _common_impl.dumps
+loads = _common_impl.loads
+set_serializer = _common_impl.set_serializer
+set_deserializer = _common_impl.set_deserializer
 
 set_serializer(default_list_serializer, list)
 set_serializer(default_list_serializer, set)
