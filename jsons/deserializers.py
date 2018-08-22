@@ -207,7 +207,8 @@ def _get_constructor_args(obj, signature_parameters, **kwargs):
     sigs = [(sig_key, sig) for sig_key, sig in signature_parameters.items()
             if obj and sig_key != 'self' and sig_key in obj]
     for sig_key, sig in sigs:
-        cls = sig.annotation if sig.annotation != inspect._empty else None
+        cls = sig.annotation if sig.annotation != inspect.Parameter.empty \
+            else None
         value = _common_impl.load(obj[sig_key], cls, **kwargs)
         constructor_args[sig_key] = value
     return constructor_args
