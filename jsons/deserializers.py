@@ -96,7 +96,7 @@ def default_set_deserializer(obj: List, cls, **kwargs) -> object:
     return set(list_)
 
 
-def default_dict_deserializer(obj: dict, _: type,
+def default_dict_deserializer(obj: dict, cls: type,
                               key_transformer: Callable[[str], str] = None,
                               **kwargs) -> object:
     """
@@ -110,6 +110,9 @@ def default_dict_deserializer(obj: dict, _: type,
     """
     key_transformer = key_transformer or (lambda key: key)
     kwargs_ = {**{'key_transformer': key_transformer}, **kwargs}
+    if hasattr(cls, '__args__') and len(cls.__args__) > 1:
+        sub_cls = cls.__args__[1]
+        kwargs_['cls'] = sub_cls
     return {key_transformer(key): _common_impl.load(obj[key], **kwargs_)
             for key in obj}
 

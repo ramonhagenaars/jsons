@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import List, Tuple, Set
+from typing import List, Tuple, Set, Dict
 from unittest.case import TestCase
 import datetime
 import jsons
@@ -174,6 +174,22 @@ class TestJsons(TestCase):
         self.assertEqual(loaded['a']['b']['c']['d'].hour, 21)
         self.assertEqual(loaded['a']['b']['c']['d'].minute, 34)
         self.assertEqual(loaded['a']['b']['c']['d'].second, 0)
+
+    def test_load_dict_with_generic(self):
+        class A:
+            def __init__(self):
+                self.name = 'A'
+
+        class B:
+            def __init__(self, a: A):
+                self.a = a
+                self.name = 'B'
+
+        dumped_b = {'a': {'name': 'A'}, 'name': 'B'}
+        dumped_dict = {'b_inst': dumped_b}
+        loaded = jsons.load(dumped_dict, Dict[str, B])
+
+        self.assertEqual(loaded['b_inst'].a.name, 'A')
 
     def test_load_partially_deserialized_dict(self):
         class C:
