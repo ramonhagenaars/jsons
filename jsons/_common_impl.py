@@ -309,7 +309,7 @@ def loads(str_: str, cls: type = None, *args, **kwargs) -> object:
     :return: an instance of type ``cls`` or a dict if no ``cls`` is given.
     """
     obj = json.loads(str_, *args, **kwargs)
-    return load(obj, cls, **kwargs) if cls else obj
+    return load(obj, cls, **kwargs)
 
 
 def set_serializer(func: callable, cls: type, high_prio: bool = True,
