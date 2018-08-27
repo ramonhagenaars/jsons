@@ -35,8 +35,9 @@ class TestJsons(TestCase):
 
     def test_dump_naive_datetime(self):
         d = datetime.datetime(year=2018, month=7, day=8, hour=21, minute=34)
-        self.assertTrue(jsons.dump(d).startswith('2018-07-08T21:34:00'))
-        self.assertTrue(not jsons.dump(d).endswith('Z'))
+        dumped = jsons.dump(d)
+        self.assertTrue(dumped.startswith('2018-07-08T21:34:00'))
+        self.assertTrue(not dumped.endswith('Z'))
 
     def test_dump_datetime_with_stripped_microseconds(self):
         d = datetime.datetime(year=2018, month=7, day=8, hour=21, minute=34,

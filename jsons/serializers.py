@@ -100,10 +100,21 @@ def default_datetime_serializer(obj: datetime, strip_microseconds: bool = True,
     :return: ``datetime`` as an RFC3339 string.
     """
     pattern = RFC3339_DATETIME_PATTERN
+    offset = None
     tzone = obj.tzinfo
     if not tzone:
         hrs_delta = datetime.now().hour - gmtime().tm_hour
-        tzone = timezone(timedelta(hours=hrs_delta))
+        if hrs_delta == 0:
+            offset = '+00:00'
+        else:
+            tzone = timezone(timedelta(hours=hrs_delta))
+    offset = offset or _datetime_offset(tzone)
+    if not strip_microseconds and obj.microsecond:
+        pattern += '.%f'
+    return obj.strftime("{}{}".format(pattern, offset))
+
+
+def _datetime_offset(tzone: timezone) -> str:
     offset = 'Z'
     if tzone.tzname(None) not in ('UTC', 'UTC+00:00'):
         tdelta = tzone.utcoffset(None)
@@ -115,9 +126,7 @@ def default_datetime_serializer(obj: datetime, strip_microseconds: bool = True,
         offset_t = time(abs(offset_h), abs(offset_m))
         operator = '+' if offset_s > 0 else '-'
         offset = offset_t.strftime('{}%H:%M'.format(operator))
-    if not strip_microseconds and obj.microsecond:
-        pattern += '.%f'
-    return obj.strftime("{}{}".format(pattern, offset))
+    return offset
 
 
 def default_primitive_serializer(obj, **_) -> object:
