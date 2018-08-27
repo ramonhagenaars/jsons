@@ -51,6 +51,13 @@ class TestJsons(TestCase):
         dumped = jsons.dump(d, strip_microseconds=False)
         self.assertEqual('2018-07-08T21:34:00.123456Z', dumped)
 
+    def test_dump_datetime_with_tz(self):
+        tzinfo = datetime.timezone(datetime.timedelta(hours=-2))
+        dat = datetime.datetime(year=2018, month=7, day=8, hour=21, minute=34,
+                                tzinfo=tzinfo)
+        dumped = jsons.dump(dat)
+        self.assertEqual(dumped, '2018-07-08T21:34:00-02:00')
+
     def test_dump_enum(self):
         class E(Enum):
             x = 1
@@ -221,6 +228,13 @@ class TestJsons(TestCase):
         dat = datetime.datetime(year=2018, month=7, day=8, hour=21, minute=34,
                                 tzinfo=datetime.timezone.utc)
         self.assertEqual(dat, jsons.load('2018-07-08T21:34:00Z'))
+
+    def test_load_datetime_with_tz(self):
+        tzinfo = datetime.timezone(datetime.timedelta(hours=-2))
+        dat = datetime.datetime(year=2018, month=7, day=8, hour=21, minute=34,
+                                tzinfo=tzinfo)
+        loaded = jsons.load('2018-07-08T21:34:00-02:00')
+        self.assertEqual(loaded, dat)
 
     def test_load_enum(self):
         class E(Enum):

@@ -112,7 +112,7 @@ def default_datetime_serializer(obj: datetime, strip_microseconds: bool = True,
         offset_s = tdelta.total_seconds()
         offset_h = int(offset_s / 3600)
         offset_m = int((offset_s / 60) % 60)
-        offset_t = time(offset_h, offset_m)
+        offset_t = time(abs(offset_h), abs(offset_m))
         operator = '+' if offset_s > 0 else '-'
         offset = offset_t.strftime('{}%H:%M'.format(operator))
     if not strip_microseconds and obj.microsecond:

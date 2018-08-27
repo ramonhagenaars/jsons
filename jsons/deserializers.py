@@ -29,23 +29,32 @@ def default_datetime_deserializer(obj: str, _: datetime, **__) -> datetime:
         regex_pattern = re.compile(r'(\.[0-9]+)')
         frac = regex_pattern.search(obj).group()
         obj = obj.replace(frac, frac[0:7])
-    if obj[-1] == 'Z':
-        dattim_str = obj[0:-1]
-        dattim_obj = datetime.strptime(dattim_str, pattern)
-        dattim_obj = datetime(dattim_obj.year, dattim_obj.month,
-                              dattim_obj.day, dattim_obj.hour,
-                              dattim_obj.minute, dattim_obj.second,
-                              dattim_obj.microsecond, timezone.utc)
-    else:
-        dattim_str, offset = obj.split('+')
-        dattim_obj = datetime.strptime(dattim_str, pattern)
-        hours, minutes = offset.split(':')
-        tz = timezone(offset=timedelta(hours=int(hours), minutes=int(minutes)))
-        datetime_list = [dattim_obj.year, dattim_obj.month, dattim_obj.day,
-                         dattim_obj.hour, dattim_obj.minute, dattim_obj.second,
-                         dattim_obj.microsecond, tz]
-        dattim_obj = datetime(*datetime_list)
-    return dattim_obj
+    dattim_func = _datetime_utc if obj[-1] == 'Z' else _datetime_with_tz
+    return dattim_func(obj, pattern)
+
+
+def _datetime_utc(obj: str, pattern: str):
+    dattim_str = obj[0:-1]
+    dattim_obj = datetime.strptime(dattim_str, pattern)
+    return datetime(dattim_obj.year, dattim_obj.month, dattim_obj.day,
+                    dattim_obj.hour, dattim_obj.minute, dattim_obj.second,
+                    dattim_obj.microsecond, timezone.utc)
+
+
+def _datetime_with_tz(obj: str, pattern: str):
+    dat_str, tim_str = obj.split('T')
+    splitter = '+' if '+' in tim_str else '-'
+    naive_tim_str, offset = tim_str.split(splitter)
+    naive_dattim_str = '{}T{}'.format(dat_str, naive_tim_str)
+    dattim_obj = datetime.strptime(naive_dattim_str, pattern)
+    hrs_str, mins_str = offset.split(':')
+    hrs = int(hrs_str) if splitter == '+' else -1 * int(hrs_str)
+    mins = int(mins_str) if splitter == '+' else -1 * int(mins_str)
+    tz = timezone(offset=timedelta(hours=hrs, minutes=mins))
+    datetime_list = [dattim_obj.year, dattim_obj.month, dattim_obj.day,
+                     dattim_obj.hour, dattim_obj.minute, dattim_obj.second,
+                     dattim_obj.microsecond, tz]
+    return datetime(*datetime_list)
 
 
 def default_list_deserializer(obj: List, cls, **kwargs) -> object:
