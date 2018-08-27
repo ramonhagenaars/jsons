@@ -28,7 +28,7 @@ class TestJsons(TestCase):
                               tzinfo=datetime.timezone.utc)
         dict_ = {'a': {'b': {'c': {'d': d}}}}
         expectation = {'a': {'b': {'c': {'d': '2018-07-08T21:34:00Z'}}}}
-        self.assertEqual(expectation, jsons.dump(dict_))
+        self.assertDictEqual(expectation, jsons.dump(dict_))
 
     def test_dump_none(self):
         self.assertEqual(None, jsons.dump(None))
@@ -99,7 +99,7 @@ class TestJsons(TestCase):
                 self.name = 'B'
 
         b = B(A())
-        self.assertEqual({'name': 'B', 'a': {'name': 'A'}}, jsons.dump(b))
+        self.assertDictEqual({'name': 'B', 'a': {'name': 'A'}}, jsons.dump(b))
 
     def test_dump_object_properties(self):
         class A:
@@ -111,8 +111,8 @@ class TestJsons(TestCase):
                 return 456  # Not to be serialized.
 
         a = A()
-        self.assertEqual({'x': 123}, jsons.dump(a))
-        self.assertEqual({}, jsons.dump(a, strip_properties=True))
+        self.assertDictEqual({'x': 123}, jsons.dump(a))
+        self.assertDictEqual({}, jsons.dump(a, strip_properties=True))
 
     def test_dump_object_strip_nulls(self):
         class A:
@@ -126,7 +126,7 @@ class TestJsons(TestCase):
 
         b = B(A())
         dumped = jsons.dump(b, strip_nulls=True)
-        self.assertEqual({'name': 'B', 'a': {}}, dumped)
+        self.assertDictEqual({'name': 'B', 'a': {}}, dumped)
 
     def test_dump_object_strip_privates(self):
         class A:
@@ -140,7 +140,7 @@ class TestJsons(TestCase):
 
         b = B(A())
         dumped = jsons.dump(b, strip_privates=True)
-        self.assertEqual({'a': {}}, dumped)
+        self.assertDictEqual({'a': {}}, dumped)
 
     def test_dump_as_parent_type(self):
         class Parent:
@@ -157,9 +157,9 @@ class TestJsons(TestCase):
         c = Child('John', 'William')
         dumped1 = jsons.dump(c)
         dumped2 = jsons.dump(c, Parent)
-        self.assertEqual(dumped1, {'child_name': 'John',
+        self.assertDictEqual(dumped1, {'child_name': 'John',
                                    'parent_name': 'William'})
-        self.assertEqual(dumped2, {'parent_name': 'William'})
+        self.assertDictEqual(dumped2, {'parent_name': 'William'})
 
     def test_load_str(self):
         self.assertEqual('some string', jsons.load('some string'))
@@ -396,8 +396,8 @@ class TestJsons(TestCase):
         person_json = person.json
         person_loaded = Person.from_json(person_json)
 
-        self.assertEqual(person_json, {'name': 'John', 'age': 65})
-        self.assertEqual(person.dump(), {'name': 'John', 'age': 65})
+        self.assertDictEqual(person_json, {'name': 'John', 'age': 65})
+        self.assertDictEqual(person.dump(), {'name': 'John', 'age': 65})
         self.assertEqual(person_loaded.name, 'John')
         self.assertEqual(person_loaded.age, 65)
         self.assertEqual(Person.load(person_json).name, 'John')
@@ -416,7 +416,7 @@ class TestJsons(TestCase):
         person_json = person.json  # should have camelCase
         person_loaded = Person.from_json(person_json)  # should have snake_case
 
-        self.assertEqual(person_json, {'myName': 'John'})
+        self.assertDictEqual(person_json, {'myName': 'John'})
         self.assertEqual(person_loaded.my_name, 'John')
         self.assertTrue(isinstance(person_loaded, Person))
 
@@ -441,8 +441,8 @@ class TestJsons(TestCase):
         c1 = C1()
         c2 = C2()
 
-        self.assertEqual(c1.json, {'x': 'f1'})
-        self.assertEqual(c2.json, {'x': 'f2'})
+        self.assertDictEqual(c1.json, {'x': 'f1'})
+        self.assertDictEqual(c2.json, {'x': 'f2'})
         self.assertEqual(jsons.dump(c1.x), 'some string')
         self.assertEqual(jsons.dump(c1.x, fork_inst=f1), 'f1')
         self.assertEqual(jsons.dump(c1.x, fork_inst=f2), 'f2')  # Note: c1.x!
