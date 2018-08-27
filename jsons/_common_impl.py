@@ -306,7 +306,8 @@ def loads(str_: str, cls: type = None, *args, **kwargs) -> object:
     :param args: extra arguments for ``json.dumps``.
     :param kwargs: extra keyword arguments for ``json.dumps``. They are also
     passed on to the deserializer function.
-    :return: an instance of type ``cls`` or a dict if no ``cls`` is given.
+    :return: a JSON-type object (dict, str, list, etc.) or an instance of type
+    ``cls`` if given.
     """
     obj = json.loads(str_, *args, **kwargs)
     return load(obj, cls, **kwargs)
