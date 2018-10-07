@@ -46,6 +46,18 @@ Usage
    some_instance = jsons.load(some_dict, SomeClass)  # Deserialization
    some_dict = jsons.dump(some_instance)  # Serialization
 
+In some cases, you have instances that contain other instances that need
+(de)serialization, for instance with lists or dicts. You can use the
+``typing`` classes for this as is demonstrated below.
+
+.. code:: python
+
+   from typing import List, Tuple
+   import jsons
+
+   # For more complex deserialization with generic types, use the typing module
+   list_of_tuples = jsons.load(some_dict, List[Tuple[AClass, AnotherClass]])
+
 API overview
 ''''''''''''
 
@@ -53,9 +65,9 @@ API overview
 -  ``load(json_obj: dict, cls: type = None) -> object``: deserializes a
    dict to an object of type ``cls``.
 -  ``dumps(obj: object, *args, **kwargs) -> str``: serializes an object
-   to a string.
+   to a JSON string.
 -  ``loads(s: str, cls: type = None, *args, **kwargs) -> object``
-   deserializes a string to an object of type ``cls``.
+   deserializes a JSON string to an object of type ``cls``.
 -  ``set_serializer(c: callable, cls: type) -> None``: sets a custom
    serialization function for type ``cls``.
 -  ``set_deserializer(c: callable, cls: type) -> None``: sets a custom
@@ -185,7 +197,7 @@ which will respectively load or dump all parameters and the return value.
    # result is now of type datetime.
 
 In the above case, the type hint could be omitted for the same result: jsons
-will recognise the timestamp from the string automatically. In case of a custom
+will recognize the timestamp from the string automatically. In case of a custom
 type, you do need a type hint. The same goes for the return type; it could be
 omitted in this case as well.
 
