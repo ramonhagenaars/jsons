@@ -4,9 +4,9 @@
 jsons
 =====
 
-A Python (3.5+) lib for deeply serializing Python objects to dicts or
-strings and for deserializing dicts or strings to Python objects using
-type hints.
+A Python (3.5+) lib for easily and deeply serializing Python objects to dicts
+or strings and for deserializing dicts or strings to Python objects using type
+hints.
 
 With ``jsons``, you can serialize/deserialize most objects already. You
 can also easily extend ``jsons`` yourself by defining a custom
@@ -62,6 +62,10 @@ API overview
    deserialization function for type ``cls``.
 -  ``JsonSerializable``: a base class that allows for convenient use of
    the jsons features.
+- ``decorators.loaded``: a decorator that will load all parameters before
+   entering the function/method body and the return value upon returning.
+- ``decorators.dumped``: a decorator that will dump all parameters before
+   entering the function/method body and the return value upon returning.
 
 Examples
 ''''''''
@@ -159,6 +163,68 @@ Example with JsonSerializable
 
 Advanced features
 '''''''''''''''''
+
+Using decorators
+----------------
+
+You can decorate a function or method with ``@loaded()`` or ``@dumped()``,
+which will respectively load or dump all parameters and the return value.
+
+.. code:: python
+
+   from datetime import datetime
+   from jsons.decorators import loaded
+
+
+   @loaded()
+   def some_func(x: datetime) -> datetime:
+       # x is now of type datetime.
+       return '2018-10-07T19:05:00+02:00'
+
+   result = some_func('2018-10-07T19:05:00+02:00')
+   # result is now of type datetime.
+
+In the above case, the type hint could be omitted for the same result: jsons
+will recognise the timestamp from the string automatically. In case of a custom
+type, you do need a type hint. The same goes for the return type; it could be
+omitted in this case as well.
+
+Similarly, you can decorate a function or method with ``@dumped`` as is done
+below.
+
+.. code:: python
+
+   from datetime import datetime
+   from jsons.decorators import dumped
+
+
+   class SomeClass:
+       @classmethod
+       @dumped()
+       def some_meth(cls, x):
+           # x is now of type str, cls remains untouched.
+           return datetime.now()
+
+   result = SomeClass.some_meth(datetime.now())
+   # result is now of type str.
+
+In case of methods, like in the example above, the special ``self`` or ``cls``
+parameters are not touched by the decorators ``@loaded()`` or ``@dumped()``.
+Additionally, you can provide a type hint for any parameter (except ``self`` or
+``cls``) or the return value. Doing so will make jsons attempt to dump into
+that particular type, just like with
+``jsons.dump(some_obj, cls=ParticularType)``.
+
+Both ``@loaded`` and ``@dumped`` can be given the following arguments:
+
+- ``parameters`` (default ``True``): if positive, parameters will be taken into
+   account.
+- ``returnvalue`` (default ``True``): if positive, the return value will be
+   taken into account.
+- ``fork_inst`` (default ``JsonSerializable``): if given, this specific
+   fork instance will be used for the loading/dumping operations.
+- ``**kwargs``: any other given keyword arguments are passed on to
+   ``json.load`` or ``json.dump``.
 
 Overriding the default (de)serialization behavior
 -------------------------------------------------
