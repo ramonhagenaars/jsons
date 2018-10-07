@@ -127,7 +127,7 @@ def _get_decorator(parameters, returnvalue, fork_inst, mapper, mapper_kwargs):
             return result
         if isinstance(decorated, staticmethod):
             warnings.warn('You cannot decorate a static- or classmethod. '
-                          'You can still obtain the desired behaviour by '
+                          'You can still obtain the desired behavior by '
                           'decorating your method first and then place '
                           '@staticmethod/@classmethod on top (switching the '
                           'order).')
