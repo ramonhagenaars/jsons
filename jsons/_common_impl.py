@@ -303,14 +303,51 @@ def loads(str_: str, cls: type = None, *args, **kwargs) -> object:
 
     :param str_: the string that is to be loaded.
     :param cls: a matching class of which an instance should be returned.
-    :param args: extra arguments for ``json.dumps``.
-    :param kwargs: extra keyword arguments for ``json.dumps``. They are also
+    :param args: extra arguments for ``json.loads``.
+    :param kwargs: extra keyword arguments for ``json.loads``. They are also
     passed on to the deserializer function.
     :return: a JSON-type object (dict, str, list, etc.) or an instance of type
     ``cls`` if given.
     """
     obj = json.loads(str_, *args, **kwargs)
     return load(obj, cls, **kwargs)
+
+
+def dumpb(obj: object, encoding: str = 'utf-8', *args, **kwargs) -> bytes:
+    """
+    Extend ``json.dumps``, allowing any Python instance to be dumped to bytes.
+    Any extra (keyword) arguments are passed on to ``json.dumps``.
+
+    :param obj: the object that is to be dumped to bytes.
+    :param encoding: the encoding that is used to transform to bytes.
+    :param args: extra arguments for ``json.dumps``.
+    :param kwargs: extra keyword arguments for ``json.dumps``. They are also
+    passed on to the serializer function.
+    :return: ``obj`` as ``bytes``.
+    """
+    dumped_dict = dump(obj, **kwargs)
+    dumped_str = json.dumps(dumped_dict, *args, **kwargs)
+    return dumped_str.encode(encoding=encoding)
+
+
+def loadb(bytes_: bytes, cls: type = None, encoding: str = 'utf-8',
+          *args, **kwargs):
+    """
+    Extend ``json.loads``, allowing bytes to be loaded into a dict or a Python
+    instance of type ``cls``. Any extra (keyword) arguments are passed on to
+    ``json.loads``.
+
+    :param bytes_: the bytes that are to be loaded.
+    :param cls: a matching class of which an instance should be returned.
+    :param encoding: the encoding that is used to transform from bytes.
+    :param args: extra arguments for ``json.loads``.
+    :param kwargs: extra keyword arguments for ``json.loads``. They are also
+    passed on to the deserializer function.
+    :return: a JSON-type object (dict, str, list, etc.) or an instance of type
+    ``cls`` if given.
+    """
+    str_ = bytes_.decode(encoding=encoding)
+    return loads(str_, cls, *args, **kwargs)
 
 
 def set_serializer(func: callable, cls: type, high_prio: bool = True,

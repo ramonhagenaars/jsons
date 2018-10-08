@@ -102,9 +102,11 @@ from jsons.serializers import default_list_serializer, \
 
 dump = _common_impl.dump
 load = _common_impl.load
-JsonSerializable = _common_impl.JsonSerializable
 dumps = _common_impl.dumps
 loads = _common_impl.loads
+dumpb = _common_impl.dumpb
+loadb = _common_impl.loadb
+JsonSerializable = _common_impl.JsonSerializable
 set_serializer = _common_impl.set_serializer
 set_deserializer = _common_impl.set_deserializer
 
