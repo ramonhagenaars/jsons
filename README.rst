@@ -68,19 +68,19 @@ API overview
    to a JSON string.
 -  ``loads(s: str, cls: type = None, *args, **kwargs) -> object``:
    deserializes a JSON string to an object of type ``cls``.
-- ``dumpb(obj: object, encoding: str = 'utf-8', *args, **kwargs) -> bytes``:
-  serializes an object to bytes.
-- ``loadb(bytes_: bytes, cls: type = None, encoding: str = 'utf-8', *args, **kwargs)``:
-  deserializes bytes to an object of type ``cls``.
+-  ``dumpb(obj: object, encoding: str = 'utf-8', *args, **kwargs) -> bytes``:
+   serializes an object to bytes.
+-  ``loadb(bytes_: bytes, cls: type = None, encoding: str = 'utf-8', *args, **kwargs)``:
+   deserializes bytes to an object of type ``cls``.
 -  ``set_serializer(c: callable, cls: type) -> None``: sets a custom
    serialization function for type ``cls``.
 -  ``set_deserializer(c: callable, cls: type) -> None``: sets a custom
    deserialization function for type ``cls``.
 -  ``JsonSerializable``: a base class that allows for convenient use of
    the jsons features.
-- ``decorators.loaded``: a decorator that will load all parameters before
+-  ``decorators.loaded``: a decorator that will load all parameters before
    entering the function/method body and the return value upon returning.
-- ``decorators.dumped``: a decorator that will dump all parameters before
+-  ``decorators.dumped``: a decorator that will dump all parameters before
    entering the function/method body and the return value upon returning.
 
 Examples
@@ -233,24 +233,26 @@ that particular type, just like with
 
 Both ``@loaded`` and ``@dumped`` can be given the following arguments:
 
-- ``parameters`` (default ``True``): if positive, parameters will be taken into
+-  ``parameters`` (default ``True``): if positive, parameters will be taken into
    account.
-- ``returnvalue`` (default ``True``): if positive, the return value will be
+-  ``returnvalue`` (default ``True``): if positive, the return value will be
    taken into account.
-- ``fork_inst`` (default ``JsonSerializable``): if given, this specific
+-  ``fork_inst`` (default ``JsonSerializable``): if given, this specific
    fork instance will be used for the loading/dumping operations.
-- ``**kwargs``: any other given keyword arguments are passed on to
+-  ``**kwargs``: any other given keyword arguments are passed on to
    ``jsons.load`` or ``jsons.dump``.
 
 The following arguments can be given only to ``@loaded``:
 
-- ``loader``: a ``jsons`` load function which must be one of ``jsons.load``,
-``jsons.loads``, ``jsons.loadb``. The given function will be used to load from.
+-  ``loader``: a ``jsons`` load function which must be one of ``jsons.load``,
+   ``jsons.loads``, ``jsons.loadb``. The given function will be used to load
+   from.
 
 The following arguments can be given only to ``@dumped``:
 
-- ``dumper``: a ``jsons`` dump function which must be one of ``jsons.dump``,
-``jsons.dumps``, ``jsons.dumpb``. The given function will be used to dump with.
+-  ``dumper``: a ``jsons`` dump function which must be one of ``jsons.dump``,
+   ``jsons.dumps``, ``jsons.dumpb``. The given function will be used to dump
+   with.
 
 Overriding the default (de)serialization behavior
 -------------------------------------------------

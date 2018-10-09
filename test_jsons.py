@@ -522,7 +522,7 @@ class TestJsons(TestCase):
                 self.a = a
                 self.name = 'B'
 
-        dumped = jsons.dumpb(B(A()))
+        dumped = jsons.dumpb(B(A()), jdkwargs={'sort_keys': True})
         b = json.dumps({'a': {'name': 'A'}, 'name': 'B'},
                        sort_keys=True).encode()
         self.assertEqual(b, dumped)
