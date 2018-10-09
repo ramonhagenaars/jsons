@@ -298,7 +298,8 @@ def dumps(obj: object, jdkwargs: Dict[str, object] = None,
     :return: ``obj`` as a ``str``.
     """
     jdkwargs = jdkwargs or {}
-    return json.dumps(dump(obj, **jdkwargs), *args, **kwargs)
+    dumped = dump(obj, *args, **kwargs)
+    return json.dumps(dumped, **jdkwargs)
 
 
 def loads(str_: str, cls: type = None, jdkwargs: Dict[str, object] = None,
