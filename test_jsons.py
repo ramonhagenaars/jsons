@@ -523,7 +523,8 @@ class TestJsons(TestCase):
                 self.name = 'B'
 
         dumped = jsons.dumpb(B(A()))
-        b = json.dumps({'a': {'name': 'A'}, 'name': 'B'}).encode()
+        b = json.dumps({'a': {'name': 'A'}, 'name': 'B'},
+                       sort_keys=True).encode()
         self.assertEqual(b, dumped)
 
     def test_loadb(self):
@@ -744,6 +745,26 @@ class TestJsons(TestCase):
         self.assertEqual(func3(c1, c2)['x'], 'c_res')
         self.assertEqual(func4(c1, c2).x, 'c_res')
         self.assertEqual(func5(c3, c3).x, 'c_res')
+
+    def test_loaded_with_loader(self):
+        class C:
+            def __init__(self, x):
+                self.x = x
+
+        @loaded(loader=jsons.loads)
+        def func_s(c: C) -> C:
+            self.assertEqual(c.x, 'c1')
+            return '{"x": "res1"}'
+
+        @loaded(loader=jsons.loadb)
+        def func_b(c: C) -> C:
+            self.assertEqual(c.x, 'c2')
+            return b'{"x": "res2"}'
+
+        s = '{"x": "c1"}'
+        b = b'{"x": "c2"}'
+        self.assertEqual(func_s(s).x, 'res1')
+        self.assertEqual(func_b(b).x, 'res2')
 
     def test_loaded_and_dumped_decorator(self):
         @dumped(parameters=False)

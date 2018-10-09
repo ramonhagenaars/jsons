@@ -4,6 +4,7 @@ private, do not import (from) it directly.
 """
 import json
 import re
+from typing import Dict
 
 VALID_TYPES = (str, int, float, bool, list, tuple, set, dict, type(None))
 RFC3339_DATETIME_PATTERN = '%Y-%m-%dT%H:%M:%S'
@@ -281,21 +282,27 @@ class JsonSerializable:
         return type_
 
 
-def dumps(obj: object, *args, **kwargs) -> str:
+def dumps(obj: object, jdkwargs: Dict[str, object] = None,
+          *args, **kwargs) -> str:
     """
     Extend ``json.dumps``, allowing any Python instance to be dumped to a
     string. Any extra (keyword) arguments are passed on to ``json.dumps``.
 
     :param obj: the object that is to be dumped to a string.
-    :param args: extra arguments for ``json.dumps``.
-    :param kwargs: extra keyword arguments for ``json.dumps``. They are also
+    :param jdkwargs: extra keyword arguments for ``json.dumps`` (not
+    ``jsons.dumps``!)
+    :param args: extra arguments for ``jsons.dumps``.
+    :param kwargs: Keyword arguments that are passed on through the
+    serialization process.
     passed on to the serializer function.
     :return: ``obj`` as a ``str``.
     """
-    return json.dumps(dump(obj, **kwargs), *args, **kwargs)
+    jdkwargs = jdkwargs or {}
+    return json.dumps(dump(obj, **jdkwargs), *args, **kwargs)
 
 
-def loads(str_: str, cls: type = None, *args, **kwargs) -> object:
+def loads(str_: str, cls: type = None, jdkwargs: Dict[str, object] = None,
+          *args, **kwargs) -> object:
     """
     Extend ``json.loads``, allowing a string to be loaded into a dict or a
     Python instance of type ``cls``. Any extra (keyword) arguments are passed
@@ -303,35 +310,42 @@ def loads(str_: str, cls: type = None, *args, **kwargs) -> object:
 
     :param str_: the string that is to be loaded.
     :param cls: a matching class of which an instance should be returned.
-    :param args: extra arguments for ``json.loads``.
-    :param kwargs: extra keyword arguments for ``json.loads``. They are also
-    passed on to the deserializer function.
+    :param jdkwargs: extra keyword arguments for ``json.loads`` (not
+    ``jsons.loads``!)
+    :param args: extra arguments for ``jsons.loads``.
+    :param kwargs: extra keyword arguments for ``jsons.loads``.
     :return: a JSON-type object (dict, str, list, etc.) or an instance of type
     ``cls`` if given.
     """
-    obj = json.loads(str_, *args, **kwargs)
-    return load(obj, cls, **kwargs)
+    jdkwargs = jdkwargs or {}
+    obj = json.loads(str_, **jdkwargs)
+    return load(obj, cls, *args, **kwargs)
 
 
-def dumpb(obj: object, encoding: str = 'utf-8', *args, **kwargs) -> bytes:
+def dumpb(obj: object, encoding: str = 'utf-8',
+          jdkwargs: Dict[str, object] = None, *args, **kwargs) -> bytes:
     """
     Extend ``json.dumps``, allowing any Python instance to be dumped to bytes.
     Any extra (keyword) arguments are passed on to ``json.dumps``.
 
     :param obj: the object that is to be dumped to bytes.
     :param encoding: the encoding that is used to transform to bytes.
-    :param args: extra arguments for ``json.dumps``.
-    :param kwargs: extra keyword arguments for ``json.dumps``. They are also
+    :param jdkwargs: extra keyword arguments for ``json.dumps`` (not
+    ``jsons.dumps``!)
+    :param args: extra arguments for ``jsons.dumps``.
+    :param kwargs: Keyword arguments that are passed on through the
+    serialization process.
     passed on to the serializer function.
     :return: ``obj`` as ``bytes``.
     """
-    dumped_dict = dump(obj, **kwargs)
-    dumped_str = json.dumps(dumped_dict, *args, **kwargs)
+    jdkwargs = jdkwargs or {}
+    dumped_dict = dump(obj, *args, **kwargs)
+    dumped_str = json.dumps(dumped_dict, **jdkwargs)
     return dumped_str.encode(encoding=encoding)
 
 
 def loadb(bytes_: bytes, cls: type = None, encoding: str = 'utf-8',
-          *args, **kwargs):
+          jdkwargs: Dict[str, object] = None, *args, **kwargs) -> object:
     """
     Extend ``json.loads``, allowing bytes to be loaded into a dict or a Python
     instance of type ``cls``. Any extra (keyword) arguments are passed on to
@@ -340,14 +354,16 @@ def loadb(bytes_: bytes, cls: type = None, encoding: str = 'utf-8',
     :param bytes_: the bytes that are to be loaded.
     :param cls: a matching class of which an instance should be returned.
     :param encoding: the encoding that is used to transform from bytes.
-    :param args: extra arguments for ``json.loads``.
-    :param kwargs: extra keyword arguments for ``json.loads``. They are also
-    passed on to the deserializer function.
+    :param jdkwargs: extra keyword arguments for ``json.loads`` (not
+    ``jsons.loads``!)
+    :param args: extra arguments for ``jsons.loads``.
+    :param kwargs: extra keyword arguments for ``jsons.loads``.
     :return: a JSON-type object (dict, str, list, etc.) or an instance of type
     ``cls`` if given.
     """
+    jdkwargs = jdkwargs or {}
     str_ = bytes_.decode(encoding=encoding)
-    return loads(str_, cls, *args, **kwargs)
+    return loads(str_, cls, jdkwargs=jdkwargs, *args, **kwargs)
 
 
 def set_serializer(func: callable, cls: type, high_prio: bool = True,

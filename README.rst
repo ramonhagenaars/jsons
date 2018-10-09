@@ -240,7 +240,17 @@ Both ``@loaded`` and ``@dumped`` can be given the following arguments:
 - ``fork_inst`` (default ``JsonSerializable``): if given, this specific
    fork instance will be used for the loading/dumping operations.
 - ``**kwargs``: any other given keyword arguments are passed on to
-   ``json.load`` or ``json.dump``.
+   ``jsons.load`` or ``jsons.dump``.
+
+The following arguments can be given only to ``@loaded``:
+
+- ``loader``: a ``jsons`` load function which must be one of ``jsons.load``,
+``jsons.loads``, ``jsons.loadb``. The given function will be used to load from.
+
+The following arguments can be given only to ``@dumped``:
+
+- ``dumper``: a ``jsons`` dump function which must be one of ``jsons.dump``,
+``jsons.dumps``, ``jsons.dumpb``. The given function will be used to dump with.
 
 Overriding the default (de)serialization behavior
 -------------------------------------------------

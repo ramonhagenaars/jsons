@@ -4,11 +4,11 @@ alternative fashion.
 """
 import warnings
 from inspect import signature, Parameter, isawaitable, iscoroutinefunction
-from jsons import JsonSerializable, dump, load
+from jsons import JsonSerializable, dump, load, loads, loadb, dumps, dumpb
 
 
 def loaded(parameters=True, returnvalue=True, fork_inst=JsonSerializable,
-           **kwargs):
+           loader=load, **kwargs):
     """
     Return a decorator that can call `jsons.load` upon all parameters and the
     return value of the decorated function.
@@ -32,13 +32,16 @@ def loaded(parameters=True, returnvalue=True, fork_inst=JsonSerializable,
     :param fork_inst: if given, it uses this fork of ``JsonSerializable``.
     :param kwargs: any keyword arguments that should be passed on to
     `jsons.load`
+    :param loader: the load function which must be one of (``load``,
+    ``loads``, ``loadb``)
     :return: a decorator that can be placed on a function.
     """
-    return _get_decorator(parameters, returnvalue, fork_inst, load, kwargs)
+    assert loader in (load, loads, loadb)
+    return _get_decorator(parameters, returnvalue, fork_inst, loader, kwargs)
 
 
 def dumped(parameters=True, returnvalue=True, fork_inst=JsonSerializable,
-           **kwargs):
+           dumper=dump, **kwargs):
     """
     Return a decorator that can call `jsons.dump` upon all parameters and the
     return value of the decorated function.
@@ -62,9 +65,12 @@ def dumped(parameters=True, returnvalue=True, fork_inst=JsonSerializable,
     :param fork_inst: if given, it uses this fork of ``JsonSerializable``.
     :param kwargs: any keyword arguments that should be passed on to
     `jsons.dump`
+    :param dumper: the dump function which must be one of (``dump``,
+    ``dumps``, ``dumpb``)
     :return: a decorator that can be placed on a function.
     """
-    return _get_decorator(parameters, returnvalue, fork_inst, dump, kwargs)
+    assert dumper in (dump, dumps, dumpb)
+    return _get_decorator(parameters, returnvalue, fork_inst, dumper, kwargs)
 
 
 def _get_params_sig(args, func):
