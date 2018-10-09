@@ -70,8 +70,8 @@ API overview
    deserializes a JSON string to an object of type ``cls``.
 - ``dumpb(obj: object, encoding: str = 'utf-8', *args, **kwargs) -> bytes``:
   serializes an object to bytes.
-- ``loadb(bytes_: bytes, cls: type = None, encoding: str = 'utf-8',
-   *args, **kwargs)``: deserializes bytes to an object of type ``cls``.
+- ``loadb(bytes_: bytes, cls: type = None, encoding: str = 'utf-8', *args, **kwargs)``:
+  deserializes bytes to an object of type ``cls``.
 -  ``set_serializer(c: callable, cls: type) -> None``: sets a custom
    serialization function for type ``cls``.
 -  ``set_deserializer(c: callable, cls: type) -> None``: sets a custom
