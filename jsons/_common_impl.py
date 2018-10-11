@@ -211,12 +211,19 @@ class JsonSerializable:
         return type_
 
     @property
-    def json(self) -> dict:
+    def json(self) -> object:
         """
         See ``jsons.dump``.
         :return: this instance in a JSON representation (dict).
         """
         return self.dump()
+
+    def __str__(self) -> str:
+        """
+        See ``jsons.dumps``.
+        :return: this instance as a JSON string.
+        """
+        return self.dumps()
 
     @classmethod
     def from_json(cls: type, json_obj: dict, **kwargs) -> object:
@@ -230,7 +237,7 @@ class JsonSerializable:
         """
         return cls.load(json_obj, **kwargs)
 
-    def dump(self, **kwargs) -> dict:
+    def dump(self, **kwargs) -> object:
         """
         See ``jsons.dump``.
         :param kwargs: the keyword args are passed on to the serializer
@@ -245,9 +252,50 @@ class JsonSerializable:
         See ``jsons.load``.
         :param kwargs: the keyword args are passed on to the serializer
         function.
+        :param json_obj: the object that is loaded into an instance of `cls`.
         :return: this instance in a JSON representation (dict).
         """
         return load(json_obj, cls, fork_inst=cls, **kwargs)
+
+    def dumps(self, **kwargs) -> str:
+        """
+        See ``jsons.dumps``.
+        :param kwargs: the keyword args are passed on to the serializer
+        function.
+        :return: this instance as a JSON string.
+        """
+        return dumps(self, fork_inst=self.__class__, **kwargs)
+
+    @classmethod
+    def loads(cls: type, json_obj: str, **kwargs) -> object:
+        """
+        See ``jsons.loads``.
+        :param kwargs: the keyword args are passed on to the serializer
+        function.
+        :param json_obj: the object that is loaded into an instance of `cls`.
+        :return: this instance in a JSON representation (dict).
+        """
+        return loads(json_obj, cls, fork_inst=cls, **kwargs)
+
+    def dumpb(self, **kwargs) -> bytes:
+        """
+        See ``jsons.dumpb``.
+        :param kwargs: the keyword args are passed on to the serializer
+        function.
+        :return: this instance as a JSON string.
+        """
+        return dumpb(self, fork_inst=self.__class__, **kwargs)
+
+    @classmethod
+    def loadb(cls: type, json_obj: bytes, **kwargs) -> object:
+        """
+        See ``jsons.loadb``.
+        :param kwargs: the keyword args are passed on to the serializer
+        function.
+        :param json_obj: the object that is loaded into an instance of `cls`.
+        :return: this instance in a JSON representation (dict).
+        """
+        return loadb(json_obj, cls, fork_inst=cls, **kwargs)
 
     @classmethod
     def set_serializer(cls: type, func: callable, cls_: type,

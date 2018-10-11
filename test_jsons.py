@@ -554,12 +554,23 @@ class TestJsons(TestCase):
 
         person = Person('John', 65)
         person_json = person.json
+        person_json_str = person.dumps()
+        person_json_bytes = person.dumpb()
         person_loaded = Person.from_json(person_json)
+        person_loaded_str = str(person_json)
+        person_loaded_bytes = Person.loadb(b'{"name": "John", "age": 65}')
 
         self.assertDictEqual(person_json, {'name': 'John', 'age': 65})
         self.assertDictEqual(person.dump(), {'name': 'John', 'age': 65})
+        self.assertDictEqual(eval(person_json_str),
+                             eval("{'name': 'John', 'age': 65}"))
+        self.assertDictEqual(eval(person_json_bytes.decode()),
+                             eval("{'name': 'John', 'age': 65}"))
+        self.assertDictEqual(eval(person_loaded_str),
+                             eval("{'name': 'John', 'age': 65}"))
         self.assertEqual(person_loaded.name, 'John')
         self.assertEqual(person_loaded.age, 65)
+        self.assertEqual(person_loaded_bytes.name, 'John')
         self.assertEqual(Person.load(person_json).name, 'John')
         self.assertEqual(Person.load(person_json).age, 65)
 
