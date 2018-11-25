@@ -156,6 +156,19 @@ class TestJsons(TestCase):
         dumped = jsons.dump(b, strip_privates=True)
         self.assertDictEqual({'a': {}}, dumped)
 
+    def test_dump_with_slots(self):
+        class C:
+            __slots__ = 'x', 'y'
+
+            def __init__(self, x):
+                self.x = x
+                self.y = 'This is no parameter'
+
+        c = C('something')
+        dumped = jsons.dump(c)
+        self.assertDictEqual(dumped, {'x': 'something',
+                                      'y': 'This is no parameter'})
+
     def test_dump_as_parent_type(self):
         class Parent:
             __slots__ = ['parent_name']
@@ -478,6 +491,31 @@ class TestJsons(TestCase):
 
         loaded2 = jsons.load({'x': 456}, WithSetter)
         self.assertEqual(loaded2.x, 456)
+
+    def test_load_slots(self):
+        class ClassWithSlots:
+            __slots__ = 'x', 'y'
+
+            def __init__(self, x):
+                self.x = x
+                self.y = 'This is not a parameter'
+
+        class ClassWithoutSlots:
+            def __init__(self, x):
+                self.x = x
+                self.y = 'This is not a parameter'
+
+        raw = {'x': 'something', 'y': 'something else', 'z': 'uh oh...'}
+        loaded_with_slots = jsons.load(raw, cls=ClassWithSlots)
+        loaded_without_slots = jsons.load(raw, cls=ClassWithoutSlots)
+
+        self.assertTrue(hasattr(loaded_with_slots, 'x'))
+        self.assertTrue(hasattr(loaded_with_slots, 'y'))
+        self.assertTrue(not hasattr(loaded_with_slots, 'z'))
+
+        self.assertTrue(hasattr(loaded_without_slots, 'x'))
+        self.assertTrue(hasattr(loaded_without_slots, 'y'))
+        self.assertTrue(hasattr(loaded_without_slots, 'z'))
 
     def test_dumps(self):
         class A:
