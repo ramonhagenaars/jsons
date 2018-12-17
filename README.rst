@@ -4,6 +4,8 @@
 jsons
 =====
 
+*~ Any Python objects to/from JSON, easily! ~*
+
 A Python (3.5+) lib for easily and deeply serializing Python objects to dicts
 or strings and for deserializing dicts or strings to Python objects using type
 hints.
@@ -28,6 +30,15 @@ Why not use ``__dict__`` for serialization?
    not).
 -  The serialization process of ``__dict__`` cannot easily be tuned.
 -  There is no means to deserialize with ``__dict__``.
+
+Why not use the standard ``json`` library?
+''''''''''''''''''''''''''''''''''''''''''
+
+- It's quite a hassle to (de)serialize custom types: you need to 
+  write a subclass of ``json.JSONEncoder`` with specific 
+  serialization/deserialization code per custom class.
+- You will need to provide that subclass of ``json.JSONEncoder`` to 
+  ``json.dumps``/``json.loads`` every single time.
 
 Installation
 ''''''''''''
