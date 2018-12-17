@@ -373,7 +373,7 @@ can create a fork in the process by setting ``fork=True`` in ``with_dump`` or
    :target: https://jsons.readthedocs.io/en/latest/?badge=latest
    :alt: Documentation Status
 
-.. |Build Status| image:: https://travis-ci.org/ramonhagenaars/geomodels.svg?branch=master
+.. |Build Status| image:: https://api.travis-ci.org/ramonhagenaars/jsons.svg?branch=master
    :target: https://travis-ci.org/ramonhagenaars/jsons
 .. |Scrutinizer Code Quality| image:: https://scrutinizer-ci.com/g/ramonhagenaars/jsons/badges/quality-score.png?b=master
    :target: https://scrutinizer-ci.com/g/ramonhagenaars/jsons/?branch=master
