@@ -23,6 +23,8 @@ def default_datetime_deserializer(obj: str, _: datetime, **__) -> datetime:
     :return: a ``datetime.datetime`` instance.
     """
     pattern = RFC3339_DATETIME_PATTERN
+    if not obj:
+    	return obj
     if '.' in obj:
         pattern += '.%f'
         # strptime allows a fraction of length 6, so trip the rest (if exists).
