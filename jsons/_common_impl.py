@@ -83,13 +83,13 @@ def load(json_obj: dict, cls: type = None, strict: bool = False,
 
     :param json_obj: the dict that is to be deserialized.
     :param cls: a matching class of which an instance should be returned.
-    :param strict: a bool to determine if a partially deserialized `json_obj`
-    is tolerated.
+    :param strict: a bool to determine if the deserializer should be strict (i.e. fail on a partially deserialized
+    `json_obj` or on `None`).
     :param fork_inst: if given, it uses this fork of ``JsonSerializable``.
     :param kwargs: the keyword args are passed on to the deserializer function.
     :return: an instance of ``cls`` if given, a dict otherwise.
     """
-    if not strict and type(json_obj) == cls:
+    if not strict and (json_obj is None or type(json_obj) == cls):
         return json_obj
     if type(json_obj) not in VALID_TYPES:
         raise KeyError('Invalid type: "{}", only arguments of the following '
@@ -97,6 +97,8 @@ def load(json_obj: dict, cls: type = None, strict: bool = False,
                        .format(type(json_obj).__name__,
                                ", ".join(typ.__name__ for typ
                                          in VALID_TYPES)))
+    if json_obj is None:
+        raise KeyError('Cannot load None with strict=True')
     cls = cls or type(json_obj)
     deserializer = _get_deserializer(cls, fork_inst)
     kwargs_ = {'strict': strict, 'fork_inst': fork_inst, **kwargs}

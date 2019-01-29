@@ -363,6 +363,9 @@ class TestJsons(TestCase):
 
     def test_load_none(self):
         self.assertEqual(None, jsons.load(None))
+        self.assertEqual(None, jsons.load(None, datetime))
+        with self.assertRaises(KeyError):
+            jsons.load(None, datetime, strict=True)
 
     def test_load_datetime(self):
         dat = datetime.datetime(year=2018, month=7, day=8, hour=21, minute=34,
