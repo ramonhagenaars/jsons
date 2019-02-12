@@ -290,7 +290,7 @@ A custom deserializer must have the following form:
 
 .. code:: python
 
-   def someclass_serializer(obj: object, cls: type = None, **kwargs) -> object:
+   def someclass_deserializer(obj: object, cls: type = None, **kwargs) -> SomeClass:
        # obj is the instance that needs to be deserialized.
        # cls is the type that is to be returned. In most cases, this is the
        # type of the object before it was serialized.
