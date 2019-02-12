@@ -280,7 +280,7 @@ A custom serializer must have the following form:
 
 .. code:: python
 
-   def someclass_serializer(obj: SomeClass, **kwargs) -> dict:
+   def someclass_serializer(obj: SomeClass, **kwargs) -> object:
        # obj is the instance that needs to be serialized.
        # Make sure to return a type with a JSON equivalent, one of:
        # (str, int, float, bool, list, dict, None)
