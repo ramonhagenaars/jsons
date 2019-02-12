@@ -117,6 +117,9 @@ class TestJsons(TestCase):
 
     def test_dump_object_properties(self):
         class A:
+            def __init__(self):
+                self.b = B()
+
             @property
             def x(self):
                 return 123
@@ -124,9 +127,14 @@ class TestJsons(TestCase):
             def y(self):
                 return 456  # Not to be serialized.
 
+        class B:
+            @property
+            def c(self):
+                return 'bananas'  # To be also stripped.
+
         a = A()
-        self.assertDictEqual({'x': 123}, jsons.dump(a))
-        self.assertDictEqual({}, jsons.dump(a, strip_properties=True))
+        self.assertDictEqual({'x': 123, 'b': {'c': 'bananas'}}, jsons.dump(a))
+        self.assertDictEqual({'b': {}}, jsons.dump(a, strip_properties=True))
 
     def test_dump_object_strip_nulls(self):
         class A:

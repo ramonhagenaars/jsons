@@ -164,6 +164,7 @@ def default_object_serializer(obj: object,
     """
     obj_dict = obj.__dict__ if strip_properties and hasattr(obj, '__dict__') \
         else _get_dict_from_obj(obj, strip_privates, **kwargs)
+    kwargs['strip_properties'] = strip_properties  # add for possibly nested objects
     return default_dict_serializer(obj_dict, key_transformer=key_transformer,
                                    strip_nulls=strip_nulls,
                                    strip_privates=strip_privates, **kwargs)
