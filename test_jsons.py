@@ -144,7 +144,6 @@ class TestJsons(TestCase):
         exp['child'] = exp.copy()
         dump = jsons.dump(obj, strip_properties=True)
         self.assertDictEqual(exp, dump)
-        # TODO all class variable also stripped
 
     def test_dump_object_strip_nulls(self):
         obj = self.AllDumpable(self.AllDumpable())
