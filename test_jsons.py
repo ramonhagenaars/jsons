@@ -102,13 +102,24 @@ class TestJsons(TestCase):
         expected = ['2018-07-08T21:34:00Z']
         self.assertEqual(dumped, expected)
 
-    class AllDumpable:
+    class ParentDumpable:
+        _par_c = 10
+
+        def __init__(self):
+            self.par_v = None
+
+        @property
+        def par_p(self):
+            return 12
+
+    class AllDumpable(ParentDumpable):
         c = 1
         _c = 2
         c_n = None
         _c_n = None
 
         def __init__(self, child=None):
+            super().__init__()
             self.child = child
             self.v = 3
             self._v = 4
@@ -133,7 +144,8 @@ class TestJsons(TestCase):
 
     def test_dump_object(self):
         obj = self.AllDumpable(self.AllDumpable())
-        exp = {'c': 1, '_c': 2, 'c_n': None, '_c_n': None,
+        exp = {'_par_c': 10, 'par_v': None, 'par_p': 12,
+               'c': 1, '_c': 2, 'c_n': None, '_c_n': None,
                'child': None, 'v': 3, '_v': 4, 'v_n': None, '_v_n': None,
                'p': 5, '_p': 5, 'p_n': None, '_p_n': None}
         exp['child'] = exp.copy()
@@ -142,7 +154,8 @@ class TestJsons(TestCase):
 
     def test_dump_object_strip_properties(self):
         obj = self.AllDumpable(self.AllDumpable())
-        exp = {'c': 1, '_c': 2, 'c_n': None, '_c_n': None,
+        exp = {'_par_c': 10, 'par_v': None,
+               'c': 1, '_c': 2, 'c_n': None, '_c_n': None,
                'child': None, 'v': 3, '_v': 4, 'v_n': None, '_v_n': None}
         exp['child'] = exp.copy()
         dump = jsons.dump(obj, strip_properties=True)
@@ -150,7 +163,8 @@ class TestJsons(TestCase):
 
     def test_dump_object_strip_nulls(self):
         obj = self.AllDumpable(self.AllDumpable())
-        exp = {'c': 1, '_c': 2, 'child': None, 'v': 3, '_v': 4, 'p': 5, '_p': 5}
+        exp = {'_par_c': 10, 'par_p': 12,
+               'c': 1, '_c': 2, 'child': None, 'v': 3, '_v': 4, 'p': 5, '_p': 5}
         exp['child'] = exp.copy()
         exp['child'].pop('child')  # child shouldn't have None child
         dump = jsons.dump(obj, strip_nulls=True)
@@ -158,7 +172,8 @@ class TestJsons(TestCase):
 
     def test_dump_object_strip_privates(self):
         obj = self.AllDumpable(self.AllDumpable())
-        exp = {'c': 1, 'c_n': None,
+        exp = {'par_v': None, 'par_p': 12,
+               'c': 1, 'c_n': None,
                'child': None, 'v': 3, 'v_n': None, 'p': 5, 'p_n': None}
         exp['child'] = exp.copy()
         dump = jsons.dump(obj, strip_privates=True)
@@ -166,7 +181,8 @@ class TestJsons(TestCase):
 
     def test_dump_object_strip_class_variables(self):
         obj = self.AllDumpable(self.AllDumpable())
-        exp = {'child': None, 'v': 3, '_v': 4, 'v_n': None, '_v_n': None,
+        exp = {'par_v': None, 'par_p': 12,
+               'child': None, 'v': 3, '_v': 4, 'v_n': None, '_v_n': None,
                'p': 5, '_p': 5, 'p_n': None, '_p_n': None}
         exp['child'] = exp.copy()
         dump = jsons.dump(obj, strip_class_variables=True)

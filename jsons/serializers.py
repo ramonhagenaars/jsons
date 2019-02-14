@@ -194,9 +194,16 @@ def _get_dict_from_obj(obj, strip_privates, strip_properties,
 def _get_class_props(cls):
     props = []
     other_cls_vars = []
-    for n, v in cls.__dict__.items():
+    for n, v in _get_complete_class_dict(cls).items():
         props.append(n) if type(v) is property else other_cls_vars.append(n)
     return props, other_cls_vars
+
+
+def _get_complete_class_dict(cls):
+    cls_dict = {}
+    for parent_class in reversed(cls.mro()):
+        cls_dict.update(parent_class.__dict__)
+    return cls_dict
 
 
 # The following default key transformers can be used with the
