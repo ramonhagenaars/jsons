@@ -1,6 +1,7 @@
 |PyPI version| |Docs| |Build Status| |Scrutinizer Code Quality|
 |Maintainability|
 
+=====
 jsons
 =====
 
@@ -20,9 +21,9 @@ the serialization/deserialization process to your need.
 ``jsons`` generates human-readable dicts or JSON strings that are not
 polluted with metadata.
 
+*******************************************
 Why not use ``__dict__`` for serialization?
-'''''''''''''''''''''''''''''''''''''''''''
-
+*******************************************
 -  The ``__dict__`` attribute only creates a *shallow* dict of an
    instance. Any contained object is not serialized to a dict.
 -  The ``__dict__`` does not take ``@property`` methods in account.
@@ -31,24 +32,27 @@ Why not use ``__dict__`` for serialization?
 -  The serialization process of ``__dict__`` cannot easily be tuned.
 -  There is no means to deserialize with ``__dict__``.
 
+******************************************
 Why not use the standard ``json`` library?
-''''''''''''''''''''''''''''''''''''''''''
+******************************************
 
-- It's quite a hassle to (de)serialize custom types: you need to 
-  write a subclass of ``json.JSONEncoder`` with specific 
+- It's quite a hassle to (de)serialize custom types: you need to
+  write a subclass of ``json.JSONEncoder`` with specific
   serialization/deserialization code per custom class.
-- You will need to provide that subclass of ``json.JSONEncoder`` to 
+- You will need to provide that subclass of ``json.JSONEncoder`` to
   ``json.dumps``/``json.loads`` every single time.
 
+************
 Installation
-''''''''''''
+************
 
 ::
 
    pip install jsons
 
+*****
 Usage
-'''''
+*****
 
 .. code:: python
 
@@ -69,8 +73,95 @@ In some cases, you have instances that contain other instances that need
    # For more complex deserialization with generic types, use the typing module
    list_of_tuples = jsons.load(some_dict, List[Tuple[AClass, AnotherClass]])
 
+************
 API overview
-''''''''''''
+************
+
+| **Function: dump**
+|
+
+    +----------------+-------------------------------------------------------------------------------------------------------------------+
+    | *Function:*    | ``jsons.dump``                                                                                                    |
+    +----------------+-------------------------------------------------------------------------------------------------------------------+
+    | *Description:* | Serialize the given object to a JSON compatible type (e.g. dict, list, string, etc.)                              |
+    +----------------+-------------------------------+-----------------------------------------------------------------------------------+
+    | *Arguments:*   | ``obj: object``               | The object that is to be serialized.                                              |
+    +                +-------------------------------+-----------------------------------------------------------------------------------+
+    |                | ``cls: Optional[type]``       | If given, ``obj`` will be dumped as if it is of type ``type``.                    |
+    +                +-------------------------------+-----------------------------------------------------------------------------------+
+    |                | ``fork_inst: Optional[type]`` | If given, the serializer functions of this fork of ``JsonSerializable`` are used. |
+    +                +-------------------------------+-----------------------------------------------------------------------------------+
+    |                | ``kwargs``                    | Keyword arguments will be passed on to the serializer functions.                  |
+    +----------------+-------------------------------+-----------------------------------------------------------------------------------+
+    | *Returns:*     | ``object``                    | The serialized ``obj`` as a JSON type.                                            |
+    +----------------+-------------------------------+-----------------------------------------------------------------------------------+
+    | *Example:*     | ::                                                                                                                |
+    |                |                                                                                                                   |
+    |                |     >>> some_utcdate = datetime.now(tz=timezone.utc)                                                              |
+    |                |     >>> jsons.dump(some_utcdate)                                                                                  |
+    |                |     '2019-02-16T20:33:36Z'                                                                                        |
+    +----------------+-------------------------------------------------------------------------------------------------------------------+
+
+| **Function: load**
+|
+
+    +----------------+---------------------------------------------------------------------------------------------------------------------------------------------------+
+    | *Function:*    | ``jsons.load``                                                                                                                                    |
+    +----------------+---------------------------------------------------------------------------------------------------------------------------------------------------+
+    | *Description:* | Deserialize the given object to a Python equivalent type or an instance of type ``cls`` (if given).                                               |
+    +----------------+-------------------------------------------------------------+-------------------------------------------------------------------------------------+
+    | *Arguments:*   | ``json_obj: object``                                        | The object that is to be deserialized.                                              |
+    +                +-------------------------------------------------------------+-------------------------------------------------------------------------------------+
+    |                | ``cls: Optional[type]``                                     | A matching class of which an instance should be returned.                           |
+    +                +-------------------------------------------------------------+-------------------------------------------------------------------------------------+
+    |                | ``strict: bool``                                            | Determines strict mode (e.g. fail on partly deserialized objects).                  |
+    +                +-------------------------------------------------------------+-------------------------------------------------------------------------------------+
+    |                | ``fork_inst: Optional[type]``                               | If given, the deserializer functions of this fork of ``JsonSerializable`` are used. |
+    +                +-------------------------------------------------------------+-------------------------------------------------------------------------------------+
+    |                | ``attr_getters: Optional[Dict[str, Callable[[], object]]]`` | A dict that may hold callables that return values for certain attributes.           |
+    +                +-------------------------------------------------------------+-------------------------------------------------------------------------------------+
+    |                | ``kwargs``                                                  | Keyword arguments will be passed on to the deserializer functions.                  |
+    +----------------+-------------------------------------------------------------+-------------------------------------------------------------------------------------+
+    | *Returns:*     | ``object``                                                  | An object of a Python equivalent type or of ``cls``.                                |
+    +----------------+-------------------------------------------------------------+-------------------------------------------------------------------------------------+
+    | *Example:*     | ::                                                                                                                                                |
+    |                |                                                                                                                                                   |
+    |                |     >>> jsons.load('2019-02-16T20:33:36Z', datetime)                                                                                              |
+    |                |     datetime.datetime(2019, 2, 16, 20, 33, 36, tzinfo=datetime.timezone.utc)                                                                      |
+    +----------------+---------------------------------------------------------------------------------------------------------------------------------------------------+
+
+| **Function: dumps**
+|
+
+    +----------------+--------------------------------------------------------------------------------------------+
+    | *Function:*    | ``jsons.dumps``                                                                            |
+    +----------------+--------------------------------------------------------------------------------------------+
+    | *Description:* | Serialize the given object to a string.                                                    |
+    +----------------+------------------+-------------------------------------------------------------------------+
+    | *Arguments:*   | ``obj: object``  | The object that is to be stringified.                                   |
+    +                +------------------+-------------------------------------------------------------------------+
+    |                | ``jdkwargs``     | Extra keyword arguments for ``json.dumps`` (not ``jsons.dumps``!)       |
+    +                +------------------+-------------------------------------------------------------------------+
+    |                | ``args``         | Extra arguments for ``jsons.dumps``.                                    |
+    +                +------------------+-------------------------------------------------------------------------+
+    |                | ``kwargs``       | Keyword arguments that are passed on through the serialization process. |
+    +----------------+------------------+-------------------------------------------------------------------------+
+    | *Returns:*     | ``object``       | An object of a Python equivalent type or of ``cls``.                    |
+    +----------------+------------------+-------------------------------------------------------------------------+
+    | *Example:*     | ::                                                                                         |
+    |                |                                                                                            |
+    |                |     >>> jsons.dumps([1, 2, 3])                                                             |
+    |                |     '[1, 2, 3]'                                                                            |
+    +----------------+--------------------------------------------------------------------------------------------+
+
+
+
+
+
+
+
+-  ``loadb(bytes_: bytes, cls: type = None, encoding: str = 'utf-8', *args, **kwargs)``: deserializes bytes to an object of
+
 
 -  ``dump(obj: object) -> dict``: serializes an object to a dict.
 -  ``load(json_obj: dict, cls: type = None) -> object``: deserializes a
@@ -94,11 +185,13 @@ API overview
 -  ``decorators.dumped``: a decorator that will dump all parameters before
    entering the function/method body and the return value upon returning.
 
+
+********
 Examples
-''''''''
+********
 
 Example with dataclasses
-------------------------
+========================
 
 .. code:: python
 
@@ -134,7 +227,7 @@ Example with dataclasses
    #           Student(name='Greg'), Student(name='Susan')])
 
 Example with regular classes
-----------------------------
+============================
 
 .. code:: python
 
@@ -167,7 +260,7 @@ Example with regular classes
    # <__main__.ClassRoom object at 0x0337F9B0>
 
 Example with JsonSerializable
------------------------------
+=============================
 
 .. code:: python
 
@@ -188,11 +281,12 @@ Example with JsonSerializable
    # Prints:
    # 'red'
 
+*****************
 Advanced features
-'''''''''''''''''
+*****************
 
 Using decorators
-----------------
+================
 
 You can decorate a function or method with ``@loaded()`` or ``@dumped()``,
 which will respectively load or dump all parameters and the return value.
@@ -266,7 +360,7 @@ The following arguments can be given only to ``@dumped``:
    with.
 
 Overriding the default (de)serialization behavior
--------------------------------------------------
+=================================================
 
 You may alter the behavior of the serialization and deserialization processes
 yourself by defining your own custom serialization/deserialization functions.
@@ -300,7 +394,7 @@ Note that in both cases, if you choose to call any other (de)serializer within
 your own, you should also pass the ``**kwargs`` upon calling.
 
 Transforming the JSON keys
---------------------------
+==========================
 You can have the keys transformed by the serialization or deserialization
 process by providing a transformer function that takes a string and returns a
 string.
@@ -324,7 +418,7 @@ The following casing styles are supported:
    KEY_TRANSFORMER_LISPCASE    # lisp-case
 
 Customizing JsonSerializable
-----------------------------
+============================
 You can customize the behavior of the ``JsonSerializable`` class or extract a
 new class from it. This can be useful if you are using ``jsons`` extensively
 throughout your project, especially if you wish to have different
@@ -361,11 +455,11 @@ the serialization and deserialization process respectively.
    custom_serializable = JsonSerializable\
        .with_dump(key_transformer=KEY_TRANSFORMER_CAMELCASE)\
        .with_load(key_transformer=KEY_TRANSFORMER_SNAKECASE)
-    
+
    class Person(custom_serializable):
        def __init__(self, my_name):
            self.my_name = my_name
-        
+
    p = Person('John')
    p.json  # {'myName': 'John'}  <-- note the camelCase
 
