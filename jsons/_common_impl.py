@@ -6,7 +6,6 @@ import json
 import re
 from json import JSONDecodeError
 from typing import Dict, Callable
-
 from jsons.exceptions import DecodeError
 
 VALID_TYPES = (str, int, float, bool, list, tuple, set, dict, type(None))
