@@ -160,7 +160,7 @@ def default_object_serializer(obj: object,
     :param strip_properties: if ``True`` the resulting dict will not contain
     values from @properties.
     :param strip_class_variables: if ``True`` the resulting dict will not
-    contain values class variables.
+    contain values from class variables.
     :param kwargs: any keyword arguments that are to be passed to the
     serializer functions.
     :return: a Python dict holding the values of ``obj``.
