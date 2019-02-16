@@ -102,59 +102,91 @@ class TestJsons(TestCase):
         expected = ['2018-07-08T21:34:00Z']
         self.assertEqual(dumped, expected)
 
+    class ParentDumpable:
+        _par_c = 10
+
+        def __init__(self):
+            self.par_v = None
+
+        @property
+        def par_p(self):
+            return 12
+
+    class AllDumpable(ParentDumpable):
+        c = 1
+        _c = 2
+        c_n = None
+        _c_n = None
+
+        def __init__(self, child=None):
+            super().__init__()
+            self.child = child
+            self.v = 3
+            self._v = 4
+            self.v_n = None
+            self._v_n = None
+
+        @property
+        def p(self):
+            return 5
+
+        @property
+        def _p(self):
+            return 5
+
+        @property
+        def p_n(self):
+            return None
+
+        @property
+        def _p_n(self):
+            return None
+
     def test_dump_object(self):
-        class A:
-            def __init__(self):
-                self.name = 'A'
+        obj = self.AllDumpable(self.AllDumpable())
+        exp = {'_par_c': 10, 'par_v': None, 'par_p': 12,
+               'c': 1, '_c': 2, 'c_n': None, '_c_n': None,
+               'child': None, 'v': 3, '_v': 4, 'v_n': None, '_v_n': None,
+               'p': 5, '_p': 5, 'p_n': None, '_p_n': None}
+        exp['child'] = exp.copy()
+        dump = jsons.dump(obj)
+        self.assertDictEqual(exp, dump)
 
-        class B:
-            def __init__(self, a):
-                self.a = a
-                self.name = 'B'
-
-        b = B(A())
-        self.assertDictEqual({'name': 'B', 'a': {'name': 'A'}}, jsons.dump(b))
-
-    def test_dump_object_properties(self):
-        class A:
-            @property
-            def x(self):
-                return 123
-
-            def y(self):
-                return 456  # Not to be serialized.
-
-        a = A()
-        self.assertDictEqual({'x': 123}, jsons.dump(a))
-        self.assertDictEqual({}, jsons.dump(a, strip_properties=True))
+    def test_dump_object_strip_properties(self):
+        obj = self.AllDumpable(self.AllDumpable())
+        exp = {'_par_c': 10, 'par_v': None,
+               'c': 1, '_c': 2, 'c_n': None, '_c_n': None,
+               'child': None, 'v': 3, '_v': 4, 'v_n': None, '_v_n': None}
+        exp['child'] = exp.copy()
+        dump = jsons.dump(obj, strip_properties=True)
+        self.assertDictEqual(exp, dump)
 
     def test_dump_object_strip_nulls(self):
-        class A:
-            def __init__(self):
-                self.name = None  # This will be stripped.
-
-        class B:
-            def __init__(self, a):
-                self.a = a
-                self.name = 'B'
-
-        b = B(A())
-        dumped = jsons.dump(b, strip_nulls=True)
-        self.assertDictEqual({'name': 'B', 'a': {}}, dumped)
+        obj = self.AllDumpable(self.AllDumpable())
+        exp = {'_par_c': 10, 'par_p': 12,
+               'c': 1, '_c': 2, 'child': None, 'v': 3, '_v': 4, 'p': 5, '_p': 5}
+        exp['child'] = exp.copy()
+        exp['child'].pop('child')  # child shouldn't have None child
+        dump = jsons.dump(obj, strip_nulls=True)
+        self.assertDictEqual(exp, dump)
 
     def test_dump_object_strip_privates(self):
-        class A:
-            def __init__(self):
-                self._name = 'A'  # This will be stripped.
+        obj = self.AllDumpable(self.AllDumpable())
+        exp = {'par_v': None, 'par_p': 12,
+               'c': 1, 'c_n': None,
+               'child': None, 'v': 3, 'v_n': None, 'p': 5, 'p_n': None}
+        exp['child'] = exp.copy()
+        dump = jsons.dump(obj, strip_privates=True)
+        self.assertDictEqual(exp, dump)
 
-        class B:
-            def __init__(self, a):
-                self.a = a
-                self._name = 'B'  # This will be stripped.
-
-        b = B(A())
-        dumped = jsons.dump(b, strip_privates=True)
-        self.assertDictEqual({'a': {}}, dumped)
+    def test_dump_object_strip_class_variables(self):
+        obj = self.AllDumpable(self.AllDumpable())
+        exp = {'par_v': None, 'par_p': 12,
+               'child': None, 'v': 3, '_v': 4, 'v_n': None, '_v_n': None,
+               'p': 5, '_p': 5, 'p_n': None, '_p_n': None}
+        exp['child'] = exp.copy()
+        dump = jsons.dump(obj, strip_class_variables=True)
+        self.assertDictEqual(exp, dump)
 
     def test_dump_with_slots(self):
         class C:
