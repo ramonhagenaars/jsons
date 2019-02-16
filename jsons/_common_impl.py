@@ -5,14 +5,16 @@ private, do not import (from) it directly.
 import json
 import re
 from json import JSONDecodeError
-from typing import Dict, Callable
+from typing import Dict, Callable, Optional
 from jsons.exceptions import DecodeError
 
 VALID_TYPES = (str, int, float, bool, list, tuple, set, dict, type(None))
 RFC3339_DATETIME_PATTERN = '%Y-%m-%dT%H:%M:%S'
 
 
-def dump(obj: object, cls: type = None, fork_inst: type = None,
+def dump(obj: object,
+         cls: Optional[type] = None,
+         fork_inst: Optional[type] = None,
          **kwargs) -> object:
     """
     Serialize the given ``obj`` to a JSON equivalent type (e.g. dict, list,
@@ -50,10 +52,10 @@ def dump(obj: object, cls: type = None, fork_inst: type = None,
 
 
 def load(json_obj: dict,
-         cls: type = None,
+         cls: Optional[type] = None,
          strict: bool = False,
-         fork_inst: type = None,
-         attr_getters: Dict[str, Callable[[], object]] = None,
+         fork_inst: Optional[type] = None,
+         attr_getters: Optional[Dict[str, Callable[[], object]]] = None,
          **kwargs) -> object:
     """
     Deserialize the given ``json_obj`` to an object of type ``cls``. If the
@@ -114,7 +116,7 @@ def load(json_obj: dict,
     return deserializer(json_obj, cls, **kwargs_)
 
 
-def _get_deserializer(cls: type, fork_inst: type = None):
+def _get_deserializer(cls: type, fork_inst: Optional[type] = None):
     fork_inst = fork_inst or JsonSerializable
     cls_name = cls.__name__ if hasattr(cls, '__name__') \
         else cls.__origin__.__name__
@@ -144,7 +146,7 @@ class JsonSerializable:
     _fork_counter = 0
 
     @classmethod
-    def fork(cls, name: str = None) -> type:
+    def fork(cls, name: Optional[str] = None) -> type:
         """
         Create a 'fork' of ``JsonSerializable``: a new ``type`` with a separate
         configuration of serializers and deserializers.
@@ -163,7 +165,7 @@ class JsonSerializable:
         return result
 
     @classmethod
-    def with_dump(cls, fork: bool = False, **kwargs) -> type:
+    def with_dump(cls, fork: Optional[bool] = False, **kwargs) -> type:
         """
         Return a class (``type``) that is based on JsonSerializable with the
         ``dump`` method being automatically provided the given ``kwargs``.
@@ -192,7 +194,7 @@ class JsonSerializable:
         return type_
 
     @classmethod
-    def with_load(cls, fork: bool = False, **kwargs) -> type:
+    def with_load(cls, fork: Optional[bool] = False, **kwargs) -> type:
         """
         Return a class (``type``) that is based on JsonSerializable with the
         ``load`` method being automatically provided the given ``kwargs``.
@@ -237,7 +239,7 @@ class JsonSerializable:
         return self.dumps()
 
     @classmethod
-    def from_json(cls: type, json_obj: dict, **kwargs) -> object:
+    def from_json(cls: type, json_obj: object, **kwargs) -> object:
         """
         See ``jsons.load``.
         :param json_obj: a JSON representation of an instance of the inheriting
@@ -258,7 +260,7 @@ class JsonSerializable:
         return dump(self, fork_inst=self.__class__, **kwargs)
 
     @classmethod
-    def load(cls: type, json_obj: dict, **kwargs) -> object:
+    def load(cls: type, json_obj: object, **kwargs) -> object:
         """
         See ``jsons.load``.
         :param kwargs: the keyword args are passed on to the serializer
@@ -309,8 +311,11 @@ class JsonSerializable:
         return loadb(json_obj, cls, fork_inst=cls, **kwargs)
 
     @classmethod
-    def set_serializer(cls: type, func: callable, cls_: type,
-                       high_prio: bool = True, fork: bool = False) -> type:
+    def set_serializer(cls: type,
+                       func: callable,
+                       cls_: type,
+                       high_prio: bool = True,
+                       fork: bool = False) -> type:
         """
         See ``jsons.set_serializer``.
         :param func: the serializer function.
@@ -325,8 +330,11 @@ class JsonSerializable:
         return type_
 
     @classmethod
-    def set_deserializer(cls: type, func: callable, cls_: type,
-                         high_prio: bool = True, fork: bool = False) -> type:
+    def set_deserializer(cls: type,
+                         func: callable,
+                         cls_: type,
+                         high_prio: bool = True,
+                         fork: bool = False) -> type:
         """
         See ``jsons.set_deserializer``.
         :param func: the deserializer function.
@@ -341,8 +349,10 @@ class JsonSerializable:
         return type_
 
 
-def dumps(obj: object, jdkwargs: Dict[str, object] = None,
-          *args, **kwargs) -> str:
+def dumps(obj: object,
+          jdkwargs: Optional[Dict[str, object]] = None,
+          *args,
+          **kwargs) -> str:
     """
     Extend ``json.dumps``, allowing any Python instance to be dumped to a
     string. Any extra (keyword) arguments are passed on to ``json.dumps``.
@@ -361,8 +371,11 @@ def dumps(obj: object, jdkwargs: Dict[str, object] = None,
     return json.dumps(dumped, **jdkwargs)
 
 
-def loads(str_: str, cls: type = None, jdkwargs: Dict[str, object] = None,
-          *args, **kwargs) -> object:
+def loads(str_: str,
+          cls: Optional[type] = None,
+          jdkwargs: Optional[Dict[str, object]] = None,
+          *args,
+          **kwargs) -> object:
     """
     Extend ``json.loads``, allowing a string to be loaded into a dict or a
     Python instance of type ``cls``. Any extra (keyword) arguments are passed
@@ -387,8 +400,11 @@ def loads(str_: str, cls: type = None, jdkwargs: Dict[str, object] = None,
         return load(obj, cls, *args, **kwargs)
 
 
-def dumpb(obj: object, encoding: str = 'utf-8',
-          jdkwargs: Dict[str, object] = None, *args, **kwargs) -> bytes:
+def dumpb(obj: object,
+          encoding: str = 'utf-8',
+          jdkwargs: Optional[Dict[str, object]] = None,
+          *args,
+          **kwargs) -> bytes:
     """
     Extend ``json.dumps``, allowing any Python instance to be dumped to bytes.
     Any extra (keyword) arguments are passed on to ``json.dumps``.
@@ -409,8 +425,12 @@ def dumpb(obj: object, encoding: str = 'utf-8',
     return dumped_str.encode(encoding=encoding)
 
 
-def loadb(bytes_: bytes, cls: type = None, encoding: str = 'utf-8',
-          jdkwargs: Dict[str, object] = None, *args, **kwargs) -> object:
+def loadb(bytes_: bytes,
+          cls: Optional[type] = None,
+          encoding: str = 'utf-8',
+          jdkwargs: Optional[Dict[str, object]] = None,
+          *args,
+          **kwargs) -> object:
     """
     Extend ``json.loads``, allowing bytes to be loaded into a dict or a Python
     instance of type ``cls``. Any extra (keyword) arguments are passed on to
@@ -434,7 +454,9 @@ def loadb(bytes_: bytes, cls: type = None, encoding: str = 'utf-8',
     return loads(str_, cls, jdkwargs=jdkwargs, *args, **kwargs)
 
 
-def set_serializer(func: callable, cls: type, high_prio: bool = True,
+def set_serializer(func: callable,
+                   cls: type,
+                   high_prio: bool = True,
                    fork_inst: type = JsonSerializable) -> None:
     """
     Set a serializer function for the given type. You may override the default
@@ -462,7 +484,9 @@ def set_serializer(func: callable, cls: type, high_prio: bool = True,
         fork_inst._serializers['nonetype'] = func
 
 
-def set_deserializer(func: callable, cls: type, high_prio: bool = True,
+def set_deserializer(func: callable,
+                     cls: type,
+                     high_prio: bool = True,
                      fork_inst: type = JsonSerializable) -> None:
     """
     Set a deserializer function for the given type. You may override the
