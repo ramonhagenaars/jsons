@@ -4,7 +4,7 @@ private, do not import (from) it directly.
 """
 import json
 import re
-from typing import Dict
+from typing import Dict, Callable
 
 VALID_TYPES = (str, int, float, bool, list, tuple, set, dict, type(None))
 RFC3339_DATETIME_PATTERN = '%Y-%m-%dT%H:%M:%S'
@@ -47,8 +47,12 @@ def dump(obj: object, cls: type = None, fork_inst: type = None,
     return serializer(obj, cls=cls, **kwargs_)
 
 
-def load(json_obj: dict, cls: type = None, strict: bool = False,
-         fork_inst: type = None, **kwargs) -> object:
+def load(json_obj: dict,
+         cls: type = None,
+         strict: bool = False,
+         fork_inst: type = None,
+         attr_getters: Dict[str, Callable[[], object]] = None,
+         **kwargs) -> object:
     """
     Deserialize the given ``json_obj`` to an object of type ``cls``. If the
     contents of ``json_obj`` do not match the interface of ``cls``, a
@@ -83,9 +87,11 @@ def load(json_obj: dict, cls: type = None, strict: bool = False,
 
     :param json_obj: the dict that is to be deserialized.
     :param cls: a matching class of which an instance should be returned.
-    :param strict: a bool to determine if the deserializer should be strict (i.e. fail on a partially deserialized
-    `json_obj` or on `None`).
+    :param strict: a bool to determine if the deserializer should be strict
+    (i.e. fail on a partially deserialized `json_obj` or on `None`).
     :param fork_inst: if given, it uses this fork of ``JsonSerializable``.
+    :param attr_getters: a ``dict`` that may hold callables that return values
+    for certain attributes.
     :param kwargs: the keyword args are passed on to the deserializer function.
     :return: an instance of ``cls`` if given, a dict otherwise.
     """
@@ -101,7 +107,8 @@ def load(json_obj: dict, cls: type = None, strict: bool = False,
         raise KeyError('Cannot load None with strict=True')
     cls = cls or type(json_obj)
     deserializer = _get_deserializer(cls, fork_inst)
-    kwargs_ = {'strict': strict, 'fork_inst': fork_inst, **kwargs}
+    kwargs_ = {'strict': strict, 'fork_inst': fork_inst,
+               'attr_getters': attr_getters, **kwargs}
     return deserializer(json_obj, cls, **kwargs_)
 
 

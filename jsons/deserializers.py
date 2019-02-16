@@ -198,8 +198,9 @@ def default_object_deserializer(obj: dict, cls: type,
         obj = {key_transformer(key): obj[key] for key in obj}
         concat_kwargs = {**kwargs, 'key_transformer': key_transformer}
     signature_parameters = inspect.signature(cls.__init__).parameters
-    constructor_args = _get_constructor_args(obj, signature_parameters,
-                                             **concat_kwargs)
+    constructor_args, getters = _get_constructor_args(obj,
+                                                      signature_parameters,
+                                                      **concat_kwargs)
     remaining_attrs = {attr_name: obj[attr_name] for attr_name in obj
                        if attr_name not in constructor_args}
     instance = cls(**constructor_args)
@@ -207,23 +208,37 @@ def default_object_deserializer(obj: dict, cls: type,
     return instance
 
 
-def _get_constructor_args(obj, signature_parameters, **kwargs):
+def _get_constructor_args(obj, signature_parameters, attr_getters=None,
+                          **kwargs):
     # Loop through the signature of cls: the type we try to deserialize to. For
     # every required parameter, we try to get the corresponding value from
     # json_obj.
-    constructor_args = dict()
-    sigs = [(sig_key, sig) for sig_key, sig in signature_parameters.items()
-            if obj and sig_key != 'self' and sig_key in obj]
+    attr_getters = dict(**(attr_getters or {}))
+    constructor_args_in_obj = dict()
+
+    sigs = []
+    for sig_key, sig in signature_parameters.items():
+        if sig_key != 'self':
+            if obj and sig_key in obj:
+                sigs.append((sig_key, sig))
+            elif sig_key in attr_getters:
+                attr_getter = attr_getters.pop(sig_key)
+                constructor_args_in_obj[sig_key] = attr_getter()
+            else:
+                pass  # TODO raise!
+
     for sig_key, sig in sigs:
         cls = sig.annotation if sig.annotation != inspect.Parameter.empty \
             else None
         value = _common_impl.load(obj[sig_key], cls, **kwargs)
-        constructor_args[sig_key] = value
-    return constructor_args
+        constructor_args_in_obj[sig_key] = value
+    return constructor_args_in_obj, attr_getters
 
 
-def _set_remaining_attrs(instance, remaining_attrs, **kwargs):
+def _set_remaining_attrs(instance, remaining_attrs, attr_getters=None,
+                         **kwargs):
     # Set any remaining attributes on the newly created instance.
+    attr_getters = attr_getters or {}
     for attr_name in remaining_attrs:
         loaded_attr = _common_impl.load(remaining_attrs[attr_name],
                                              type(remaining_attrs[attr_name]),
@@ -232,6 +247,8 @@ def _set_remaining_attrs(instance, remaining_attrs, **kwargs):
             setattr(instance, attr_name, loaded_attr)
         except AttributeError:
             pass  # This is raised when a @property does not have a setter.
+    for attr_name, getter in attr_getters.items():
+        setattr(instance, attr_name, getter())
 
 
 # The following default key transformers can be used with the

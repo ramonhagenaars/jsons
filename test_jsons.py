@@ -466,6 +466,26 @@ class TestJsons(TestCase):
         self.assertEqual(b.name, loaded_b.name)
         self.assertEqual(b.a.name, loaded_b.a.name)
 
+    def test_load_object_with_attr_getters(self):
+        class A:
+            def __init__(self, x, y):
+                self.x = x
+                self.y = y
+
+        class B:
+            def __init__(self, x):
+                self.x = x
+
+        a = A(1, 2)
+        loaded_a = jsons.load({'x': 1}, A, attr_getters={'y': lambda: 2})
+        self.assertEqual(a.x, loaded_a.x)
+        self.assertEqual(a.y, loaded_a.y)
+
+        b = B(1)
+        loaded_b = jsons.load({'x': 1}, B, attr_getters={'y': lambda: 2})
+        self.assertEqual(b.x, loaded_b.x)
+        self.assertEqual(2, loaded_b.y)
+
     def test_load_object_with_default_value(self):
         class A:
             def __init__(self, x, y = 2):
