@@ -5,6 +5,7 @@ alternative fashion.
 import warnings
 from inspect import signature, Parameter, isawaitable, iscoroutinefunction
 from jsons import JsonSerializable, dump, load, loads, loadb, dumps, dumpb
+from jsons.exceptions import InvalidDecorationError
 
 
 def loaded(parameters=True, returnvalue=True, fork_inst=JsonSerializable,
@@ -137,8 +138,9 @@ def _get_decorator(parameters, returnvalue, fork_inst, mapper, mapper_kwargs):
                           'decorating your method first and then place '
                           '@staticmethod/@classmethod on top (switching the '
                           'order).')
-            raise Exception('Cannot decorate a static- or classmethod.')
+            raise InvalidDecorationError(
+                'Cannot decorate a static- or classmethod.')
         if isinstance(decorated, type):
-            raise Exception('Cannot decorate a class.')
+            raise InvalidDecorationError('Cannot decorate a class.')
         return _async_wrapper if iscoroutinefunction(decorated) else _wrapper
     return _decorator

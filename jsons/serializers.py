@@ -9,8 +9,14 @@ from enum import EnumMeta
 from time import gmtime
 from typing import Callable
 from jsons import _common_impl
-from jsons._common_impl import RFC3339_DATETIME_PATTERN, snakecase, \
-    camelcase, pascalcase, lispcase, JsonSerializable
+from jsons._common_impl import (
+    RFC3339_DATETIME_PATTERN,
+    snakecase,
+    camelcase,
+    pascalcase,
+    lispcase,
+    JsonSerializable
+)
 
 
 def default_iterable_serializer(obj, **kwargs) -> list:

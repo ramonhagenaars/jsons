@@ -4,7 +4,10 @@ private, do not import (from) it directly.
 """
 import json
 import re
+from json import JSONDecodeError
 from typing import Dict, Callable
+
+from jsons.exceptions import DecodeError
 
 VALID_TYPES = (str, int, float, bool, list, tuple, set, dict, type(None))
 RFC3339_DATETIME_PATTERN = '%Y-%m-%dT%H:%M:%S'
@@ -31,8 +34,8 @@ def dump(obj: object, cls: type = None, fork_inst: type = None,
     :return: the serialized obj as a JSON type.
     """
     if cls and not hasattr(cls, '__slots__'):
-        raise KeyError('Invalid type: "{}", only types that have a __slots__ '
-                       'defined are allowed.'.format(cls.__name__))
+        raise ValueError('Invalid type: "{}", only types that have a '
+                         '__slots__ defined are allowed.'.format(cls.__name__))
     cls_ = cls or obj.__class__
     cls_name = cls_.__name__.lower()
     fork_inst = fork_inst or JsonSerializable
@@ -98,13 +101,13 @@ def load(json_obj: dict,
     if not strict and (json_obj is None or type(json_obj) == cls):
         return json_obj
     if type(json_obj) not in VALID_TYPES:
-        raise KeyError('Invalid type: "{}", only arguments of the following '
-                       'types are allowed: {}'
-                       .format(type(json_obj).__name__,
-                               ", ".join(typ.__name__ for typ
-                                         in VALID_TYPES)))
+        raise ValueError('Invalid type: "{}", only arguments of the following '
+                         'types are allowed: {}'
+                         .format(type(json_obj).__name__,
+                                 ", ".join(typ.__name__
+                                           for typ in VALID_TYPES)))
     if json_obj is None:
-        raise KeyError('Cannot load None with strict=True')
+        raise ValueError('Cannot load None with strict=True')
     cls = cls or type(json_obj)
     deserializer = _get_deserializer(cls, fork_inst)
     kwargs_ = {'strict': strict, 'fork_inst': fork_inst,
@@ -376,8 +379,13 @@ def loads(str_: str, cls: type = None, jdkwargs: Dict[str, object] = None,
     ``cls`` if given.
     """
     jdkwargs = jdkwargs or {}
-    obj = json.loads(str_, **jdkwargs)
-    return load(obj, cls, *args, **kwargs)
+    try:
+        obj = json.loads(str_, **jdkwargs)
+    except JSONDecodeError as err:
+        raise DecodeError('Could not load a dict; the given string is not '
+                          'valid JSON.', str_, cls, err)
+    else:
+        return load(obj, cls, *args, **kwargs)
 
 
 def dumpb(obj: object, encoding: str = 'utf-8',
@@ -419,6 +427,9 @@ def loadb(bytes_: bytes, cls: type = None, encoding: str = 'utf-8',
     :return: a JSON-type object (dict, str, list, etc.) or an instance of type
     ``cls`` if given.
     """
+    if not isinstance(bytes_, bytes):
+        raise ValueError('loadb accepts bytes only, "{}" was given'
+                         .format(type(bytes_)))
     jdkwargs = jdkwargs or {}
     str_ = bytes_.decode(encoding=encoding)
     return loads(str_, cls, jdkwargs=jdkwargs, *args, **kwargs)

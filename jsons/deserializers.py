@@ -10,8 +10,14 @@ from datetime import datetime, timezone, timedelta
 from enum import EnumMeta
 from typing import List, Callable
 from jsons import _common_impl
-from jsons._common_impl import RFC3339_DATETIME_PATTERN, snakecase, \
-    camelcase, pascalcase, lispcase
+from jsons._common_impl import (
+    RFC3339_DATETIME_PATTERN,
+    snakecase,
+    camelcase,
+    pascalcase,
+    lispcase
+)
+from jsons.exceptions import UnfulfilledArgumentError
 
 
 def default_datetime_deserializer(obj: str, _: datetime, **__) -> datetime:
@@ -199,6 +205,7 @@ def default_object_deserializer(obj: dict, cls: type,
         concat_kwargs = {**kwargs, 'key_transformer': key_transformer}
     signature_parameters = inspect.signature(cls.__init__).parameters
     constructor_args, getters = _get_constructor_args(obj,
+                                                      cls,
                                                       signature_parameters,
                                                       **concat_kwargs)
     remaining_attrs = {attr_name: obj[attr_name] for attr_name in obj
@@ -208,30 +215,36 @@ def default_object_deserializer(obj: dict, cls: type,
     return instance
 
 
-def _get_constructor_args(obj, signature_parameters, attr_getters=None,
+def _get_constructor_args(obj, cls, signature_parameters, attr_getters=None,
                           **kwargs):
     # Loop through the signature of cls: the type we try to deserialize to. For
     # every required parameter, we try to get the corresponding value from
     # json_obj.
     attr_getters = dict(**(attr_getters or {}))
     constructor_args_in_obj = dict()
-
-    sigs = []
     for sig_key, sig in signature_parameters.items():
         if sig_key != 'self':
             if obj and sig_key in obj:
-                sigs.append((sig_key, sig))
+                # This argument is in obj.
+                arg_cls = None
+                if sig.annotation != inspect.Parameter.empty:
+                    arg_cls = sig.annotation
+                value = _common_impl.load(obj[sig_key], arg_cls, **kwargs)
+                constructor_args_in_obj[sig_key] = value
             elif sig_key in attr_getters:
+                # There exists an attr_getter for this argument.
                 attr_getter = attr_getters.pop(sig_key)
                 constructor_args_in_obj[sig_key] = attr_getter()
-            else:
-                pass  # TODO raise!
+            elif sig.default != inspect.Parameter.empty:
+                # There is a default value for this argument.
+                constructor_args_in_obj[sig_key] = sig.default
+            elif sig.kind not in (inspect.Parameter.VAR_POSITIONAL,
+                                  inspect.Parameter.VAR_KEYWORD):
+                # This argument is no *args or **kwargs and has no value.
+                raise UnfulfilledArgumentError(
+                    'No value found for "{}"'.format(sig_key),
+                    sig_key, obj, cls)
 
-    for sig_key, sig in sigs:
-        cls = sig.annotation if sig.annotation != inspect.Parameter.empty \
-            else None
-        value = _common_impl.load(obj[sig_key], cls, **kwargs)
-        constructor_args_in_obj[sig_key] = value
     return constructor_args_in_obj, attr_getters
 
 
@@ -241,8 +254,8 @@ def _set_remaining_attrs(instance, remaining_attrs, attr_getters=None,
     attr_getters = attr_getters or {}
     for attr_name in remaining_attrs:
         loaded_attr = _common_impl.load(remaining_attrs[attr_name],
-                                             type(remaining_attrs[attr_name]),
-                                             **kwargs)
+                                        type(remaining_attrs[attr_name]),
+                                        **kwargs)
         try:
             setattr(instance, attr_name, loaded_attr)
         except AttributeError:

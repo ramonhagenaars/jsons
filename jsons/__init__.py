@@ -112,6 +112,12 @@ from jsons.serializers import (
     default_dict_serializer,
     default_tuple_serializer,
 )
+from jsons.exceptions import (
+    DeserializationError,
+    DecodeError,
+    UnfulfilledArgumentError,
+    InvalidDecorationError
+)
 
 dump = _common_impl.dump
 load = _common_impl.load

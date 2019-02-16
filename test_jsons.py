@@ -9,6 +9,8 @@ from jsons import JsonSerializable, KEY_TRANSFORMER_CAMELCASE
 from jsons._common_impl import snakecase, camelcase, pascalcase, lispcase
 from jsons.decorators import dumped, loaded
 from jsons.deserializers import KEY_TRANSFORMER_SNAKECASE
+from jsons.exceptions import UnfulfilledArgumentError, InvalidDecorationError, \
+    DecodeError
 
 
 class TestJsons(TestCase):
@@ -319,7 +321,7 @@ class TestJsons(TestCase):
         self.assertEqual(res2['x'], 'res2')
         self.assertEqual(res3['x'], 'res3')
 
-        with self.assertRaises(Exception):
+        with self.assertRaises(InvalidDecorationError):
             class Clazz:
                 @dumped()
                 @staticmethod
@@ -327,7 +329,7 @@ class TestJsons(TestCase):
                     pass  # This won't work; you need to swap the decorators.
 
     def test_dumped_decorator_on_class(self):
-        with self.assertRaises(Exception):
+        with self.assertRaises(InvalidDecorationError):
             @loaded()
             class Clazz:
                 pass
@@ -390,13 +392,13 @@ class TestJsons(TestCase):
         dat = datetime.datetime(year=2018, month=7, day=8, hour=21, minute=34,
                                 tzinfo=datetime.timezone.utc)
         dumped = {'d': dat}
-        with self.assertRaises(KeyError):
+        with self.assertRaises(ValueError):
             jsons.load(dumped, C, strict=True)
 
     def test_load_none(self):
         self.assertEqual(None, jsons.load(None))
         self.assertEqual(None, jsons.load(None, datetime))
-        with self.assertRaises(KeyError):
+        with self.assertRaises(ValueError):
             jsons.load(None, datetime, strict=True)
 
     def test_load_datetime(self):
@@ -906,3 +908,33 @@ class TestJsons(TestCase):
             self.assertEqual(res.x, 'c_res')
 
         asyncio.get_event_loop().run_until_complete(_test_body())
+
+    def test_exception_unfulfilled_arg(self):
+        class C:
+            def __init__(self, x, y):
+                self.x = x
+                self.y = y
+
+        with self.assertRaises(UnfulfilledArgumentError):
+            jsons.load({"x": 1}, C)
+
+        try:
+            jsons.load({"x": 1}, C)
+        except UnfulfilledArgumentError as err:
+            self.assertDictEqual({"x": 1}, err.source)
+            self.assertEqual(C, err.target)
+            self.assertEqual('y', err.argument)
+
+    def test_exception_wrong_json(self):
+        with self.assertRaises(DecodeError):
+            jsons.loads('{this aint no JSON!')
+
+        try:
+            jsons.loads('{this aint no JSON!')
+        except DecodeError as err:
+            self.assertEqual(None, err.target)
+            self.assertEqual('{this aint no JSON!', err.source)
+
+    def test_exception_wrong_bytes(self):
+        with self.assertRaises(ValueError):
+            jsons.loadb('{"key": "value"}')
