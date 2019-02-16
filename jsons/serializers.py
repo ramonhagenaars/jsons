@@ -201,8 +201,9 @@ def _get_class_props(cls):
 
 def _get_complete_class_dict(cls):
     cls_dict = {}
-    for parent_class in reversed(cls.mro()):
-        cls_dict.update(parent_class.__dict__)
+    # Loop reversed so values of sub-classes override those of super-classes.
+    for cls_or_elder in reversed(cls.mro()):
+        cls_dict.update(cls_or_elder.__dict__)
     return cls_dict
 
 
