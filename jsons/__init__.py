@@ -88,17 +88,30 @@ Alternatively, you can make use of the `JsonSerializable` class.
 from datetime import datetime
 from enum import Enum
 from jsons import _common_impl
-from jsons.deserializers import default_list_deserializer, \
-    default_enum_deserializer, default_datetime_deserializer, \
-    default_string_deserializer, default_primitive_deserializer, \
-    default_object_deserializer, default_dict_deserializer, \
-    default_tuple_deserializer, default_set_deserializer
-from jsons.serializers import default_list_serializer, \
-    default_enum_serializer, default_datetime_serializer, \
-    default_primitive_serializer, default_object_serializer, \
-    KEY_TRANSFORMER_SNAKECASE, KEY_TRANSFORMER_CAMELCASE, \
-    KEY_TRANSFORMER_PASCALCASE, KEY_TRANSFORMER_LISPCASE, \
-    default_dict_serializer, default_tuple_serializer
+from jsons.deserializers import (
+    default_list_deserializer,
+    default_enum_deserializer,
+    default_datetime_deserializer,
+    default_string_deserializer,
+    default_primitive_deserializer,
+    default_object_deserializer,
+    default_dict_deserializer,
+    default_tuple_deserializer,
+    default_set_deserializer,
+)
+from jsons.serializers import (
+    default_list_serializer,
+    default_enum_serializer,
+    default_datetime_serializer,
+    default_primitive_serializer,
+    default_object_serializer,
+    KEY_TRANSFORMER_SNAKECASE,
+    KEY_TRANSFORMER_CAMELCASE,
+    KEY_TRANSFORMER_PASCALCASE,
+    KEY_TRANSFORMER_LISPCASE,
+    default_dict_serializer,
+    default_tuple_serializer,
+)
 
 dump = _common_impl.dump
 load = _common_impl.load
