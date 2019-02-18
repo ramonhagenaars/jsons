@@ -4,9 +4,8 @@ process of a particular type as follows:
 
 ``jsons.set_serializer(custom_deserializer, SomeClass)``
 """
-from datetime import datetime, time, timedelta, timezone
+from datetime import datetime, time, timezone, timedelta
 from enum import EnumMeta
-from time import gmtime
 from typing import Callable
 from jsons import _common_impl
 from jsons._common_impl import (
@@ -106,39 +105,40 @@ def default_datetime_serializer(obj: datetime, strip_microseconds: bool = True,
     :return: ``datetime`` as an RFC3339 string.
     """
     pattern = RFC3339_DATETIME_PATTERN
-    offset = None
-    tzone = obj.tzinfo
-    if not tzone:
-        hrs_delta = datetime.now().hour - gmtime().tm_hour
-        if hrs_delta == 0:
-            offset = '+00:00'
-        else:
-            tzone = timezone(timedelta(hours=hrs_delta))
-    offset = offset or _datetime_offset(tzone)
+    offset = _datetime_offset(obj)
     if not strip_microseconds and obj.microsecond:
         pattern += '.%f'
     return obj.strftime("{}{}".format(pattern, offset))
 
 
-def _datetime_offset(tzone: timezone) -> str:
+def _datetime_offset(obj: datetime) -> str:
+    tzone = obj.tzinfo
+    if not tzone:
+        tzone = obj.astimezone().tzinfo
+        if tzone is timezone.utc:
+            # datetimes without tzinfo are treated as local times.
+            return '+00:00'
     offset = 'Z'
     if tzone.tzname(None) not in ('UTC', 'UTC+00:00'):
-        tdelta = tzone.utcoffset(None)
-        if not tdelta:
-            tdelta = tzone.adjusted_offset
-        offset_s = tdelta.total_seconds()
-        offset_h = int(offset_s / 3600)
-        offset_m = int((offset_s / 60) % 60)
-        offset_t = time(abs(offset_h), abs(offset_m))
-        operator = '+' if offset_s > 0 else '-'
-        offset = offset_t.strftime('{}%H:%M'.format(operator))
+        tdelta = tzone.utcoffset(None) or tzone.adjusted_offset
+        offset = _create_offset(tdelta)
+    return offset
+
+
+def _create_offset(tdelta: timedelta) -> str:
+    offset_s = tdelta.total_seconds()
+    offset_h = int(offset_s / 3600)
+    offset_m = int((offset_s / 60) % 60)
+    offset_t = time(abs(offset_h), abs(offset_m))
+    operator = '+' if offset_s > 0 else '-'
+    offset = offset_t.strftime('{}%H:%M'.format(operator))
     return offset
 
 
 def default_primitive_serializer(obj, **_) -> object:
     """
     Serialize a primitive; simply return the given ``obj``.
-    :param obj:
+    :param obj: the primitive.
     :param _: not used.
     :return: ``obj``.
     """
