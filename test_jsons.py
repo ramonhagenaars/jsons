@@ -434,6 +434,15 @@ class TestJsons(TestCase):
         cls = Tuple[int, Tuple[List[datetime.datetime]]]
         self.assertEqual(tup, jsons.load(expectation, cls))
 
+    def test_load_tuple_with_n_length(self):
+        dat = datetime.datetime(year=2018, month=7, day=8, hour=21, minute=34,
+                                tzinfo=datetime.timezone.utc)
+        expectation = (dat, dat)
+        loaded = jsons.load(['2018-07-08T21:34:00Z',
+                             '2018-07-08T21:34:00Z'],
+                            cls=Tuple[datetime.datetime, ...])
+        self.assertEqual(expectation, loaded)
+
     def test_load_set(self):
         dat = datetime.datetime(year=2018, month=7, day=8, hour=21, minute=34,
                                 tzinfo=datetime.timezone.utc)
