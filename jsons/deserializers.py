@@ -196,7 +196,7 @@ def default_object_deserializer(obj: dict, cls: type,
     :param cls: the type to which ``obj`` should be deserialized.
     :param key_transformer: a function that transforms the keys in order to
     match the attribute names of ``cls``.
-    :param strict:
+    :param strict: deserialize in strict mode.
     :param kwargs: any keyword arguments that may be passed to the
     deserializers.
     :return: an instance of type ``cls``.
