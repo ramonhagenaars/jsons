@@ -10,7 +10,7 @@ from jsons._common_impl import snakecase, camelcase, pascalcase, lispcase
 from jsons.decorators import dumped, loaded
 from jsons.deserializers import KEY_TRANSFORMER_SNAKECASE
 from jsons.exceptions import UnfulfilledArgumentError, InvalidDecorationError, \
-    DecodeError
+    DecodeError, SignatureMismatchError
 
 
 class TestJsons(TestCase):
@@ -400,6 +400,22 @@ class TestJsons(TestCase):
         self.assertEqual(None, jsons.load(None, datetime))
         with self.assertRaises(ValueError):
             jsons.load(None, datetime, strict=True)
+
+    def test_load_too_many_args(self):
+        class C:
+            def __init__(self, x: int):
+                self.x = x
+
+        with self.assertRaises(SignatureMismatchError):
+            jsons.load({'x': 1, 'y': 2}, C, strict=True)
+
+        try:
+            jsons.load({'x': 1, 'y': 2}, C, strict=True)
+        except SignatureMismatchError as err:
+            self.assertEqual(err.argument, 'y')
+            self.assertEqual(err.target, C)
+            self.assertDictEqual(err.source, {'x': 1, 'y': 2})
+
 
     def test_load_datetime(self):
         dat = datetime.datetime(year=2018, month=7, day=8, hour=21, minute=34,

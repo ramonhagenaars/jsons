@@ -17,7 +17,7 @@ from jsons._common_impl import (
     pascalcase,
     lispcase
 )
-from jsons.exceptions import UnfulfilledArgumentError
+from jsons.exceptions import UnfulfilledArgumentError, SignatureMismatchError
 
 
 def default_datetime_deserializer(obj: str, _: datetime, **__) -> datetime:
@@ -185,6 +185,7 @@ def default_primitive_deserializer(obj: object,
 
 def default_object_deserializer(obj: dict, cls: type,
                                 key_transformer: Callable[[str], str] = None,
+                                strict: bool = False,
                                 **kwargs) -> object:
     """
     Deserialize ``obj`` into an instance of type ``cls``. If ``obj`` contains
@@ -195,6 +196,7 @@ def default_object_deserializer(obj: dict, cls: type,
     :param cls: the type to which ``obj`` should be deserialized.
     :param key_transformer: a function that transforms the keys in order to
     match the attribute names of ``cls``.
+    :param strict:
     :param kwargs: any keyword arguments that may be passed to the
     deserializers.
     :return: an instance of type ``cls``.
@@ -202,7 +204,11 @@ def default_object_deserializer(obj: dict, cls: type,
     concat_kwargs = kwargs
     if key_transformer:
         obj = {key_transformer(key): obj[key] for key in obj}
-        concat_kwargs = {**kwargs, 'key_transformer': key_transformer}
+        concat_kwargs = {
+            **kwargs,
+            'key_transformer': key_transformer
+        }
+    concat_kwargs['strict'] = strict
     signature_parameters = inspect.signature(cls.__init__).parameters
     constructor_args, getters = _get_constructor_args(obj,
                                                       cls,
@@ -210,6 +216,11 @@ def default_object_deserializer(obj: dict, cls: type,
                                                       **concat_kwargs)
     remaining_attrs = {attr_name: obj[attr_name] for attr_name in obj
                        if attr_name not in constructor_args}
+    if strict and remaining_attrs:
+        unexpected_arg = list(remaining_attrs.keys())[0]
+        err_msg = 'Type "{}" does not expect "{}"'.format(cls.__name__,
+                                                          unexpected_arg)
+        raise SignatureMismatchError(err_msg, unexpected_arg, obj, cls)
     instance = cls(**constructor_args)
     _set_remaining_attrs(instance, remaining_attrs, **kwargs)
     return instance
