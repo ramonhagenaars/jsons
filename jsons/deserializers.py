@@ -183,7 +183,8 @@ def default_primitive_deserializer(obj: object,
     return obj
 
 
-def default_object_deserializer(obj: dict, cls: type,
+def default_object_deserializer(obj: dict,
+                                cls: type,
                                 key_transformer: Callable[[str], str] = None,
                                 strict: bool = False,
                                 **kwargs) -> object:

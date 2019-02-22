@@ -18,7 +18,7 @@ from jsons._common_impl import (
 )
 
 
-def default_iterable_serializer(obj, **kwargs) -> list:
+def default_iterable_serializer(obj: object, **kwargs) -> list:
     """
     Serialize the given ``obj`` to a list of serialized objects.
     :param obj: the iterable that is to be serialized.
@@ -51,7 +51,8 @@ def default_tuple_serializer(obj: tuple, **kwargs) -> list:
     return default_iterable_serializer(obj, **kwargs)
 
 
-def default_dict_serializer(obj: dict, strip_nulls: bool = False,
+def default_dict_serializer(obj: dict,
+                            strip_nulls: bool = False,
                             key_transformer: Callable[[str], str] = None,
                             **kwargs) -> dict:
     """
@@ -77,7 +78,8 @@ def default_dict_serializer(obj: dict, strip_nulls: bool = False,
     return result
 
 
-def default_enum_serializer(obj: EnumMeta, use_enum_name: bool = True,
+def default_enum_serializer(obj: EnumMeta,
+                            use_enum_name: bool = True,
                             **_) -> str:
     """
     Serialize the given obj. By default, the name of the enum element is
