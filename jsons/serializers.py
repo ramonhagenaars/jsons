@@ -4,11 +4,12 @@ process of a particular type as follows:
 
 ``jsons.set_serializer(custom_deserializer, SomeClass)``
 """
-from datetime import datetime, time, timezone, timedelta
+from datetime import datetime
 from enum import EnumMeta
 from typing import Callable
-from jsons import _common_impl
-from jsons._common_impl import (
+from jsons import _main_impl
+from jsons._datetime_impl import datetime_offset
+from jsons._main_impl import (
     RFC3339_DATETIME_PATTERN,
     snakecase,
     camelcase,
@@ -26,7 +27,7 @@ def default_iterable_serializer(obj: object, **kwargs) -> list:
     process.
     :return: a list of which all elements are serialized.
     """
-    return [_common_impl.dump(elem, **kwargs) for elem in obj]
+    return [_main_impl.dump(elem, **kwargs) for elem in obj]
 
 
 def default_list_serializer(obj: list, **kwargs) -> list:
@@ -68,9 +69,9 @@ def default_dict_serializer(obj: dict,
     """
     result = dict()
     for key in obj:
-        dumped_elem = _common_impl.dump(obj[key],
-                                        key_transformer=key_transformer,
-                                        strip_nulls=strip_nulls, **kwargs)
+        dumped_elem = _main_impl.dump(obj[key],
+                                      key_transformer=key_transformer,
+                                      strip_nulls=strip_nulls, **kwargs)
         if not (strip_nulls and dumped_elem is None):
             if key_transformer:
                 key = key_transformer(key)
@@ -94,7 +95,8 @@ def default_enum_serializer(obj: EnumMeta,
     return getattr(obj, attr)
 
 
-def default_datetime_serializer(obj: datetime, strip_microseconds: bool = True,
+def default_datetime_serializer(obj: datetime,
+                                strip_microseconds: bool = True,
                                 **_) -> str:
     """
     Serialize the given datetime instance to a string. It uses the RFC3339
@@ -107,34 +109,10 @@ def default_datetime_serializer(obj: datetime, strip_microseconds: bool = True,
     :return: ``datetime`` as an RFC3339 string.
     """
     pattern = RFC3339_DATETIME_PATTERN
-    offset = _datetime_offset(obj)
+    offset = datetime_offset(obj)
     if not strip_microseconds and obj.microsecond:
         pattern += '.%f'
     return obj.strftime("{}{}".format(pattern, offset))
-
-
-def _datetime_offset(obj: datetime) -> str:
-    tzone = obj.tzinfo
-    if not tzone:
-        tzone = obj.astimezone().tzinfo
-        if tzone is timezone.utc:
-            # datetimes without tzinfo are treated as local times.
-            return '+00:00'
-    offset = 'Z'
-    if tzone.tzname(None) not in ('UTC', 'UTC+00:00'):
-        tdelta = tzone.utcoffset(None) or tzone.adjusted_offset
-        offset = _create_offset(tdelta)
-    return offset
-
-
-def _create_offset(tdelta: timedelta) -> str:
-    offset_s = tdelta.total_seconds()
-    offset_h = int(offset_s / 3600)
-    offset_m = int((offset_s / 60) % 60)
-    offset_t = time(abs(offset_h), abs(offset_m))
-    operator = '+' if offset_s > 0 else '-'
-    offset = offset_t.strftime('{}%H:%M'.format(operator))
-    return offset
 
 
 def default_primitive_serializer(obj, **_) -> object:
@@ -184,8 +162,11 @@ def default_object_serializer(obj: object,
                                    **kwargs)
 
 
-def _get_dict_from_obj(obj, strip_privates, strip_properties,
-                       strip_class_variables, cls=None, *_, **__):
+def _get_dict_from_obj(obj,
+                       strip_privates,
+                       strip_properties,
+                       strip_class_variables,
+                       cls=None, *_, **__):
     excluded_elems = dir(JsonSerializable)
     props, other_cls_vars = _get_class_props(obj.__class__)
     return {attr: obj.__getattribute__(attr) for attr in dir(obj)

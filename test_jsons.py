@@ -11,7 +11,7 @@ from jsons import (
     KEY_TRANSFORMER_SNAKECASE,
     DeserializationError
 )
-from jsons._common_impl import snakecase, camelcase, pascalcase, lispcase
+from jsons._main_impl import snakecase, camelcase, pascalcase, lispcase
 from jsons.decorators import dumped, loaded
 from jsons.exceptions import (
     UnfulfilledArgumentError,
