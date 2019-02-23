@@ -6,7 +6,7 @@ process of a particular type as follows:
 """
 from datetime import datetime
 from enum import EnumMeta
-from typing import Callable
+from typing import Callable, Optional
 from jsons import _main_impl
 from jsons._datetime_impl import get_offset_str
 from jsons._main_impl import (
@@ -52,10 +52,11 @@ def default_tuple_serializer(obj: tuple, **kwargs) -> list:
     return default_iterable_serializer(obj, **kwargs)
 
 
-def default_dict_serializer(obj: dict,
-                            strip_nulls: bool = False,
-                            key_transformer: Callable[[str], str] = None,
-                            **kwargs) -> dict:
+def default_dict_serializer(
+        obj: dict,
+        strip_nulls: bool = False,
+        key_transformer: Optional[Callable[[str], str]] = None,
+        **kwargs) -> dict:
     """
     Serialize the given ``obj`` to a dict of serialized objects.
     :param obj: the dict that is to be serialized.
@@ -115,7 +116,7 @@ def default_datetime_serializer(obj: datetime,
     return obj.strftime("{}{}".format(pattern, offset))
 
 
-def default_primitive_serializer(obj, **_) -> object:
+def default_primitive_serializer(obj: object, **_) -> object:
     """
     Serialize a primitive; simply return the given ``obj``.
     :param obj: the primitive.
@@ -125,13 +126,14 @@ def default_primitive_serializer(obj, **_) -> object:
     return obj
 
 
-def default_object_serializer(obj: object,
-                              key_transformer: Callable[[str], str] = None,
-                              strip_nulls: bool = False,
-                              strip_privates: bool = False,
-                              strip_properties: bool = False,
-                              strip_class_variables: bool = False,
-                              **kwargs) -> dict:
+def default_object_serializer(
+        obj: object,
+        key_transformer: Optional[Callable[[str], str]] = None,
+        strip_nulls: bool = False,
+        strip_privates: bool = False,
+        strip_properties: bool = False,
+        strip_class_variables: bool = False,
+        **kwargs) -> dict:
     """
     Serialize the given ``obj`` to a dict. All values within ``obj`` are also
     serialized. If ``key_transformer`` is given, it will be used to transform
