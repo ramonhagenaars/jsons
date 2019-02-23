@@ -2,15 +2,23 @@ import asyncio
 import datetime
 import json
 from enum import Enum
-from typing import List, Tuple, Set, Dict
+from typing import List, Tuple, Set, Dict, Optional, Union
 from unittest.case import TestCase
 import jsons
-from jsons import JsonSerializable, KEY_TRANSFORMER_CAMELCASE
+from jsons import (
+    JsonSerializable,
+    KEY_TRANSFORMER_CAMELCASE,
+    KEY_TRANSFORMER_SNAKECASE,
+    DeserializationError
+)
 from jsons._common_impl import snakecase, camelcase, pascalcase, lispcase
 from jsons.decorators import dumped, loaded
-from jsons.deserializers import KEY_TRANSFORMER_SNAKECASE
-from jsons.exceptions import UnfulfilledArgumentError, InvalidDecorationError, \
-    DecodeError, SignatureMismatchError
+from jsons.exceptions import (
+    UnfulfilledArgumentError,
+    InvalidDecorationError,
+    DecodeError,
+    SignatureMismatchError
+)
 
 
 class TestJsons(TestCase):
@@ -392,7 +400,7 @@ class TestJsons(TestCase):
         dat = datetime.datetime(year=2018, month=7, day=8, hour=21, minute=34,
                                 tzinfo=datetime.timezone.utc)
         dumped = {'d': dat}
-        with self.assertRaises(ValueError):
+        with self.assertRaises(DeserializationError):
             jsons.load(dumped, C, strict=True)
 
     def test_load_none(self):
@@ -460,6 +468,25 @@ class TestJsons(TestCase):
                              '2018-07-08T21:34:00Z'],
                             cls=Tuple[datetime.datetime, ...])
         self.assertEqual(expectation, loaded)
+
+    def test_load_union(self):
+        class A:
+            def __init__(self, x):
+                self.x = x
+
+        class B:
+            def __init__(self, x: Optional[int]):
+                self.x = x
+
+        class C:
+            def __init__(self, x: Union[datetime.datetime, A]):
+                self.x = x
+
+        self.assertEqual(1, jsons.load({'x': 1}, B).x)
+        self.assertEqual(None, jsons.load({'x': None}, B).x)
+        self.assertEqual(1, jsons.load({'x': {'x': 1}}, C).x.x)
+        with self.assertRaises(DeserializationError):
+            jsons.load({'x': 'no match in the union'}, C).x
 
     def test_load_set(self):
         dat = datetime.datetime(year=2018, month=7, day=8, hour=21, minute=34,

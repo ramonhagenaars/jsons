@@ -87,6 +87,7 @@ Alternatively, you can make use of the `JsonSerializable` class.
 """
 from datetime import datetime
 from enum import Enum
+from typing import Union
 from jsons import _common_impl
 from jsons.deserializers import (
     default_list_deserializer,
@@ -98,6 +99,7 @@ from jsons.deserializers import (
     default_dict_deserializer,
     default_tuple_deserializer,
     default_set_deserializer,
+    default_union_deserializer,
 )
 from jsons.serializers import (
     default_list_serializer,
@@ -143,6 +145,7 @@ set_serializer(default_primitive_serializer, None)
 set_serializer(default_object_serializer, object, False)
 set_deserializer(default_list_deserializer, list)
 set_deserializer(default_tuple_deserializer, tuple)
+set_deserializer(default_union_deserializer, Union)
 set_deserializer(default_set_deserializer, set)
 set_deserializer(default_dict_deserializer, dict)
 set_deserializer(default_enum_deserializer, Enum)

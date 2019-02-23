@@ -17,7 +17,8 @@ from jsons._common_impl import (
     pascalcase,
     lispcase
 )
-from jsons.exceptions import UnfulfilledArgumentError, SignatureMismatchError
+from jsons.exceptions import UnfulfilledArgumentError, SignatureMismatchError, \
+    JsonsError, DeserializationError
 
 
 def default_datetime_deserializer(obj: str, _: datetime, **__) -> datetime:
@@ -92,6 +93,19 @@ def default_tuple_deserializer(obj: List, cls, **kwargs) -> object:
     list_ = [_common_impl.load(value, tuple_types[i], **kwargs)
              for i, value in enumerate(obj)]
     return tuple(list_)
+
+
+def default_union_deserializer(obj: object, cls, **kwargs) -> object:
+    for sub_type in cls.__args__:
+        try:
+            return _common_impl.load(obj, sub_type, **kwargs)
+        except JsonsError:
+            pass  # Try the next one.
+    else:
+        args_msg = ', '.join([cls_.__name__ for cls_ in cls.__args__])
+        err_msg = ('Could not match the object of type "{}" to any type of '
+                   'the Union: {}'.format(str(cls), args_msg))  # TODO use _get_class_name
+        raise DeserializationError(err_msg, obj, cls)
 
 
 def default_set_deserializer(obj: List, cls, **kwargs) -> object:

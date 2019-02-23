@@ -5,8 +5,12 @@ private, do not import (from) it directly.
 import json
 import re
 from json import JSONDecodeError
-from typing import Dict, Callable, Optional
-from jsons.exceptions import DecodeError
+from typing import Dict, Callable, Optional, Union
+from jsons.exceptions import (
+    DecodeError,
+    DeserializationError,
+    JsonsError
+)
 
 VALID_TYPES = (str, int, float, bool, list, tuple, set, dict, type(None))
 RFC3339_DATETIME_PATTERN = '%Y-%m-%dT%H:%M:%S'
@@ -49,6 +53,10 @@ def dump(obj: object,
             serializer = fork_inst._serializers[pname]
     kwargs_ = {'fork_inst': fork_inst, **kwargs}
     return serializer(obj, cls=cls, **kwargs_)
+    # try:
+    #     return serializer(obj, cls=cls, **kwargs_)
+    # except Exception as err:
+    #     raise SerializationError(str(err))  # TODO afmaken
 
 
 def load(json_obj: dict,
@@ -113,21 +121,51 @@ def load(json_obj: dict,
     deserializer = _get_deserializer(cls, fork_inst)
     kwargs_ = {'strict': strict, 'fork_inst': fork_inst,
                'attr_getters': attr_getters, **kwargs}
-    return deserializer(json_obj, cls, **kwargs_)
+    try:
+        return deserializer(json_obj, cls, **kwargs_)
+    except Exception as err:
+        if isinstance(err, JsonsError):
+            raise
+        raise DeserializationError(str(err), json_obj, cls)
 
 
-def _get_deserializer(cls: type, fork_inst: Optional[type] = None):
+def _get_deserializer(cls: type, fork_inst: Optional[type] = None) -> callable:
     fork_inst = fork_inst or JsonSerializable
-    cls_name = cls.__name__ if hasattr(cls, '__name__') \
-        else cls.__origin__.__name__
+    # cls_name = cls.__name__ if hasattr(cls, '__name__') \
+    #     else cls.__origin__.__name__
+    cls_name = _get_class_name(cls)
     deserializer = fork_inst._deserializers.get(cls_name.lower(), None)
     if not deserializer:
-        parents = [cls_ for cls_ in fork_inst._classes_deserializers
-                   if issubclass(cls, cls_)]
+        parents = _get_parents(cls, fork_inst._classes_deserializers)
         if parents:
             pname = parents[0].__name__.lower()
             deserializer = fork_inst._deserializers[pname]
     return deserializer
+
+
+def _get_parents(cls: type, lizers: list) -> list:
+    parents = []
+    for cls_ in lizers:
+        try:
+            if issubclass(cls, cls_):
+                parents.append(cls_)
+        except TypeError:
+            pass  # Some types do not support `issubclass` (e.g. Union).
+    return parents
+
+
+def _get_class_name(cls: type) -> str:
+    if hasattr(cls, '__name__') and cls.__name__:
+        cls_name = cls.__name__
+    elif hasattr(cls, '_name') and cls._name:
+        cls_name = cls._name  # e.g. Union
+    elif hasattr(cls, '__origin__'):
+        origin = cls.__origin__
+        cls_name = _get_class_name(origin)
+    else:
+        #TODO raise Unsupported class error?
+        raise DeserializationError('Unsupported type "{}"'.format(cls), None, None)
+    return cls_name
 
 
 class JsonSerializable:
@@ -479,13 +517,14 @@ def set_serializer(func: callable,
     if cls:
         index = 0 if high_prio else len(fork_inst._classes_serializers)
         fork_inst._classes_serializers.insert(index, cls)
-        fork_inst._serializers[cls.__name__.lower()] = func
+        cls_name = _get_class_name(cls)
+        fork_inst._serializers[cls_name.lower()] = func
     else:
         fork_inst._serializers['nonetype'] = func
 
 
 def set_deserializer(func: callable,
-                     cls: type,
+                     cls: Union[type, str],
                      high_prio: bool = True,
                      fork_inst: type = JsonSerializable) -> None:
     """
@@ -502,7 +541,7 @@ def set_deserializer(func: callable,
     You may ask additional arguments between ``cls`` and ``kwargs``.
 
     :param func: the deserializer function.
-    :param cls: the type this serializer can handle.
+    :param cls: the type or the name of the type this serializer can handle.
     :param high_prio: determines the order in which is looked for the callable.
     :param fork_inst: if given, it uses this fork of ``JsonSerializable``.
     :return: None.
@@ -510,7 +549,8 @@ def set_deserializer(func: callable,
     if cls:
         index = 0 if high_prio else len(fork_inst._classes_deserializers)
         fork_inst._classes_deserializers.insert(index, cls)
-        fork_inst._deserializers[cls.__name__.lower()] = func
+        cls_name = _get_class_name(cls)
+        fork_inst._deserializers[cls_name.lower()] = func
     else:
         fork_inst._deserializers['nonetype'] = func
 
