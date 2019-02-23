@@ -11,7 +11,7 @@ from enum import EnumMeta
 from typing import List, Callable
 from jsons import _main_impl
 from jsons._common_impl import get_class_name
-from jsons._datetime_impl import datetime_with_tz, datetime_utc
+from jsons._datetime_impl import get_datetime_inst
 from jsons._main_impl import (
     RFC3339_DATETIME_PATTERN,
     snakecase,
@@ -42,8 +42,7 @@ def default_datetime_deserializer(obj: str, _: datetime, **__) -> datetime:
         regex_pattern = re.compile(r'(\.[0-9]+)')
         frac = regex_pattern.search(obj).group()
         obj = obj.replace(frac, frac[0:7])
-    dattim_func = datetime_utc if obj[-1] == 'Z' else datetime_with_tz
-    return dattim_func(obj, pattern)
+    return get_datetime_inst(obj, pattern)
 
 
 def default_list_deserializer(obj: List, cls, **kwargs) -> object:

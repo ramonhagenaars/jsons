@@ -4,9 +4,32 @@ PRIVATE MODULE: do not import (from) it directly.
 This module contains functionality for ``datetime`` related stuff.
 """
 from datetime import datetime, timezone, timedelta, time
+from typing import Union
 
 
-def datetime_offset(obj: datetime) -> str:
+def get_offset_str(obj: Union[datetime, timedelta]) -> str:
+    """
+    Return the textual offset of the given ``obj``.
+    :param obj: a datetime or timedelta instance.
+    :return: the offset following RFC3339.
+    """
+    func = (_datetime_offset_str if isinstance(obj, datetime)
+            else _timedelta_offset_str)
+    return func(obj)
+
+
+def get_datetime_inst(obj: str, pattern: str) -> datetime:
+    """
+    Return a datetime instance with timezone info from the given ``obj``.
+    :param obj: the ``obj`` in RFC3339 format.
+    :param pattern: the datetime pattern.
+    :return: a datetime instance with timezone info.
+    """
+    func = _datetime_utc_inst if obj[-1] == 'Z' else _datetime_offset_inst
+    return func(obj, pattern)
+
+
+def _datetime_offset_str(obj: datetime) -> str:
     """
     Return a textual offset (e.g. +01:00 or Z) for the given datetime.
     :param obj: the datetime instance.
@@ -21,11 +44,11 @@ def datetime_offset(obj: datetime) -> str:
     offset = 'Z'
     if tzone.tzname(None) not in ('UTC', 'UTC+00:00'):
         tdelta = tzone.utcoffset(None) or tzone.adjusted_offset
-        offset = timedelta_offset(tdelta)
+        offset = _timedelta_offset_str(tdelta)
     return offset
 
 
-def timedelta_offset(tdelta: timedelta) -> str:
+def _timedelta_offset_str(tdelta: timedelta) -> str:
     """
     Return a textual offset (e.g. +01:00 or Z) for the given timedelta.
     :param tdelta: the timedelta instance.
@@ -40,7 +63,7 @@ def timedelta_offset(tdelta: timedelta) -> str:
     return offset
 
 
-def datetime_utc(obj: str, pattern: str) -> datetime:
+def _datetime_utc_inst(obj: str, pattern: str) -> datetime:
     """
     Return a datetime instance with UTC timezone info.
     :param obj: a datetime in RFC3339 format.
@@ -52,7 +75,7 @@ def datetime_utc(obj: str, pattern: str) -> datetime:
     return datetime.combine(dattim_obj.date(), dattim_obj.time(), timezone.utc)
 
 
-def datetime_with_tz(obj: str, pattern: str) -> datetime:
+def _datetime_offset_inst(obj: str, pattern: str) -> datetime:
     """
     Return a datetime instance with timezone info.
     :param obj: a datetime in RFC3339 format.

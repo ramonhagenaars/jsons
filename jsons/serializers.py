@@ -8,7 +8,7 @@ from datetime import datetime
 from enum import EnumMeta
 from typing import Callable
 from jsons import _main_impl
-from jsons._datetime_impl import datetime_offset
+from jsons._datetime_impl import get_offset_str
 from jsons._main_impl import (
     RFC3339_DATETIME_PATTERN,
     snakecase,
@@ -109,7 +109,7 @@ def default_datetime_serializer(obj: datetime,
     :return: ``datetime`` as an RFC3339 string.
     """
     pattern = RFC3339_DATETIME_PATTERN
-    offset = datetime_offset(obj)
+    offset = get_offset_str(obj)
     if not strip_microseconds and obj.microsecond:
         pattern += '.%f'
     return obj.strftime("{}{}".format(pattern, offset))
