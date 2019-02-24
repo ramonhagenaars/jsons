@@ -63,7 +63,7 @@ def dump(obj: object,
     #     raise SerializationError(str(err))  # TODO afmaken
 
 
-def load(json_obj: dict,
+def load(json_obj: object,
          cls: Optional[type] = None,
          strict: bool = False,
          fork_inst: Optional[type] = None,

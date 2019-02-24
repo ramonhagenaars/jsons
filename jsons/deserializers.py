@@ -8,7 +8,7 @@ import inspect
 import re
 from datetime import datetime
 from enum import EnumMeta
-from typing import List, Callable
+from typing import List, Callable, Union, Optional
 from jsons import _main_impl
 from jsons._common_impl import get_class_name
 from jsons._datetime_impl import get_datetime_inst
@@ -27,12 +27,14 @@ from jsons.exceptions import (
 )
 
 
-def default_datetime_deserializer(obj: str, _: datetime, **__) -> datetime:
+def default_datetime_deserializer(obj: str,
+                                  cls: type = datetime,
+                                  **kwargs) -> datetime:
     """
     Deserialize a string with an RFC3339 pattern to a datetime instance.
-    :param obj:
-    :param _: not used.
-    :param __: not used.
+    :param obj: the string that is to be deserialized.
+    :param cls: not used.
+    :param kwargs: not used.
     :return: a ``datetime.datetime`` instance.
     """
     pattern = RFC3339_DATETIME_PATTERN
@@ -45,7 +47,7 @@ def default_datetime_deserializer(obj: str, _: datetime, **__) -> datetime:
     return get_datetime_inst(obj, pattern)
 
 
-def default_list_deserializer(obj: List, cls, **kwargs) -> object:
+def default_list_deserializer(obj: list, cls: type = None, **kwargs) -> list:
     """
     Deserialize a list by deserializing all items of that list.
     :param obj: the list that needs deserializing.
@@ -59,11 +61,13 @@ def default_list_deserializer(obj: List, cls, **kwargs) -> object:
     return [_main_impl.load(x, cls_, **kwargs) for x in obj]
 
 
-def default_tuple_deserializer(obj: List, cls, **kwargs) -> object:
+def default_tuple_deserializer(obj: tuple,
+                               cls: type = None,
+                               **kwargs) -> object:
     """
     Deserialize a (JSON) list into a tuple by deserializing all items of that
     list.
-    :param obj: the list that needs deserializing.
+    :param obj: the tuple that needs deserializing.
     :param cls: the type optionally with a generic (e.g. Tuple[str, int]).
     :param kwargs: any keyword arguments.
     :return: a deserialized tuple instance.
@@ -76,7 +80,17 @@ def default_tuple_deserializer(obj: List, cls, **kwargs) -> object:
     return tuple(list_)
 
 
-def default_union_deserializer(obj: object, cls, **kwargs) -> object:
+def default_union_deserializer(obj: object, cls: Union, **kwargs) -> object:
+    """
+    Deserialize an object to any matching type of the given union. The first
+    successful deserialization is returned.
+    :param obj: The object that needs deserializing.
+    :param cls: The Union type with a generic (e.g. Union[str, int]).
+    :param kwargs: Any keyword arguments that are passed through the
+    deserialization process.
+    :return: An object of the first type of the Union that could be
+    deserialized successfully.
+    """
     for sub_type in cls.__args__:
         try:
             return _main_impl.load(obj, sub_type, **kwargs)
@@ -85,16 +99,17 @@ def default_union_deserializer(obj: object, cls, **kwargs) -> object:
     else:
         args_msg = ', '.join([get_class_name(cls_) for cls_ in cls.__args__])
         err_msg = ('Could not match the object of type "{}" to any type of '
-                   'the Union: {}'.format(str(cls), args_msg))  # TODO use _get_class_name
+                   'the Union: {}'.format(str(cls), args_msg))
         raise DeserializationError(err_msg, obj, cls)
 
 
-def default_set_deserializer(obj: List, cls, **kwargs) -> object:
+def default_set_deserializer(obj: list, cls: type, **kwargs) -> set:
     """
     Deserialize a (JSON) list into a set by deserializing all items of that
-    list.
+    list. If the list as a generic type (e.g. Set[datetime]) then it is
+    assumed that all elements can be deserialized to that type.
     :param obj: the list that needs deserializing.
-    :param cls: the type optionally with a generic (e.g. Set[str]).
+    :param cls: the type, optionally with a generic (e.g. Set[str]).
     :param kwargs: any keyword arguments.
     :return: a deserialized set instance.
     """
@@ -105,9 +120,11 @@ def default_set_deserializer(obj: List, cls, **kwargs) -> object:
     return set(list_)
 
 
-def default_dict_deserializer(obj: dict, cls: type,
-                              key_transformer: Callable[[str], str] = None,
-                              **kwargs) -> object:
+def default_dict_deserializer(
+        obj: dict,
+        cls: type,
+        key_transformer: Optional[Callable[[str], str]] = None,
+        **kwargs) -> dict:
     """
     Deserialize a dict by deserializing all instances of that dict.
     :param obj: the dict that needs deserializing.
@@ -126,8 +143,10 @@ def default_dict_deserializer(obj: dict, cls: type,
             for key in obj}
 
 
-def default_enum_deserializer(obj: str, cls: EnumMeta,
-                              use_enum_name: bool = True, **__) -> object:
+def default_enum_deserializer(obj: str,
+                              cls: EnumMeta,
+                              use_enum_name: bool = True,
+                              **kwargs) -> object:
     """
     Deserialize an enum value to an enum instance. The serialized value must
     can be the name of the enum element or the value; dependent on
@@ -136,7 +155,7 @@ def default_enum_deserializer(obj: str, cls: EnumMeta,
     :param cls: the enum class.
     :param use_enum_name: determines whether the name or the value of an enum
     element should be used.
-    :param __: not used.
+    :param kwargs: not used.
     :return: the corresponding enum element instance.
     """
     if use_enum_name:
@@ -149,12 +168,14 @@ def default_enum_deserializer(obj: str, cls: EnumMeta,
     return result
 
 
-def default_string_deserializer(obj: str, _: type = None, **kwargs) -> object:
+def default_string_deserializer(obj: str,
+                                cls: Optional[type] = None,
+                                **kwargs) -> object:
     """
     Deserialize a string. If the given ``obj`` can be parsed to a date, a
     ``datetime`` instance is returned.
     :param obj: the string that is to be deserialized.
-    :param _: not used.
+    :param cls: not used.
     :param kwargs: any keyword arguments.
     :return: the deserialized obj.
     """
@@ -167,22 +188,24 @@ def default_string_deserializer(obj: str, _: type = None, **kwargs) -> object:
 
 
 def default_primitive_deserializer(obj: object,
-                                   _: type = None, **__) -> object:
+                                   cls: Optional[type] = None,
+                                   **kwargs) -> object:
     """
     Deserialize a primitive: it simply returns the given primitive.
     :param obj: the value that is to be deserialized.
-    :param _: not used.
-    :param __: not used.
+    :param cls: not used.
+    :param kwargs: not used.
     :return: ``obj``.
     """
     return obj
 
 
-def default_object_deserializer(obj: dict,
-                                cls: type,
-                                key_transformer: Callable[[str], str] = None,
-                                strict: bool = False,
-                                **kwargs) -> object:
+def default_object_deserializer(
+        obj: dict,
+        cls: type,
+        key_transformer: Optional[Callable[[str], str]] = None,
+        strict: bool = False,
+        **kwargs) -> object:
     """
     Deserialize ``obj`` into an instance of type ``cls``. If ``obj`` contains
     keys with a certain case style (e.g. camelCase) that do not match the style
