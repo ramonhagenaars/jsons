@@ -73,7 +73,9 @@ class DeserializationError(JsonsError):
 
 
 class SerializationError(JsonsError):
-    pass  # TODO
+    """
+    Raised when serialization failed for some reason.
+    """
 
 
 class DecodeError(DeserializationError, JSONDecodeError):

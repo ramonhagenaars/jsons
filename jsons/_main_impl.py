@@ -12,8 +12,8 @@ from jsons._common_impl import get_class_name, get_parents
 from jsons.exceptions import (
     DecodeError,
     DeserializationError,
-    JsonsError
-)
+    JsonsError,
+    SerializationError, ArgumentError)
 
 VALID_TYPES = (str, int, float, bool, list, tuple, set, dict, type(None))
 RFC3339_DATETIME_PATTERN = '%Y-%m-%dT%H:%M:%S'
@@ -42,8 +42,9 @@ def dump(obj: object,
     :return: the serialized obj as a JSON type.
     """
     if cls and not hasattr(cls, '__slots__'):
-        raise ValueError('Invalid type: "{}", only types that have a '
-                         '__slots__ defined are allowed.'
+        raise SerializationError('Invalid type: "{}". Only types that have a '
+                                 '__slots__ defined are allowed when '
+                                 'providing "cls".'
                          .format(get_class_name(cls)))
     cls_ = cls or obj.__class__
     cls_name = get_class_name(cls_, str.lower)
@@ -56,11 +57,10 @@ def dump(obj: object,
             pname = get_class_name(parents[0], str.lower)
             serializer = fork_inst._serializers[pname]
     kwargs_ = {'fork_inst': fork_inst, **kwargs}
-    return serializer(obj, cls=cls, **kwargs_)
-    # try:
-    #     return serializer(obj, cls=cls, **kwargs_)
-    # except Exception as err:
-    #     raise SerializationError(str(err))  # TODO afmaken
+    try:
+        return serializer(obj, cls=cls, **kwargs_)
+    except Exception as err:
+        raise SerializationError(str(err))
 
 
 def load(json_obj: object,
@@ -72,7 +72,7 @@ def load(json_obj: object,
     """
     Deserialize the given ``json_obj`` to an object of type ``cls``. If the
     contents of ``json_obj`` do not match the interface of ``cls``, a
-    TypeError is raised.
+    DeserializationError is raised.
 
     If ``json_obj`` contains a value that belongs to a custom class, there must
     be a type hint present for that value in ``cls`` to let this function know
@@ -114,13 +114,13 @@ def load(json_obj: object,
     if not strict and (json_obj is None or type(json_obj) == cls):
         return json_obj
     if type(json_obj) not in VALID_TYPES:
-        raise ValueError('Invalid type: "{}", only arguments of the following '
-                         'types are allowed: {}'
-                         .format(get_class_name(type(json_obj)),
-                                 ", ".join(get_class_name(typ)
-                                           for typ in VALID_TYPES)))
+        raise ArgumentError('Invalid type: "{}", only arguments of the following '
+                            'types are allowed: {}'
+                            .format(get_class_name(type(json_obj)),
+                                    ", ".join(get_class_name(typ)
+                                              for typ in VALID_TYPES)))
     if json_obj is None:
-        raise ValueError('Cannot load None with strict=True')
+        raise ArgumentError('Cannot load None with strict=True')
     cls = cls or type(json_obj)
     deserializer = _get_deserializer(cls, fork_inst)
     kwargs_ = {'strict': strict, 'fork_inst': fork_inst,
@@ -462,8 +462,8 @@ def loadb(bytes_: bytes,
     ``cls`` if given.
     """
     if not isinstance(bytes_, bytes):
-        raise ValueError('loadb accepts bytes only, "{}" was given'
-                         .format(type(bytes_)))
+        raise ArgumentError('loadb accepts bytes only, "{}" was given'
+                            .format(type(bytes_)))
     jdkwargs = jdkwargs or {}
     str_ = bytes_.decode(encoding=encoding)
     return loads(str_, cls, jdkwargs=jdkwargs, *args, **kwargs)
