@@ -13,7 +13,7 @@ from jsons.exceptions import (
     DecodeError,
     DeserializationError,
     JsonsError,
-    SerializationError, ArgumentError)
+    SerializationError)
 
 VALID_TYPES = (str, int, float, bool, list, tuple, set, dict, type(None))
 RFC3339_DATETIME_PATTERN = '%Y-%m-%dT%H:%M:%S'
@@ -114,13 +114,16 @@ def load(json_obj: object,
     if not strict and (json_obj is None or type(json_obj) == cls):
         return json_obj
     if type(json_obj) not in VALID_TYPES:
-        raise ArgumentError('Invalid type: "{}", only arguments of the following '
-                            'types are allowed: {}'
-                            .format(get_class_name(type(json_obj)),
-                                    ", ".join(get_class_name(typ)
-                                              for typ in VALID_TYPES)))
+        raise DeserializationError(
+            'Invalid type: "{}", only arguments of the following types are '
+            'allowed: {}'.format(get_class_name(type(json_obj)),
+                                 ", ".join(get_class_name(typ)
+                                           for typ in VALID_TYPES)),
+            json_obj,
+            cls)
     if json_obj is None:
-        raise ArgumentError('Cannot load None with strict=True')
+        raise DeserializationError('Cannot load None with strict=True',
+                                   json_obj, cls)
     cls = cls or type(json_obj)
     deserializer = _get_deserializer(cls, fork_inst)
     kwargs_ = {'strict': strict, 'fork_inst': fork_inst,
@@ -462,8 +465,8 @@ def loadb(bytes_: bytes,
     ``cls`` if given.
     """
     if not isinstance(bytes_, bytes):
-        raise ArgumentError('loadb accepts bytes only, "{}" was given'
-                            .format(type(bytes_)))
+        raise DeserializationError('loadb accepts bytes only, "{}" was given'
+                                   .format(type(bytes_)), bytes_, cls)
     jdkwargs = jdkwargs or {}
     str_ = bytes_.decode(encoding=encoding)
     return loads(str_, cls, jdkwargs=jdkwargs, *args, **kwargs)

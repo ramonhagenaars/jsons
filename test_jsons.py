@@ -17,8 +17,7 @@ from jsons.exceptions import (
     UnfulfilledArgumentError,
     InvalidDecorationError,
     DecodeError,
-    SignatureMismatchError
-)
+    SignatureMismatchError)
 
 
 class TestJsons(TestCase):
@@ -406,7 +405,7 @@ class TestJsons(TestCase):
     def test_load_none(self):
         self.assertEqual(None, jsons.load(None))
         self.assertEqual(None, jsons.load(None, datetime))
-        with self.assertRaises(ValueError):
+        with self.assertRaises(DeserializationError):
             jsons.load(None, datetime, strict=True)
 
     def test_load_too_many_args(self):
@@ -979,5 +978,5 @@ class TestJsons(TestCase):
             self.assertEqual('{this aint no JSON!', err.source)
 
     def test_exception_wrong_bytes(self):
-        with self.assertRaises(ValueError):
+        with self.assertRaises(DeserializationError):
             jsons.loadb('{"key": "value"}')

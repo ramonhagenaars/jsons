@@ -19,7 +19,7 @@ class JsonsError(Exception):
 class ArgumentError(JsonsError, ValueError):
     """
     Raised when serialization or deserialization went wrong caused by a wrong
-    argument.
+    argument when serializing or deserializing.
     """
     def __init__(self, message: str, argument: str):
         """
