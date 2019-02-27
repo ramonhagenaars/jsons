@@ -201,7 +201,7 @@ Main functions
 | *Example:*     | ::                                                                                                 |
 |                |                                                                                                    |
 |                |     >>> jsons.set_serializer(lambda obj, **_: 123, str)                                            |
-|                |     >>> jsons.dump("any string")                                                                   |
+|                |     >>> jsons.dump('any string')                                                                   |
 |                |     123                                                                                            |
 +----------------+----------------------------------------------------------------------------------------------------+
 
@@ -233,7 +233,7 @@ Main functions
 | *Example:*     | ::                                                                                                 |
 |                |                                                                                                    |
 |                |     >>> jsons.set_deserializer(lambda obj, cls, **_: 123, str)                                     |
-|                |     >>> jsons.load("any string")                                                                   |
+|                |     >>> jsons.load('any string')                                                                   |
 |                |     123                                                                                            |
 +----------------+----------------------------------------------------------------------------------------------------+
 
@@ -241,7 +241,363 @@ Main functions
 Classes
 *******
 
+''''''''''''''''
+JsonSerializable
+''''''''''''''''
+This class can be used as a base class for your models.
 
+::
+
+    @dataclass
+    class Car(JsonSerializable:
+        color: str
+        owner: str
+
+You can now dump your model using the ``json`` property:
+
+::
+
+    car = Car('red', 'Gary')
+    dumped = car.json  # == jsons.dump(car)
+
+
+The JSON data can now also be loaded using your model:
+
+::
+
+    loaded = Car.from_json(dumped)  # == jsons.load(dumped, Car)
+
+|
+|
+| **Method: fork**
+|
+
++----------------+-------------------------------------------------------------------------------------------+
+| *Method:*      | *@classmethod*                                                                            |
+|                |                                                                                           |
+|                | ``jsons.JsonSerializable.fork``                                                           |
++----------------+-------------------------------------------------------------------------------------------+
+| *Description:* | Create a 'fork' of ``JsonSerializable``: a new ``type`` with a separate configuration of  |
+|                | serializers and deserializers.                                                            |
++----------------+-----------------------------+-------------------------------------------------------------+
+| *Arguments:*   | ``name: Optional[str]``     | The name of the new fork (accessable with ``__name__``).    |
++----------------+-----------------------------+-------------------------------------------------------------+
+| *Returns:*     | ``type``                    | A new ``type`` based on ``JsonSerializable``.               |
++----------------+-----------------------------+-------------------------------------------------------------+
+| *Example:*     | ::                                                                                        |
+|                |                                                                                           |
+|                |     >>> fork = jsons.JsonSerializable.fork()                                              |
+|                |     >>> jsons.set_deserializer(lambda obj, *_, **__: 'Regular!', str)                     |
+|                |     >>> fork.set_deserializer(lambda obj, *_, **__: 'Fork!', str)                         |
+|                |     >>> jsons.load('any string')                                                          |
+|                |     'Regular!'                                                                            |
+|                |     >>> jsons.load('any string', fork_inst=fork)                                          |
+|                |     'Fork!'                                                                               |
++----------------+-------------------------------------------------------------------------------------------+
+
+|
+|
+| **Method: with_dump**
+|
+
++----------------+------------------------------------------------------------------------------------------+
+| *Method:*      | *@classmethod*                                                                           |
+|                |                                                                                          |
+|                | ``jsons.JsonSerializable.with_dump``                                                     |
++----------------+------------------------------------------------------------------------------------------+
+| *Description:* | Return a class (``type``) that is based on JsonSerializable with the``dump`` method      |
+|                | being automatically provided the given ``kwargs``.                                       |
++----------------+--------------------------+---------------------------------------------------------------+
+| *Arguments:*   | ``fork: Optional[bool]`` | Determines whether a new fork is to be created. See also      |
+|                |                          | ``JsonSerializable.fork`` and ``JsonSerializable.with_load``. |
++                +--------------------------+---------------------------------------------------------------+
+|                | ``kwargs``               | Any keyword arguments that are to be passed on through the    |
+|                |                          | serialization process.                                        |
++----------------+--------------------------+---------------------------------------------------------------+
+| *Returns:*     | ``type``                 | Returns the ``JsonSerializable`` class or its fork (to allow  |
+|                |                          | you to stack).                                                |
++----------------+--------------------------+---------------------------------------------------------------+
+| *Example:*     | ::                                                                                       |
+|                |                                                                                          |
+|                |     >>> @dataclass                                                                       |
+|                |     ... class Person(JsonSerializable                                                    |
+|                |     ...              .with_dump(key_transformer=KEY_TRANSFORMER_CAMELCASE)               |
+|                |     ...              .with_load(key_transformer=KEY_TRANSFORMER_SNAKECASE)):             |
+|                |     ...     first_name: str                                                              |
+|                |     ...     last_name: str                                                               |
+|                |     >>> Person('Johnny', 'Jones').json                                                   |
+|                |     {'firstName': 'Johnny', 'lastName': 'Jones'}                                         |
++----------------+------------------------------------------------------------------------------------------+
+
+|
+|
+| **Method: json**
+|
+
++----------------+-----------------------------------------------+
+| *Method:*      | @property                                     |
+|                |                                               |
+|                | ``jsons.JsonSerializable.json``               |
++----------------+-----------------------------------------------+
+| *Description:* | See ``jsons.dump``.                           |
++----------------+------------------------+----------------------+
+| *Arguments:*   | ``kwargs``             | See ``jsons.dump``.  |
++----------------+------------------------+----------------------+
+| *Returns:*     | ``object``             | See ``jsons.dump``.  |
++----------------+------------------------+----------------------+
+| *Example:*     | ::                                            |
+|                |                                               |
+|                |     >>> @dataclass                            |
+|                |     ... class Person(jsons.JsonSerializable): |
+|                |     ...     name: str                         |
+|                |     >>> Person('Johnny').json                 |
+|                |     {"name": "Johnny"}                        |
++----------------+-----------------------------------------------+
+
+|
+|
+| **Method: dump**
+|
+
++----------------+-----------------------------------------------+
+| *Method:*      | ``jsons.JsonSerializable.dump``               |
++----------------+-----------------------------------------------+
+| *Description:* | See ``jsons.dump``.                           |
++----------------+------------------------+----------------------+
+| *Arguments:*   | ``kwargs``             | See ``jsons.dump``.  |
++----------------+------------------------+----------------------+
+| *Returns:*     | ``object``             | See ``jsons.dump``.  |
++----------------+------------------------+----------------------+
+| *Example:*     | ::                                            |
+|                |                                               |
+|                |     >>> @dataclass                            |
+|                |     ... class Person(jsons.JsonSerializable): |
+|                |     ...     name: str                         |
+|                |     >>> Person('Johnny').dump()               |
+|                |     {"name": "Johnny"}                        |
++----------------+-----------------------------------------------+
+
+|
+|
+| **Method: dumps**
+|
+
++----------------+------------------------------------------------+
+| *Method:*      | ``jsons.JsonSerializable.dumps``               |
++----------------+------------------------------------------------+
+| *Description:* | See ``jsons.dumps``.                           |
++----------------+------------------------+-----------------------+
+| *Arguments:*   | ``kwargs``             | See ``jsons.dumps``.  |
++----------------+------------------------+-----------------------+
+| *Returns:*     | ``object``             | See ``jsons.dumps``.  |
++----------------+------------------------+-----------------------+
+| *Example:*     | ::                                             |
+|                |                                                |
+|                |     >>> @dataclass                             |
+|                |     ... class Person(jsons.JsonSerializable):  |
+|                |     ...     name: str                          |
+|                |     >>> Person('Johnny').dumps()               |
+|                |     '{"name": "Johnny"}'                       |
++----------------+------------------------------------------------+
+
+|
+|
+| **Method: dumpb**
+|
+
++----------------+------------------------------------------------+
+| *Method:*      | ``jsons.JsonSerializable.dumpb``               |
++----------------+------------------------------------------------+
+| *Description:* | See ``jsons.dumpb``.                           |
++----------------+------------------------+-----------------------+
+| *Arguments:*   | ``kwargs``             | See ``jsons.dumpb``.  |
++----------------+------------------------+-----------------------+
+| *Returns:*     | ``object``             | See ``jsons.dumpb``.  |
++----------------+------------------------+-----------------------+
+| *Example:*     | ::                                             |
+|                |                                                |
+|                |     >>> @dataclass                             |
+|                |     ... class Person(jsons.JsonSerializable):  |
+|                |     ...     name: str                          |
+|                |     >>> Person('Johnny').dumpb()               |
+|                |     b'{"name": "Johnny"}'                      |
++----------------+------------------------------------------------+
+
+|
+|
+| **Method: from_json**
+|
+
++----------------+-----------------------------------------------+
+| *Method:*      | *@classmethod*                                |
+|                |                                               |
+|                | ``jsons.JsonSerializable.from_json``          |
++----------------+-----------------------------------------------+
+| *Description:* | See ``jsons.load``.                           |
++----------------+------------------------+----------------------+
+| *Arguments:*   | ``json_obj: object``   | See ``jsons.load``.  |
++                +------------------------+----------------------+
+|                | ``kwargs``             | See ``jsons.load``.  |
++----------------+------------------------+----------------------+
+| *Returns:*     | ``object``             | See ``jsons.load``.  |
++----------------+------------------------+----------------------+
+| *Example:*     | ::                                            |
+|                |                                               |
+|                |     >>> @dataclass                            |
+|                |     ... class Person(jsons.JsonSerializable): |
+|                |     ...     name: str                         |
+|                |     >>> Person.from_json({'name': 'Johnny'})  |
+|                |     '{"name": "Johnny"}'                      |
++----------------+-----------------------------------------------+
+
+|
+|
+| **Method: load**
+|
+
++----------------+-----------------------------------------------+
+| *Method:*      | *@classmethod*                                |
+|                |                                               |
+|                | ``jsons.JsonSerializable.load``               |
++----------------+-----------------------------------------------+
+| *Description:* | See ``jsons.load``.                           |
++----------------+------------------------+----------------------+
+| *Arguments:*   | ``json_obj: object``   | See ``jsons.load``.  |
++                +------------------------+----------------------+
+|                | ``kwargs``             | See ``jsons.load``.  |
++----------------+------------------------+----------------------+
+| *Returns:*     | ``object``             | See ``jsons.load``.  |
++----------------+------------------------+----------------------+
+| *Example:*     | ::                                            |
+|                |                                               |
+|                |     >>> @dataclass                            |
+|                |     ... class Person(jsons.JsonSerializable): |
+|                |     ...     name: str                         |
+|                |     >>> Person.load({'name': 'Johnny'})       |
+|                |     '{"name": "Johnny"}'                      |
++----------------+-----------------------------------------------+
+
+|
+|
+| **Method: loads**
+|
+
++----------------+------------------------------------------------+
+| *Method:*      | *@classmethod*                                 |
+|                |                                                |
+|                | ``jsons.JsonSerializable.loads``               |
++----------------+------------------------------------------------+
+| *Description:* | See ``jsons.loads``.                           |
++----------------+------------------------+-----------------------+
+| *Arguments:*   | ``json_obj: object``   | See ``jsons.loads``.  |
++                +------------------------+-----------------------+
+|                | ``kwargs``             | See ``jsons.loads``.  |
++----------------+------------------------+-----------------------+
+| *Returns:*     | ``object``             | See ``jsons.loads``.  |
++----------------+------------------------+-----------------------+
+| *Example:*     | ::                                             |
+|                |                                                |
+|                |     >>> @dataclass                             |
+|                |     ... class Person(jsons.JsonSerializable):  |
+|                |     ...     name: str                          |
+|                |     >>> Person.loads('{"name": "Johnny"}')     |
+|                |     '{"name": "Johnny"}'                       |
++----------------+------------------------------------------------+
+
+|
+|
+| **Method: loadb**
+|
+
++----------------+------------------------------------------------+
+| *Method:*      | *@classmethod*                                 |
+|                |                                                |
+|                | ``jsons.JsonSerializable.loadb``               |
++----------------+------------------------------------------------+
+| *Description:* | See ``jsons.loadb``.                           |
++----------------+------------------------+-----------------------+
+| *Arguments:*   | ``json_obj: object``   | See ``jsons.loadb``.  |
++                +------------------------+-----------------------+
+|                | ``kwargs``             | See ``jsons.loadb``.  |
++----------------+------------------------+-----------------------+
+| *Returns:*     | ``object``             | See ``jsons.loadb``.  |
++----------------+------------------------+-----------------------+
+| *Example:*     | ::                                             |
+|                |                                                |
+|                |     >>> @dataclass                             |
+|                |     ... class Person(jsons.JsonSerializable):  |
+|                |     ...     name: str                          |
+|                |     >>> Person.loads(b'{"name": "Johnny"}')    |
+|                |     '{"name": "Johnny"}'                       |
++----------------+------------------------------------------------+
+
+|
+|
+| **Method: set_serializer**
+|
+
++----------------+--------------------------------------------------------------------------------------------------------------+
+| *Method:*      | @classmethod                                                                                                 |
+|                |                                                                                                              |
+|                | ``jsons.JsonSerializable.set_serializer``                                                                    |
++----------------+--------------------------------------------------------------------------------------------------------------+
+| *Description:* | See ``jsons.set_serializer``.                                                                                |
++----------------+-------------------------------+------------------------------------------------------------------------------+
+| *Arguments:*   | ``func: callable``            | See ``jsons.set_serializer``.                                                |
++                +-------------------------------+------------------------------------------------------------------------------+
+|                | ``cls_: type``                | Note the trailing underscore. See ``cls`` of ``jsons.set_serializer``.       |
++                +-------------------------------+------------------------------------------------------------------------------+
+|                | ``high_prio: Optional[bool]`` | See ``jsons.set_serializer``.                                                |
++                +-------------------------------+------------------------------------------------------------------------------+
+|                | ``fork: Optional[bool]``      | If ``True``, a fork is created and the serializer is added to that fork.     |
++----------------+-------------------------------+------------------------------------------------------------------------------+
+| *Returns:*     | ``type``                      | Returns the ``JsonSerializable`` class or its fork (to allow you to stack).  |
++----------------+-------------------------------+------------------------------------------------------------------------------+
+| *Example:*     | ::                                                                                                           |
+|                |                                                                                                              |
+|                |     >>> class BaseModel(JsonSerializable                                                                     |
+|                |     ...                 .set_serializer(lambda obj, cls, **_: obj.upper(), str)):                            |
+|                |     ...     pass                                                                                             |
+|                |     >>> @dataclass                                                                                           |
+|                |     ... class Person(BaseModel):                                                                             |
+|                |     ...    name: str                                                                                         |
+|                |     >>> Person('Arnold').json                                                                                |
+|                |     {'name': 'ARNOLD'}                                                                                       |
++----------------+--------------------------------------------------------------------------------------------------------------+
+
+|
+|
+| **Method: set_deserializer**
+|
+
++----------------+----------------------------------------------------------------------------------------------------------------+
+| *Method:*      | @classmethod                                                                                                   |
+|                |                                                                                                                |
+|                | ``jsons.JsonSerializable.set_deserializer``                                                                    |
++----------------+----------------------------------------------------------------------------------------------------------------+
+| *Description:* | See ``jsons.set_deserializer``.                                                                                |
++----------------+-------------------------------+--------------------------------------------------------------------------------+
+| *Arguments:*   | ``func: callable``            | See ``jsons.set_deserializer``.                                                |
++                +-------------------------------+--------------------------------------------------------------------------------+
+|                | ``cls_: type``                | Note the trailing underscore. See ``cls`` of ``jsons.set_deserializer``.       |
++                +-------------------------------+--------------------------------------------------------------------------------+
+|                | ``high_prio: Optional[bool]`` | See ``jsons.set_deserializer``.                                                |
++                +-------------------------------+--------------------------------------------------------------------------------+
+|                | ``fork: Optional[bool]``      | If ``True``, a fork is created and the serializer is added to that fork.       |
++----------------+-------------------------------+--------------------------------------------------------------------------------+
+| *Returns:*     | ``type``                      | Returns the ``JsonSerializable`` class or its fork (to allow you to stack).    |
++----------------+-------------------------------+--------------------------------------------------------------------------------+
+| *Example:*     | ::                                                                                                             |
+|                |                                                                                                                |
+|                |     >>> class BaseModel(JsonSerializable                                                                       |
+|                |     ...                 .set_deserializer(lambda obj, cls, **_: obj.upper(), str)):                            |
+|                |     ...     pass                                                                                               |
+|                |     >>> @dataclass                                                                                             |
+|                |     ... class Person(BaseModel):                                                                               |
+|                |     ...    name: str                                                                                           |
+|                |     >>> Person.from_json({'name': 'Arnold'})                                                                   |
+|                |     {'name': 'ARNOLD'}                                                                                         |
++----------------+----------------------------------------------------------------------------------------------------------------+
 
 **********
 Decorators

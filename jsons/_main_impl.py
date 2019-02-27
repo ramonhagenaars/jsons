@@ -329,8 +329,8 @@ class JsonSerializable:
     def set_serializer(cls: type,
                        func: callable,
                        cls_: type,
-                       high_prio: bool = True,
-                       fork: bool = False) -> type:
+                       high_prio: Optional[bool] = True,
+                       fork: Optional[bool] = False) -> type:
         """
         See ``jsons.set_serializer``.
         :param func: the serializer function.
@@ -348,8 +348,8 @@ class JsonSerializable:
     def set_deserializer(cls: type,
                          func: callable,
                          cls_: type,
-                         high_prio: bool = True,
-                         fork: bool = False) -> type:
+                         high_prio: Optional[bool] = True,
+                         fork: Optional[bool] = False) -> type:
         """
         See ``jsons.set_deserializer``.
         :param func: the deserializer function.

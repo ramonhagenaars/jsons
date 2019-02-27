@@ -54,6 +54,7 @@ def default_tuple_serializer(obj: tuple, **kwargs) -> list:
 
 def default_dict_serializer(
         obj: dict,
+        cls: Optional[type] = None,
         strip_nulls: bool = False,
         key_transformer: Optional[Callable[[str], str]] = None,
         **kwargs) -> dict:
