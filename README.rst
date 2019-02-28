@@ -366,6 +366,22 @@ can create a fork in the process by setting ``fork=True`` in ``with_dump`` or
 Meta
 ''''
 
+Recent updates
+--------------
+0.7.0
++++++
+- Doc: Improved API documentation
+- Feature: Support for loading Union or Optional
+- Feature: Extended strict-mode
+- Feature: Added custom Exceptions
+- Feature: Support for attr-getters
+- Bugfix: local timezone for datetime serialization improved
+
+0.6.1
++++++
+- Feature: Support for loading tuples of variable length
+
+
 Contributors
 ------------
 Special thanks to the following contributors:
