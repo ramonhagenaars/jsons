@@ -739,6 +739,37 @@ Decorators
 Serializers
 ***********
 
+.. _default_datetime_serializer:
+
+|
+|
+| **Function: default_datetime_serializer**
+|
+
++----------------+-----------------------------------------------------------------------------------------------+
+| *Function:*    | ``jsons.default_datetime_serializer``                                                         |
++----------------+-----------------------------------------------------------------------------------------------+
+| *Description:* | Serialize the given datetime instance to a string. It uses                                    |
+|                | the RFC3339 pattern. If the datetime is a local time, an                                      |
+|                | offset is provided. If datetime is in UTC, the result is                                      |
+|                | suffixed with a 'Z'.                                                                          |
++----------------+-----------------------------------------------------------------------------------------------+
+| *Arguments:*   | ``obj: datetime``                      | The datetime instance that is to be                  |
+|                |                                        | serialized.                                          |
++                +----------------------------------------+------------------------------------------------------+
+|                | ``strip_microseconds: Optional[bool]`` | Determines whether microseconds should be discarded. |
++                +----------------------------------------+------------------------------------------------------+
+|                | ``kwargs``                             | Not used.                                            |
++----------------+----------------------------------------+------------------------------------------------------+
+| *Returns:*     | ``datetime``                           | ``datetime`` as an RFC3339 string.                   |
++----------------+----------------------------------------+------------------------------------------------------+
+| *Example:*     | ::                                                                                            |
+|                |                                                                                               |
+|                |     >>> dt = datetime.now(tz=timezone.utc)                                                    |
+|                |     >>> default_datetime_serializer(dt)                                                       |
+|                |     '2019-02-28T20:37:42Z'                                                                    |
++----------------+-----------------------------------------------------------------------------------------------+
+
 .. _default_iterable_serializer:
 
 |

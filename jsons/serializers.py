@@ -98,8 +98,8 @@ def default_enum_serializer(obj: EnumMeta,
 
 
 def default_datetime_serializer(obj: datetime,
-                                strip_microseconds: bool = True,
-                                **_) -> str:
+                                strip_microseconds: Optional[bool] = True,
+                                **kwargs) -> str:
     """
     Serialize the given datetime instance to a string. It uses the RFC3339
     pattern. If datetime is a localtime, an offset is provided. If datetime is
@@ -107,7 +107,7 @@ def default_datetime_serializer(obj: datetime,
     :param obj: the datetime instance that is to be serialized.
     :param strip_microseconds: determines whether microseconds should be
     omitted.
-    :param _: not used.
+    :param kwargs: not used.
     :return: ``datetime`` as an RFC3339 string.
     """
     pattern = RFC3339_DATETIME_PATTERN
