@@ -73,11 +73,13 @@ In some cases, you have instances that contain other instances that need
    # For more complex deserialization with generic types, use the typing module
    list_of_tuples = jsons.load(some_dict, List[Tuple[AClass, AnotherClass]])
 
-************
-API overview
-************
+*****************
+API DOCUMENTATION
+*****************
 
+See the separate documentation page:
 
+`Documentation <https://github.com/ramonhagenaars/jsons/blob/master/API_DOCUMENTATION>`_
 
 ********
 Examples
@@ -385,6 +387,7 @@ Recent updates
 Contributors
 ------------
 Special thanks to the following contributors:
+
 
 - `finetuned89 <https://github.com/finetuned89>`_
 - `haluzpav <https://github.com/haluzpav>`_

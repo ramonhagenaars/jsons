@@ -2,9 +2,50 @@
 jsons API documentation
 =======================
 
+*****
+INDEX
+*****
+- `Main functions`_
+    - dump_
+    - load_
+    - dumps_
+    - loads_
+    - dumpb_
+    - loadb_
+    - set_serializer_
+    - set_deserializer_
+- `Classes`_
+    - JsonSerializable_
+- `Decorators`_
+    - loaded_
+    - dumped_
+- `Serializers`_
+    - default_datetime_serializer_
+    - default_iterable_serializer_
+    - default_list_serializer_
+    - default_tuple_serializer_
+    - default_dict_serializer_
+    - default_enum_serializer_
+    - default_primitive_serializer_
+    - default_object_serializer_
+- `Deserializers`_
+    - default_datetime_deserializer_
+    - default_list_deserializer_
+    - default_tuple_deserializer_
+    - default_union_deserializer_
+    - default_set_deserializer_
+    - default_dict_deserializer_
+    - default_enum_deserializer_
+    - default_string_deserializer_
+    - default_primitive_deserializer_
+    - default_object_deserializer_
+
+
 **************
 Main functions
 **************
+
+.. _dump:
 
 | **Function: dump**
 |
@@ -30,6 +71,8 @@ Main functions
 |                |     >>> jsons.dump(some_utcdate)                                                                                  |
 |                |     '2019-02-16T20:33:36Z'                                                                                        |
 +----------------+-------------------------------------------------------------------------------------------------------------------+
+
+.. _load:
 
 |
 |
@@ -61,6 +104,8 @@ Main functions
 |                |     datetime.datetime(2019, 2, 16, 20, 33, 36, tzinfo=datetime.timezone.utc)                                                                      |
 +----------------+---------------------------------------------------------------------------------------------------------------------------------------------------+
 
+.. _dumps:
+
 |
 |
 | **Function: dumps**
@@ -86,6 +131,8 @@ Main functions
 |                |     >>> jsons.dumps([1, 2, 3])                                                             |
 |                |     '[1, 2, 3]'                                                                            |
 +----------------+--------------------------------------------------------------------------------------------+
+
+.. _loads:
 
 |
 |
@@ -115,6 +162,8 @@ Main functions
 |                |     [1, 2, 3]                                                                                          |
 +----------------+--------------------------------------------------------------------------------------------------------+
 
+.. _dumpb:
+
 |
 |
 | **Function: dumpb**
@@ -142,6 +191,8 @@ Main functions
 |                |     >>> jsons.dumpb([1, 2, 3])                                                              |
 |                |     b'[1, 2, 3]'                                                                            |
 +----------------+---------------------------------------------------------------------------------------------+
+
+.. _loadb:
 
 |
 |
@@ -172,6 +223,8 @@ Main functions
 |                |     >>> jsons.loadb(b'[1, 2, 3]')                                                                               |
 |                |     [1, 2, 3]                                                                                                   |
 +----------------+-----------------------------------------------------------------------------------------------------------------+
+
+.. _set_serializer:
 
 |
 |
@@ -204,6 +257,8 @@ Main functions
 |                |     >>> jsons.dump('any string')                                                                   |
 |                |     123                                                                                            |
 +----------------+----------------------------------------------------------------------------------------------------+
+
+.. _set_deserializer:
 
 |
 |
@@ -267,6 +322,8 @@ The JSON data can now also be loaded using your model:
 
     loaded = Car.from_json(dumped)  # == jsons.load(dumped, Car)
 
+.. _fork:
+
 |
 |
 | **Method: fork**
@@ -294,6 +351,8 @@ The JSON data can now also be loaded using your model:
 |                |     >>> jsons.load('any string', fork_inst=fork)                                          |
 |                |     'Fork!'                                                                               |
 +----------------+-------------------------------------------------------------------------------------------+
+
+.. _with_dump:
 
 |
 |
@@ -328,6 +387,8 @@ The JSON data can now also be loaded using your model:
 |                |     >>> Person('Johnny', 'Jones').json                                                   |
 |                |     {'firstName': 'Johnny', 'lastName': 'Jones'}                                         |
 +----------------+------------------------------------------------------------------------------------------+
+
+.. _json:
 
 |
 |
@@ -603,6 +664,8 @@ The JSON data can now also be loaded using your model:
 Decorators
 **********
 
+.. _loaded:
+
 | **Decorator: loaded**
 |
 
@@ -634,6 +697,8 @@ Decorators
 |                |     >>> type(res).__name__                                                                                    |
 |                |     'datetime'                                                                                                |
 +----------------+---------------------------------------------------------------------------------------------------------------+
+
+.. _dumped:
 
 |
 |
@@ -674,6 +739,8 @@ Decorators
 Serializers
 ***********
 
+.. _default_iterable_serializer:
+
 |
 |
 | **Function: default_iterable_serializer**
@@ -696,6 +763,8 @@ Serializers
 |                |     >>> default_iterable_serializer((1, 2, 3))                                               |
 |                |     [1, 2, 3]                                                                                |
 +----------------+------------------------------------------------+---------------------------------------------+
+
+.. _default_list_serializer:
 
 |
 |
@@ -720,6 +789,8 @@ Serializers
 |                |     [1, 2, '2019-02-19T18:41:47Z']                                                         |
 +----------------+--------------------------------------------------------------------------------------------+
 
+.. _default_tuple_serializer:
+
 |
 |
 | **Function: default_tuple_serializer**
@@ -742,6 +813,8 @@ Serializers
 |                |     >>> default_iterable_serializer((1, 2, datetime.now(tz=timezone.utc)))                 |
 |                |     [1, 2, '2019-02-19T18:41:47Z']                                                         |
 +----------------+--------------------------------------------------------------------------------------------+
+
+.. _default_dict_serializer:
 
 |
 |
@@ -771,6 +844,8 @@ Serializers
 |                |     >>> default_dict_serializer({'x': datetime.now()})                                                                |
 |                |     {'x': '2019-02-23T13:46:10.650772+01:00'}                                                                         |
 +----------------+-----------------------------------------------------------------------------------------------------------------------+
+
+.. _default_enum_serializer:
 
 |
 |
@@ -803,6 +878,8 @@ Serializers
 |                |     'RED'                                                                                                 |
 +----------------+-----------------------------------------------------------------------------------------------------------+
 
+.. _default_primitive_serializer:
+
 |
 |
 | **Function: default_primitive_serializer**
@@ -824,6 +901,8 @@ Serializers
 |                |     >>> jsons.default_primitive_serializer(42)                                        |
 |                |     42                                                                                |
 +----------------+---------------------------------------------------------------------------------------+
+
+.. _default_object_serializer:
 
 |
 |
@@ -871,6 +950,8 @@ Serializers
 Deserializers
 *************
 
+.. _default_datetime_deserializer:
+
 |
 |
 | **Function: default_datetime_deserializer**
@@ -895,6 +976,8 @@ Deserializers
 |                |     datetime.datetime(2019, 2, 23, 22, 28, tzinfo=datetime.timezone.utc) |
 +----------------+--------------------------------------------------------------------------+
 
+.. _default_list_deserializer:
+
 |
 |
 | **Function: default_list_deserializer**
@@ -918,6 +1001,8 @@ Deserializers
 |                |     >>> jsons.default_list_deserializer(['2019-02-23T22:28:00Z'])          |
 |                |     [datetime.datetime(2019, 2, 23, 22, 28, tzinfo=datetime.timezone.utc)] |
 +----------------+----------------------------------------------------------------------------+
+
+.. _default_tuple_deserializer:
 
 |
 |
@@ -946,6 +1031,8 @@ Deserializers
 |                |     (datetime.datetime(2019, 2, 23, 22, 28, tzinfo=datetime.timezone.utc),)          |
 +----------------+--------------------------------------------------------------------------------------+
 
+.. _default_union_deserializer:
+
 |
 |
 | **Function: default_union_deserializer**
@@ -973,6 +1060,8 @@ Deserializers
 |                |     datetime.datetime(2019, 2, 23, 22, 28, tzinfo=datetime.timezone.utc)                                            |
 +----------------+---------------------------------------------------------------------------------------------------------------------+
 
+.. _default_set_deserializer:
+
 |
 |
 | **Function: default_set_deserializer**
@@ -998,6 +1087,8 @@ Deserializers
 |                |     >>> jsons.default_set_deserializer(['2019-02-24T17:43:00Z'], Set[datetime])                                                   |
 |                |     {datetime.datetime(2019, 2, 24, 17, 43, tzinfo=datetime.timezone.utc)}                                                        |
 +----------------+-----------------------------------------------------------------------------------------------------------------------------------+
+
+.. _default_dict_deserializer:
 
 |
 |
@@ -1028,6 +1119,8 @@ Deserializers
 |                |     >>> jsons.default_dict_deserializer({'a': '2019-02-24T17:43:00Z'}, Dict[str, datetime]) |
 |                |     {'a': datetime.datetime(2019, 2, 24, 17, 43, tzinfo=datetime.timezone.utc)}             |
 +----------------+---------------------------------------------------------------------------------------------+
+
+.. _default_enum_deserializer:
 
 |
 |
@@ -1061,6 +1154,8 @@ Deserializers
 |                |     Color.RED                                                                                             |
 +----------------+-----------------------------------------------------------------------------------------------------------+
 
+.. _default_string_deserializer:
+
 |
 |
 | **Function: default_string_deserializer**
@@ -1086,6 +1181,8 @@ Deserializers
 |                |     2019-02-24 21:33:00+00:00                                                                 |
 +----------------+-----------------------------------------------------------------------------------------------+
 
+.. _default_primitive_deserializer:
+
 |
 |
 | **Function: default_primitive_deserializer**
@@ -1110,6 +1207,8 @@ Deserializers
 |                |     >>> jsons.default_primitive_deserializer(42)                                        |
 |                |     42                                                                                  |
 +----------------+-----------------------------------------------------------------------------------------+
+
+.. _default_object_deserializer:
 
 |
 |
