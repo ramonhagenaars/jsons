@@ -39,7 +39,7 @@ def _datetime_offset_str(obj: datetime) -> str:
     if not tzone:
         # datetimes without tzinfo are treated as local times.
         tzone = datetime.now(timezone.utc).astimezone().tzinfo
-        if tzone is timezone.utc:
+        if tzone is timezone.utc or tzone.utc is timezone.utc:
             return '+00:00'
     offset = 'Z'
     if tzone.tzname(None) not in ('UTC', 'UTC+00:00'):
