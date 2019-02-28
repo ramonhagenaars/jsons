@@ -3,7 +3,7 @@ PRIVATE MODULE: do not import (from) it directly.
 
 This module contains functionality for ``datetime`` related stuff.
 """
-from datetime import datetime, timezone, timedelta, time
+from datetime import datetime, timezone, timedelta, time, date
 from typing import Union
 
 
@@ -38,7 +38,7 @@ def _datetime_offset_str(obj: datetime) -> str:
     tzone = obj.tzinfo
     if not tzone:
         # datetimes without tzinfo are treated as local times.
-        tzone = obj.astimezone().tzinfo
+        tzone = datetime.now(timezone.utc).astimezone().tzinfo
         if tzone is timezone.utc:
             return '+00:00'
     offset = 'Z'
@@ -72,7 +72,7 @@ def _datetime_utc_inst(obj: str, pattern: str) -> datetime:
     """
     dattim_str = obj[0:-1]
     dattim_obj = datetime.strptime(dattim_str, pattern)
-    return datetime.combine(dattim_obj.date(), dattim_obj.time(), timezone.utc)
+    return _new_datetime(dattim_obj.date(), dattim_obj.time(), timezone.utc)
 
 
 def _datetime_offset_inst(obj: str, pattern: str) -> datetime:
@@ -91,4 +91,18 @@ def _datetime_offset_inst(obj: str, pattern: str) -> datetime:
     hrs = int(hrs_str) * factor
     mins = int(mins_str) * factor
     tz = timezone(offset=timedelta(hours=hrs, minutes=mins))
-    return datetime.combine(dattim_obj.date(), dattim_obj.time(), tz)
+    return _new_datetime(dattim_obj.date(), dattim_obj.time(), tz)
+
+
+def _new_datetime(date_inst: date, time_inst: time, tzinfo: timezone):
+    """
+    Return a datetime instance from a date, time and timezone.
+
+    This function was required due to the missing argument for tzinfo under the
+    Linux Python distribution.
+    :param date_inst: the date.
+    :param time_inst: the time.
+    :param tzinfo: the Timezone.
+    :return: a combined datetime instance.
+    """
+    return datetime.combine(date_inst, time_inst).replace(tzinfo=tzinfo)

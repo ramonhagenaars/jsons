@@ -20,6 +20,8 @@ def get_class_name(cls: type,
     if not cls_name and hasattr(cls, '__origin__'):
         origin = cls.__origin__
         cls_name = get_class_name(origin)
+    if not cls_name:
+        cls_name = str(cls)
     if cls_name and transformer:
         cls_name = transformer(cls_name)
     return cls_name
