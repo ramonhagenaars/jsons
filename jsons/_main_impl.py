@@ -47,16 +47,12 @@ def dump(obj: object,
                                  'providing "cls".'
                          .format(get_class_name(cls)))
     cls_ = cls or obj.__class__
-    cls_name = get_class_name(cls_, str.lower)
     fork_inst = fork_inst or JsonSerializable
-    serializer = fork_inst._serializers.get(cls_name, None)
-    if not serializer:
-        parents = [cls_ser for cls_ser in fork_inst._classes_serializers
-                   if isinstance(obj, cls_ser)]
-        if parents:
-            pname = get_class_name(parents[0], str.lower)
-            serializer = fork_inst._serializers[pname]
-    kwargs_ = {'fork_inst': fork_inst, **kwargs}
+    serializer = _get_serializer(cls_, fork_inst)
+    kwargs_ = {
+        'fork_inst': fork_inst,
+        **kwargs
+    }
     try:
         return serializer(obj, cls=cls, **kwargs_)
     except Exception as err:
@@ -126,8 +122,12 @@ def load(json_obj: object,
                                    json_obj, cls)
     cls = cls or type(json_obj)
     deserializer = _get_deserializer(cls, fork_inst)
-    kwargs_ = {'strict': strict, 'fork_inst': fork_inst,
-               'attr_getters': attr_getters, **kwargs}
+    kwargs_ = {
+        'strict': strict,
+        'fork_inst': fork_inst,
+        'attr_getters': attr_getters,
+        **kwargs
+    }
     try:
         return deserializer(json_obj, cls, **kwargs_)
     except Exception as err:
@@ -136,16 +136,31 @@ def load(json_obj: object,
         raise DeserializationError(str(err), json_obj, cls)
 
 
+def _get_serializer(cls: type, fork_inst: Optional[type] = None) -> callable:
+    inst = fork_inst or JsonSerializable
+    serializer = _get_lizer(cls, inst._serializers,
+                            inst._classes_serializers)
+    return serializer
+
+
 def _get_deserializer(cls: type, fork_inst: Optional[type] = None) -> callable:
-    fork_inst = fork_inst or JsonSerializable
+    inst = fork_inst or JsonSerializable
+    deserializer = _get_lizer(cls, inst._deserializers,
+                              inst._classes_deserializers)
+    return deserializer
+
+
+def _get_lizer(cls: type,
+               lizers: Dict[str, callable],
+               classes_lizers: list) -> callable:
     cls_name = get_class_name(cls, str.lower)
-    deserializer = fork_inst._deserializers.get(cls_name, None)
-    if not deserializer:
-        parents = get_parents(cls, fork_inst._classes_deserializers)
+    lizer = lizers.get(cls_name, None)
+    if not lizer:
+        parents = get_parents(cls, classes_lizers)
         if parents:
             pname = get_class_name(parents[0], str.lower)
-            deserializer = fork_inst._deserializers[pname]
-    return deserializer
+            lizer = lizers[pname]
+    return lizer
 
 
 class JsonSerializable:
