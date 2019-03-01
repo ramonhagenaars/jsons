@@ -1087,7 +1087,7 @@ Deserializers
 +----------------+----------------------------------------+----------------------------------------------------------------------------+
 | *Example:*     | ::                                                                                                                  |
 |                |                                                                                                                     |
-|                |     >>> jsons.default_union_deserializer('2019-02-23T22:28:00Z', Union[List[datetime.datetime], datetime.datetime]) |
+|                |     >>> jsons.default_union_deserializer('2019-02-23T22:28:00Z', Union[List[datetime], datetime])                   |
 |                |     datetime.datetime(2019, 2, 23, 22, 28, tzinfo=datetime.timezone.utc)                                            |
 +----------------+---------------------------------------------------------------------------------------------------------------------+
 
