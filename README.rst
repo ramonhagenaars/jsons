@@ -1,6 +1,7 @@
 |PyPI version| |Docs| |Build Status| |Scrutinizer Code Quality|
 |Maintainability|
 
+=====
 jsons
 =====
 
@@ -20,9 +21,9 @@ the serialization/deserialization process to your need.
 ``jsons`` generates human-readable dicts or JSON strings that are not
 polluted with metadata.
 
+*******************************************
 Why not use ``__dict__`` for serialization?
-'''''''''''''''''''''''''''''''''''''''''''
-
+*******************************************
 -  The ``__dict__`` attribute only creates a *shallow* dict of an
    instance. Any contained object is not serialized to a dict.
 -  The ``__dict__`` does not take ``@property`` methods in account.
@@ -31,24 +32,27 @@ Why not use ``__dict__`` for serialization?
 -  The serialization process of ``__dict__`` cannot easily be tuned.
 -  There is no means to deserialize with ``__dict__``.
 
+******************************************
 Why not use the standard ``json`` library?
-''''''''''''''''''''''''''''''''''''''''''
+******************************************
 
-- It's quite a hassle to (de)serialize custom types: you need to 
-  write a subclass of ``json.JSONEncoder`` with specific 
+- It's quite a hassle to (de)serialize custom types: you need to
+  write a subclass of ``json.JSONEncoder`` with specific
   serialization/deserialization code per custom class.
-- You will need to provide that subclass of ``json.JSONEncoder`` to 
+- You will need to provide that subclass of ``json.JSONEncoder`` to
   ``json.dumps``/``json.loads`` every single time.
 
+************
 Installation
-''''''''''''
+************
 
 ::
 
    pip install jsons
 
+*****
 Usage
-'''''
+*****
 
 .. code:: python
 
@@ -69,36 +73,20 @@ In some cases, you have instances that contain other instances that need
    # For more complex deserialization with generic types, use the typing module
    list_of_tuples = jsons.load(some_dict, List[Tuple[AClass, AnotherClass]])
 
-API overview
-''''''''''''
+*****************
+API DOCUMENTATION
+*****************
 
--  ``dump(obj: object) -> dict``: serializes an object to a dict.
--  ``load(json_obj: dict, cls: type = None) -> object``: deserializes a
-   dict to an object of type ``cls``.
--  ``dumps(obj: object, *args, **kwargs) -> str``: serializes an object
-   to a JSON string.
--  ``loads(s: str, cls: type = None, *args, **kwargs) -> object``:
-   deserializes a JSON string to an object of type ``cls``.
--  ``dumpb(obj: object, encoding: str = 'utf-8', *args, **kwargs) -> bytes``:
-   serializes an object to bytes.
--  ``loadb(bytes_: bytes, cls: type = None, encoding: str = 'utf-8', *args, **kwargs)``:
-   deserializes bytes to an object of type ``cls``.
--  ``set_serializer(c: callable, cls: type) -> None``: sets a custom
-   serialization function for type ``cls``.
--  ``set_deserializer(c: callable, cls: type) -> None``: sets a custom
-   deserialization function for type ``cls``.
--  ``JsonSerializable``: a base class that allows for convenient use of
-   the jsons features.
--  ``decorators.loaded``: a decorator that will load all parameters before
-   entering the function/method body and the return value upon returning.
--  ``decorators.dumped``: a decorator that will dump all parameters before
-   entering the function/method body and the return value upon returning.
+See the separate documentation page:
 
+`Documentation <https://github.com/ramonhagenaars/jsons/blob/master/API_DOCUMENTATION>`_
+
+********
 Examples
-''''''''
+********
 
 Example with dataclasses
-------------------------
+========================
 
 .. code:: python
 
@@ -134,7 +122,7 @@ Example with dataclasses
    #           Student(name='Greg'), Student(name='Susan')])
 
 Example with regular classes
-----------------------------
+============================
 
 .. code:: python
 
@@ -167,7 +155,7 @@ Example with regular classes
    # <__main__.ClassRoom object at 0x0337F9B0>
 
 Example with JsonSerializable
------------------------------
+=============================
 
 .. code:: python
 
@@ -188,11 +176,12 @@ Example with JsonSerializable
    # Prints:
    # 'red'
 
+*****************
 Advanced features
-'''''''''''''''''
+*****************
 
 Using decorators
-----------------
+================
 
 You can decorate a function or method with ``@loaded()`` or ``@dumped()``,
 which will respectively load or dump all parameters and the return value.
@@ -266,7 +255,7 @@ The following arguments can be given only to ``@dumped``:
    with.
 
 Overriding the default (de)serialization behavior
--------------------------------------------------
+=================================================
 
 You may alter the behavior of the serialization and deserialization processes
 yourself by defining your own custom serialization/deserialization functions.
@@ -300,7 +289,7 @@ Note that in both cases, if you choose to call any other (de)serializer within
 your own, you should also pass the ``**kwargs`` upon calling.
 
 Transforming the JSON keys
---------------------------
+==========================
 You can have the keys transformed by the serialization or deserialization
 process by providing a transformer function that takes a string and returns a
 string.
@@ -324,7 +313,7 @@ The following casing styles are supported:
    KEY_TRANSFORMER_LISPCASE    # lisp-case
 
 Customizing JsonSerializable
-----------------------------
+============================
 You can customize the behavior of the ``JsonSerializable`` class or extract a
 new class from it. This can be useful if you are using ``jsons`` extensively
 throughout your project, especially if you wish to have different
@@ -361,11 +350,11 @@ the serialization and deserialization process respectively.
    custom_serializable = JsonSerializable\
        .with_dump(key_transformer=KEY_TRANSFORMER_CAMELCASE)\
        .with_load(key_transformer=KEY_TRANSFORMER_SNAKECASE)
-    
+
    class Person(custom_serializable):
        def __init__(self, my_name):
            self.my_name = my_name
-        
+
    p = Person('John')
    p.json  # {'myName': 'John'}  <-- note the camelCase
 
@@ -379,9 +368,26 @@ can create a fork in the process by setting ``fork=True`` in ``with_dump`` or
 Meta
 ''''
 
+Recent updates
+--------------
+0.7.0
++++++
+- Doc: Improved API documentation
+- Feature: Support for loading Union or Optional
+- Feature: Extended strict-mode
+- Feature: Added custom Exceptions
+- Feature: Support for attr-getters
+- Bugfix: local timezone for datetime serialization improved
+
+0.6.1
++++++
+- Feature: Support for loading tuples of variable length
+
+
 Contributors
 ------------
 Special thanks to the following contributors:
+
 
 - `finetuned89 <https://github.com/finetuned89>`_
 - `haluzpav <https://github.com/haluzpav>`_

@@ -2,13 +2,22 @@ import asyncio
 import datetime
 import json
 from enum import Enum
-from typing import List, Tuple, Set, Dict
+from typing import List, Tuple, Set, Dict, Optional, Union
 from unittest.case import TestCase
 import jsons
-from jsons import JsonSerializable, KEY_TRANSFORMER_CAMELCASE
-from jsons._common_impl import snakecase, camelcase, pascalcase, lispcase
+from jsons import (
+    JsonSerializable,
+    KEY_TRANSFORMER_CAMELCASE,
+    KEY_TRANSFORMER_SNAKECASE,
+    DeserializationError
+)
+from jsons._main_impl import snakecase, camelcase, pascalcase, lispcase
 from jsons.decorators import dumped, loaded
-from jsons.deserializers import KEY_TRANSFORMER_SNAKECASE
+from jsons.exceptions import (
+    UnfulfilledArgumentError,
+    InvalidDecorationError,
+    DecodeError,
+    SignatureMismatchError)
 
 
 class TestJsons(TestCase):
@@ -319,7 +328,7 @@ class TestJsons(TestCase):
         self.assertEqual(res2['x'], 'res2')
         self.assertEqual(res3['x'], 'res3')
 
-        with self.assertRaises(Exception):
+        with self.assertRaises(InvalidDecorationError):
             class Clazz:
                 @dumped()
                 @staticmethod
@@ -327,7 +336,7 @@ class TestJsons(TestCase):
                     pass  # This won't work; you need to swap the decorators.
 
     def test_dumped_decorator_on_class(self):
-        with self.assertRaises(Exception):
+        with self.assertRaises(InvalidDecorationError):
             @loaded()
             class Clazz:
                 pass
@@ -390,14 +399,30 @@ class TestJsons(TestCase):
         dat = datetime.datetime(year=2018, month=7, day=8, hour=21, minute=34,
                                 tzinfo=datetime.timezone.utc)
         dumped = {'d': dat}
-        with self.assertRaises(KeyError):
+        with self.assertRaises(DeserializationError):
             jsons.load(dumped, C, strict=True)
 
     def test_load_none(self):
         self.assertEqual(None, jsons.load(None))
         self.assertEqual(None, jsons.load(None, datetime))
-        with self.assertRaises(KeyError):
+        with self.assertRaises(DeserializationError):
             jsons.load(None, datetime, strict=True)
+
+    def test_load_too_many_args(self):
+        class C:
+            def __init__(self, x: int):
+                self.x = x
+
+        with self.assertRaises(SignatureMismatchError):
+            jsons.load({'x': 1, 'y': 2}, C, strict=True)
+
+        try:
+            jsons.load({'x': 1, 'y': 2}, C, strict=True)
+        except SignatureMismatchError as err:
+            self.assertEqual(err.argument, 'y')
+            self.assertEqual(err.target, C)
+            self.assertDictEqual(err.source, {'x': 1, 'y': 2})
+
 
     def test_load_datetime(self):
         dat = datetime.datetime(year=2018, month=7, day=8, hour=21, minute=34,
@@ -443,6 +468,25 @@ class TestJsons(TestCase):
                             cls=Tuple[datetime.datetime, ...])
         self.assertEqual(expectation, loaded)
 
+    def test_load_union(self):
+        class A:
+            def __init__(self, x):
+                self.x = x
+
+        class B:
+            def __init__(self, x: Optional[int]):
+                self.x = x
+
+        class C:
+            def __init__(self, x: Union[datetime.datetime, A]):
+                self.x = x
+
+        self.assertEqual(1, jsons.load({'x': 1}, B).x)
+        self.assertEqual(None, jsons.load({'x': None}, B).x)
+        self.assertEqual(1, jsons.load({'x': {'x': 1}}, C).x.x)
+        with self.assertRaises(DeserializationError):
+            jsons.load({'x': 'no match in the union'}, C).x
+
     def test_load_set(self):
         dat = datetime.datetime(year=2018, month=7, day=8, hour=21, minute=34,
                                 tzinfo=datetime.timezone.utc)
@@ -465,6 +509,26 @@ class TestJsons(TestCase):
         loaded_b = jsons.load({'name': 'B', 'a': {'name': 'A'}}, B)
         self.assertEqual(b.name, loaded_b.name)
         self.assertEqual(b.a.name, loaded_b.a.name)
+
+    def test_load_object_with_attr_getters(self):
+        class A:
+            def __init__(self, x, y):
+                self.x = x
+                self.y = y
+
+        class B:
+            def __init__(self, x):
+                self.x = x
+
+        a = A(1, 2)
+        loaded_a = jsons.load({'x': 1}, A, attr_getters={'y': lambda: 2})
+        self.assertEqual(a.x, loaded_a.x)
+        self.assertEqual(a.y, loaded_a.y)
+
+        b = B(1)
+        loaded_b = jsons.load({'x': 1}, B, attr_getters={'y': lambda: 2})
+        self.assertEqual(b.x, loaded_b.x)
+        self.assertEqual(2, loaded_b.y)
 
     def test_load_object_with_default_value(self):
         class A:
@@ -886,3 +950,33 @@ class TestJsons(TestCase):
             self.assertEqual(res.x, 'c_res')
 
         asyncio.get_event_loop().run_until_complete(_test_body())
+
+    def test_exception_unfulfilled_arg(self):
+        class C:
+            def __init__(self, x, y):
+                self.x = x
+                self.y = y
+
+        with self.assertRaises(UnfulfilledArgumentError):
+            jsons.load({"x": 1}, C)
+
+        try:
+            jsons.load({"x": 1}, C)
+        except UnfulfilledArgumentError as err:
+            self.assertDictEqual({"x": 1}, err.source)
+            self.assertEqual(C, err.target)
+            self.assertEqual('y', err.argument)
+
+    def test_exception_wrong_json(self):
+        with self.assertRaises(DecodeError):
+            jsons.loads('{this aint no JSON!')
+
+        try:
+            jsons.loads('{this aint no JSON!')
+        except DecodeError as err:
+            self.assertEqual(None, err.target)
+            self.assertEqual('{this aint no JSON!', err.source)
+
+    def test_exception_wrong_bytes(self):
+        with self.assertRaises(DeserializationError):
+            jsons.loadb('{"key": "value"}')

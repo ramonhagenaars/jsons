@@ -6,20 +6,35 @@ deserialization process of a particular type as follows:
 """
 import inspect
 import re
-from datetime import datetime, timezone, timedelta
+from datetime import datetime
 from enum import EnumMeta
-from typing import List, Callable
-from jsons import _common_impl
-from jsons._common_impl import RFC3339_DATETIME_PATTERN, snakecase, \
-    camelcase, pascalcase, lispcase
+from typing import List, Callable, Union, Optional
+from jsons import _main_impl
+from jsons._common_impl import get_class_name
+from jsons._datetime_impl import get_datetime_inst
+from jsons._main_impl import (
+    RFC3339_DATETIME_PATTERN,
+    snakecase,
+    camelcase,
+    pascalcase,
+    lispcase
+)
+from jsons.exceptions import (
+    UnfulfilledArgumentError,
+    SignatureMismatchError,
+    JsonsError,
+    DeserializationError
+)
 
 
-def default_datetime_deserializer(obj: str, _: datetime, **__) -> datetime:
+def default_datetime_deserializer(obj: str,
+                                  cls: type = datetime,
+                                  **kwargs) -> datetime:
     """
     Deserialize a string with an RFC3339 pattern to a datetime instance.
-    :param obj:
-    :param _: not used.
-    :param __: not used.
+    :param obj: the string that is to be deserialized.
+    :param cls: not used.
+    :param kwargs: not used.
     :return: a ``datetime.datetime`` instance.
     """
     pattern = RFC3339_DATETIME_PATTERN
@@ -29,35 +44,10 @@ def default_datetime_deserializer(obj: str, _: datetime, **__) -> datetime:
         regex_pattern = re.compile(r'(\.[0-9]+)')
         frac = regex_pattern.search(obj).group()
         obj = obj.replace(frac, frac[0:7])
-    dattim_func = _datetime_utc if obj[-1] == 'Z' else _datetime_with_tz
-    return dattim_func(obj, pattern)
+    return get_datetime_inst(obj, pattern)
 
 
-def _datetime_utc(obj: str, pattern: str):
-    dattim_str = obj[0:-1]
-    dattim_obj = datetime.strptime(dattim_str, pattern)
-    return datetime(dattim_obj.year, dattim_obj.month, dattim_obj.day,
-                    dattim_obj.hour, dattim_obj.minute, dattim_obj.second,
-                    dattim_obj.microsecond, timezone.utc)
-
-
-def _datetime_with_tz(obj: str, pattern: str):
-    dat_str, tim_str = obj.split('T')
-    splitter = '+' if '+' in tim_str else '-'
-    naive_tim_str, offset = tim_str.split(splitter)
-    naive_dattim_str = '{}T{}'.format(dat_str, naive_tim_str)
-    dattim_obj = datetime.strptime(naive_dattim_str, pattern)
-    hrs_str, mins_str = offset.split(':')
-    hrs = int(hrs_str) if splitter == '+' else -1 * int(hrs_str)
-    mins = int(mins_str) if splitter == '+' else -1 * int(mins_str)
-    tz = timezone(offset=timedelta(hours=hrs, minutes=mins))
-    datetime_list = [dattim_obj.year, dattim_obj.month, dattim_obj.day,
-                     dattim_obj.hour, dattim_obj.minute, dattim_obj.second,
-                     dattim_obj.microsecond, tz]
-    return datetime(*datetime_list)
-
-
-def default_list_deserializer(obj: List, cls, **kwargs) -> object:
+def default_list_deserializer(obj: list, cls: type = None, **kwargs) -> list:
     """
     Deserialize a list by deserializing all items of that list.
     :param obj: the list that needs deserializing.
@@ -68,14 +58,16 @@ def default_list_deserializer(obj: List, cls, **kwargs) -> object:
     cls_ = None
     if cls and hasattr(cls, '__args__'):
         cls_ = cls.__args__[0]
-    return [_common_impl.load(x, cls_, **kwargs) for x in obj]
+    return [_main_impl.load(x, cls_, **kwargs) for x in obj]
 
 
-def default_tuple_deserializer(obj: List, cls, **kwargs) -> object:
+def default_tuple_deserializer(obj: tuple,
+                               cls: type = None,
+                               **kwargs) -> object:
     """
     Deserialize a (JSON) list into a tuple by deserializing all items of that
     list.
-    :param obj: the list that needs deserializing.
+    :param obj: the tuple that needs deserializing.
     :param cls: the type optionally with a generic (e.g. Tuple[str, int]).
     :param kwargs: any keyword arguments.
     :return: a deserialized tuple instance.
@@ -83,17 +75,41 @@ def default_tuple_deserializer(obj: List, cls, **kwargs) -> object:
     tuple_types = getattr(cls, '__tuple_params__', cls.__args__)
     if len(tuple_types) > 1 and tuple_types[1] is ...:
         tuple_types = [tuple_types[0]] * len(obj)
-    list_ = [_common_impl.load(value, tuple_types[i], **kwargs)
+    list_ = [_main_impl.load(value, tuple_types[i], **kwargs)
              for i, value in enumerate(obj)]
     return tuple(list_)
 
 
-def default_set_deserializer(obj: List, cls, **kwargs) -> object:
+def default_union_deserializer(obj: object, cls: Union, **kwargs) -> object:
+    """
+    Deserialize an object to any matching type of the given union. The first
+    successful deserialization is returned.
+    :param obj: The object that needs deserializing.
+    :param cls: The Union type with a generic (e.g. Union[str, int]).
+    :param kwargs: Any keyword arguments that are passed through the
+    deserialization process.
+    :return: An object of the first type of the Union that could be
+    deserialized successfully.
+    """
+    for sub_type in cls.__args__:
+        try:
+            return _main_impl.load(obj, sub_type, **kwargs)
+        except JsonsError:
+            pass  # Try the next one.
+    else:
+        args_msg = ', '.join([get_class_name(cls_) for cls_ in cls.__args__])
+        err_msg = ('Could not match the object of type "{}" to any type of '
+                   'the Union: {}'.format(str(cls), args_msg))
+        raise DeserializationError(err_msg, obj, cls)
+
+
+def default_set_deserializer(obj: list, cls: type, **kwargs) -> set:
     """
     Deserialize a (JSON) list into a set by deserializing all items of that
-    list.
+    list. If the list as a generic type (e.g. Set[datetime]) then it is
+    assumed that all elements can be deserialized to that type.
     :param obj: the list that needs deserializing.
-    :param cls: the type optionally with a generic (e.g. Set[str]).
+    :param cls: the type, optionally with a generic (e.g. Set[str]).
     :param kwargs: any keyword arguments.
     :return: a deserialized set instance.
     """
@@ -104,9 +120,11 @@ def default_set_deserializer(obj: List, cls, **kwargs) -> object:
     return set(list_)
 
 
-def default_dict_deserializer(obj: dict, cls: type,
-                              key_transformer: Callable[[str], str] = None,
-                              **kwargs) -> object:
+def default_dict_deserializer(
+        obj: dict,
+        cls: type,
+        key_transformer: Optional[Callable[[str], str]] = None,
+        **kwargs) -> dict:
     """
     Deserialize a dict by deserializing all instances of that dict.
     :param obj: the dict that needs deserializing.
@@ -121,12 +139,14 @@ def default_dict_deserializer(obj: dict, cls: type,
     if hasattr(cls, '__args__') and len(cls.__args__) > 1:
         sub_cls = cls.__args__[1]
         kwargs_['cls'] = sub_cls
-    return {key_transformer(key): _common_impl.load(obj[key], **kwargs_)
+    return {key_transformer(key): _main_impl.load(obj[key], **kwargs_)
             for key in obj}
 
 
-def default_enum_deserializer(obj: str, cls: EnumMeta,
-                              use_enum_name: bool = True, **__) -> object:
+def default_enum_deserializer(obj: str,
+                              cls: EnumMeta,
+                              use_enum_name: bool = True,
+                              **kwargs) -> object:
     """
     Deserialize an enum value to an enum instance. The serialized value must
     can be the name of the enum element or the value; dependent on
@@ -135,7 +155,7 @@ def default_enum_deserializer(obj: str, cls: EnumMeta,
     :param cls: the enum class.
     :param use_enum_name: determines whether the name or the value of an enum
     element should be used.
-    :param __: not used.
+    :param kwargs: not used.
     :return: the corresponding enum element instance.
     """
     if use_enum_name:
@@ -148,38 +168,44 @@ def default_enum_deserializer(obj: str, cls: EnumMeta,
     return result
 
 
-def default_string_deserializer(obj: str, _: type = None, **kwargs) -> object:
+def default_string_deserializer(obj: str,
+                                cls: Optional[type] = None,
+                                **kwargs) -> object:
     """
     Deserialize a string. If the given ``obj`` can be parsed to a date, a
     ``datetime`` instance is returned.
     :param obj: the string that is to be deserialized.
-    :param _: not used.
+    :param cls: not used.
     :param kwargs: any keyword arguments.
     :return: the deserialized obj.
     """
     try:
         # Use load instead of default_datetime_deserializer to allow the
         # datetime deserializer to be overridden.
-        return _common_impl.load(obj, datetime, **kwargs)
+        return _main_impl.load(obj, datetime, **kwargs)
     except:
         return obj
 
 
 def default_primitive_deserializer(obj: object,
-                                   _: type = None, **__) -> object:
+                                   cls: Optional[type] = None,
+                                   **kwargs) -> object:
     """
     Deserialize a primitive: it simply returns the given primitive.
     :param obj: the value that is to be deserialized.
-    :param _: not used.
-    :param __: not used.
+    :param cls: not used.
+    :param kwargs: not used.
     :return: ``obj``.
     """
     return obj
 
 
-def default_object_deserializer(obj: dict, cls: type,
-                                key_transformer: Callable[[str], str] = None,
-                                **kwargs) -> object:
+def default_object_deserializer(
+        obj: dict,
+        cls: type,
+        key_transformer: Optional[Callable[[str], str]] = None,
+        strict: bool = False,
+        **kwargs) -> object:
     """
     Deserialize ``obj`` into an instance of type ``cls``. If ``obj`` contains
     keys with a certain case style (e.g. camelCase) that do not match the style
@@ -189,6 +215,7 @@ def default_object_deserializer(obj: dict, cls: type,
     :param cls: the type to which ``obj`` should be deserialized.
     :param key_transformer: a function that transforms the keys in order to
     match the attribute names of ``cls``.
+    :param strict: deserialize in strict mode.
     :param kwargs: any keyword arguments that may be passed to the
     deserializers.
     :return: an instance of type ``cls``.
@@ -196,42 +223,81 @@ def default_object_deserializer(obj: dict, cls: type,
     concat_kwargs = kwargs
     if key_transformer:
         obj = {key_transformer(key): obj[key] for key in obj}
-        concat_kwargs = {**kwargs, 'key_transformer': key_transformer}
+        concat_kwargs = {
+            **kwargs,
+            'key_transformer': key_transformer
+        }
+    concat_kwargs['strict'] = strict
     signature_parameters = inspect.signature(cls.__init__).parameters
-    constructor_args = _get_constructor_args(obj, signature_parameters,
-                                             **concat_kwargs)
+    constructor_args, getters = _get_constructor_args(obj,
+                                                      cls,
+                                                      signature_parameters,
+                                                      **concat_kwargs)
     remaining_attrs = {attr_name: obj[attr_name] for attr_name in obj
                        if attr_name not in constructor_args}
+    if strict and remaining_attrs:
+        unexpected_arg = list(remaining_attrs.keys())[0]
+        err_msg = 'Type "{}" does not expect "{}"'.format(get_class_name(cls),
+                                                          unexpected_arg)
+        raise SignatureMismatchError(err_msg, unexpected_arg, obj, cls)
     instance = cls(**constructor_args)
     _set_remaining_attrs(instance, remaining_attrs, **kwargs)
     return instance
 
 
-def _get_constructor_args(obj, signature_parameters, **kwargs):
+def _get_constructor_args(obj,
+                          cls,
+                          signature_parameters,
+                          attr_getters=None,
+                          **kwargs):
     # Loop through the signature of cls: the type we try to deserialize to. For
     # every required parameter, we try to get the corresponding value from
     # json_obj.
-    constructor_args = dict()
-    sigs = [(sig_key, sig) for sig_key, sig in signature_parameters.items()
-            if obj and sig_key != 'self' and sig_key in obj]
-    for sig_key, sig in sigs:
-        cls = sig.annotation if sig.annotation != inspect.Parameter.empty \
-            else None
-        value = _common_impl.load(obj[sig_key], cls, **kwargs)
-        constructor_args[sig_key] = value
-    return constructor_args
+    attr_getters = dict(**(attr_getters or {}))
+    constructor_args_in_obj = dict()
+    signatures = ((sig_key, sig) for sig_key, sig in
+                  signature_parameters.items() if sig_key != 'self')
+    for sig_key, sig in signatures:
+        if obj and sig_key in obj:
+            # This argument is in obj.
+            arg_cls = None
+            if sig.annotation != inspect.Parameter.empty:
+                arg_cls = sig.annotation
+            value = _main_impl.load(obj[sig_key], arg_cls, **kwargs)
+            constructor_args_in_obj[sig_key] = value
+        elif sig_key in attr_getters:
+            # There exists an attr_getter for this argument.
+            attr_getter = attr_getters.pop(sig_key)
+            constructor_args_in_obj[sig_key] = attr_getter()
+        elif sig.default != inspect.Parameter.empty:
+            # There is a default value for this argument.
+            constructor_args_in_obj[sig_key] = sig.default
+        elif sig.kind not in (inspect.Parameter.VAR_POSITIONAL,
+                              inspect.Parameter.VAR_KEYWORD):
+            # This argument is no *args or **kwargs and has no value.
+            raise UnfulfilledArgumentError(
+                'No value found for "{}"'.format(sig_key),
+                sig_key, obj, cls)
+
+    return constructor_args_in_obj, attr_getters
 
 
-def _set_remaining_attrs(instance, remaining_attrs, **kwargs):
+def _set_remaining_attrs(instance,
+                         remaining_attrs,
+                         attr_getters=None,
+                         **kwargs):
     # Set any remaining attributes on the newly created instance.
+    attr_getters = attr_getters or {}
     for attr_name in remaining_attrs:
-        loaded_attr = _common_impl.load(remaining_attrs[attr_name],
-                                             type(remaining_attrs[attr_name]),
-                                             **kwargs)
+        loaded_attr = _main_impl.load(remaining_attrs[attr_name],
+                                      type(remaining_attrs[attr_name]),
+                                      **kwargs)
         try:
             setattr(instance, attr_name, loaded_attr)
         except AttributeError:
             pass  # This is raised when a @property does not have a setter.
+    for attr_name, getter in attr_getters.items():
+        setattr(instance, attr_name, getter())
 
 
 # The following default key transformers can be used with the
