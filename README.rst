@@ -79,7 +79,7 @@ API DOCUMENTATION
 
 See the separate documentation page:
 
-`Documentation <https://github.com/ramonhagenaars/jsons/blob/master/API_DOCUMENTATION>`_
+`Documentation <https://github.com/ramonhagenaars/jsons/blob/master/API_DOCUMENTATION.rst>`_
 
 ********
 Examples
