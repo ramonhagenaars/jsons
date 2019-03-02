@@ -8,6 +8,7 @@ import inspect
 import re
 from datetime import datetime
 from enum import EnumMeta
+from functools import partial
 from typing import List, Callable, Union, Optional
 from jsons import _main_impl
 from jsons._common_impl import get_class_name
@@ -249,10 +250,8 @@ def default_object_deserializer(
             'key_transformer': key_transformer
         }
     concat_kwargs['strict'] = strict
-    signature_parameters = inspect.signature(cls.__init__).parameters
     constructor_args, getters = _get_constructor_args(obj,
                                                       cls,
-                                                      signature_parameters,
                                                       **concat_kwargs)
     remaining_attrs = {attr_name: obj[attr_name] for attr_name in obj
                        if attr_name not in constructor_args}
@@ -268,39 +267,44 @@ def default_object_deserializer(
 
 def _get_constructor_args(obj,
                           cls,
-                          signature_parameters,
                           attr_getters=None,
                           **kwargs):
     # Loop through the signature of cls: the type we try to deserialize to. For
     # every required parameter, we try to get the corresponding value from
     # json_obj.
+    signature_parameters = inspect.signature(cls.__init__).parameters
     attr_getters = dict(**(attr_getters or {}))
-    constructor_args_in_obj = dict()
-    signatures = ((sig_key, sig) for sig_key, sig in
-                  signature_parameters.items() if sig_key != 'self')
-    for sig_key, sig in signatures:
-        if obj and sig_key in obj:
-            # This argument is in obj.
-            arg_cls = None
-            if sig.annotation != inspect.Parameter.empty:
-                arg_cls = sig.annotation
-            value = _main_impl.load(obj[sig_key], arg_cls, **kwargs)
-            constructor_args_in_obj[sig_key] = value
-        elif sig_key in attr_getters:
-            # There exists an attr_getter for this argument.
-            attr_getter = attr_getters.pop(sig_key)
-            constructor_args_in_obj[sig_key] = attr_getter()
-        elif sig.default != inspect.Parameter.empty:
-            # There is a default value for this argument.
-            constructor_args_in_obj[sig_key] = sig.default
-        elif sig.kind not in (inspect.Parameter.VAR_POSITIONAL,
-                              inspect.Parameter.VAR_KEYWORD):
-            # This argument is no *args or **kwargs and has no value.
-            raise UnfulfilledArgumentError(
-                'No value found for "{}"'.format(sig_key),
-                sig_key, obj, cls)
-
+    value_for_attr_part = partial(_get_value_for_attr, obj=obj, cls=cls,
+                                  attr_getters=attr_getters, **kwargs)
+    args_gen = (value_for_attr_part(sig_key=sig_key, sig=sig) for sig_key, sig
+                in signature_parameters.items() if sig_key != 'self')
+    constructor_args_in_obj = {key: value for key, value in args_gen if key}
     return constructor_args_in_obj, attr_getters
+
+
+def _get_value_for_attr(obj, cls, sig_key, sig, attr_getters, **kwargs):
+    result = None, None
+    if obj and sig_key in obj:
+        # This argument is in obj.
+        arg_cls = None
+        if sig.annotation != inspect.Parameter.empty:
+            arg_cls = sig.annotation
+        value = _main_impl.load(obj[sig_key], arg_cls, **kwargs)
+        result = sig_key, value
+    elif sig_key in attr_getters:
+        # There exists an attr_getter for this argument.
+        attr_getter = attr_getters.pop(sig_key)
+        result = sig_key, attr_getter()
+    elif sig.default != inspect.Parameter.empty:
+        # There is a default value for this argument.
+        result = sig_key, sig.default
+    elif sig.kind not in (inspect.Parameter.VAR_POSITIONAL,
+                          inspect.Parameter.VAR_KEYWORD):
+        # This argument is no *args or **kwargs and has no value.
+        raise UnfulfilledArgumentError(
+            'No value found for "{}"'.format(sig_key),
+            sig_key, obj, cls)
+    return result
 
 
 def _set_remaining_attrs(instance,
