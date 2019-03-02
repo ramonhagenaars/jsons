@@ -27,6 +27,8 @@ Example serialization output:
 ::
 
     {'birthday': '1956-01-31T12:00:00Z', 'name': 'Guido van Rossum'}
+    
+Read the `documentation <https://jsons.readthedocs.io/en/latest/>`_    
 
 ************
 Installation
@@ -65,7 +67,7 @@ API Documentation
 
 See the separate documentation page:
 
-`Documentation <https://github.com/ramonhagenaars/jsons/blob/master/API_DOCUMENTATION.rst>`_
+`Documentation <https://jsons.readthedocs.io/en/latest/>`_
 
 *******************************************
 Why not use ``__dict__`` for serialization?
