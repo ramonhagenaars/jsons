@@ -1,12 +1,17 @@
 |PyPI version| |Docs| |Build Status| |Code Coverage| |Scrutinizer Code Quality|
 |Maintainability|
 
+::
 
+       _                     
+      (_)                    
+       _ ___  ___  _ __  ___ 
+      | / __|/ _ \| '_ \/ __|
+      | \__ | (_) | | | \__ \
+      | |___/\___/|_| |_|___/
+     _/ |                    
+    |__/                     
 
-
-=====
-jsons
-=====
 
 *~ Any Python objects to/from JSON, easily! ~*
 
