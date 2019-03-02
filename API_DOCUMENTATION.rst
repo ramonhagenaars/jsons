@@ -3,7 +3,7 @@ jsons API documentation
 =======================
 
 *****
-INDEX
+Index
 *****
 - `Main functions`_
     - dump_
