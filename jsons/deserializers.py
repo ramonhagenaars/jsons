@@ -186,14 +186,7 @@ def default_enum_deserializer(obj: str,
     :param kwargs: not used.
     :return: the corresponding enum element instance.
     """
-    if use_enum_name:
-        result = cls[obj]
-    else:
-        for elem in cls:
-            if elem.value == obj:
-                result = elem
-                break
-    return result
+    return cls[obj] if use_enum_name else cls(obj)
 
 
 def default_string_deserializer(obj: str,
