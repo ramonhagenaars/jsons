@@ -1,5 +1,8 @@
-|PyPI version| |Docs| |Build Status| |Scrutinizer Code Quality|
+|PyPI version| |Docs| |Build Status| |Code Coverage| |Scrutinizer Code Quality|
 |Maintainability|
+
+
+
 
 =====
 jsons
@@ -408,7 +411,12 @@ Special thanks to the following contributors:
 
 .. |Build Status| image:: https://api.travis-ci.org/ramonhagenaars/jsons.svg?branch=master
    :target: https://travis-ci.org/ramonhagenaars/jsons
+   
+.. |Code Coverage| image:: https://codecov.io/gh/ramonhagenaars/jsons/branch/master/graph/badge.svg
+  :target: https://codecov.io/gh/ramonhagenaars/jsons
+   
 .. |Scrutinizer Code Quality| image:: https://scrutinizer-ci.com/g/ramonhagenaars/jsons/badges/quality-score.png?b=master
    :target: https://scrutinizer-ci.com/g/ramonhagenaars/jsons/?branch=master
+   
 .. |Maintainability| image:: https://api.codeclimate.com/v1/badges/17d997068b3387c2f2c3/maintainability
    :target: https://codeclimate.com/github/ramonhagenaars/jsons/maintainability
