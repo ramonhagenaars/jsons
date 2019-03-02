@@ -9,8 +9,8 @@
       | / __|/ _ \| '_ \/ __|
       | \__ | (_) | | | \__ \
       | |___/\___/|_| |_|___/
-     _/ |                    
-    |__/                     
+     _/ | JSON SERIALIZATION                   
+    |__/      MADE EASY!               
 
 
 *~ Any Python objects to/from JSON, easily! ~*
