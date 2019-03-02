@@ -365,11 +365,13 @@ You can, of course, also do this with a fork of ``JsonSerializable`` or you
 can create a fork in the process by setting ``fork=True`` in ``with_dump`` or
 ``with_load``.
 
+****
 Meta
-''''
+****
 
 Recent updates
---------------
+==============
+
 0.7.0
 +++++
 - Doc: Improved API documentation
@@ -385,7 +387,7 @@ Recent updates
 
 
 Contributors
-------------
+============
 Special thanks to the following contributors:
 
 
