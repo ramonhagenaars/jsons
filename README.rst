@@ -372,6 +372,11 @@ Meta
 Recent updates
 ==============
 
+0.7.1
++++++
+- Bugfix: Deserializing named tuples raised an exception
+- Impl: Restructure of the code (splitted functions, moved to packages, ...)
+
 0.7.0
 +++++
 - Doc: Improved API documentation
@@ -379,7 +384,7 @@ Recent updates
 - Feature: Extended strict-mode
 - Feature: Added custom Exceptions
 - Feature: Support for attr-getters
-- Bugfix: local timezone for datetime serialization improved
+- Bugfix: Local timezone for datetime serialization improved
 
 0.6.1
 +++++
