@@ -77,7 +77,7 @@ In some cases, you have instances that contain other instances that need
    list_of_tuples = jsons.load(some_dict, List[Tuple[AClass, AnotherClass]])
 
 *****************
-API DOCUMENTATION
+API Documentation
 *****************
 
 See the separate documentation page:
