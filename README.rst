@@ -17,12 +17,28 @@
 
 
 * *Python 3.5+*
-* *Minimal effort to use*
-* *No magic, just you, Python and jsons*
-* *Human readible JSON without pollution*
-* *Easily customizable and extendable*
+* *Minimal effort to use!*
+* *No magic, just you, Python and jsons!*
+* *Human readible JSON without pollution!*
+* *Easily customizable and extendable!*
+* *Type hints for the win!*
 
-Example serialization output:
+**Example of a model to be serialized:**
+
+::
+
+    @dataclass
+    class Person:
+        name: str
+        birthday: datetime
+        
+**Example of the serialization:**
+
+::
+
+    jsons.dump(Person('Guido van Rossum', guido_datetime))
+
+**Output after serialization:**
 
 ::
 
