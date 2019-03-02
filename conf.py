@@ -154,9 +154,7 @@ html_theme_options = {
 # html_short_title = None
 
 # The name of an image file (relative to this directory) to place at the top
-# of the 
-
-.
+# of the sidebar.
 #
 # html_logo = None
 
