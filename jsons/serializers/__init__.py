@@ -1,3 +1,9 @@
+"""
+This package contains default serializers. You can override the
+serialization process of a particular type as follows:
+
+``jsons.set_serializer(custom_serializer, SomeClass)``
+"""
 from jsons._main_impl import snakecase, camelcase, pascalcase, lispcase
 from jsons.serializers.default_datetime import default_datetime_serializer
 from jsons.serializers.default_dict import default_dict_serializer

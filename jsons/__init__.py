@@ -88,7 +88,7 @@ Alternatively, you can make use of the `JsonSerializable` class.
 from datetime import datetime
 from enum import Enum
 from typing import Union
-from jsons import _main_impl, deserializers, serializers
+from jsons import _main_impl, deserializers, serializers, classes
 from jsons._main_impl import snakecase, camelcase, pascalcase, lispcase
 from jsons.exceptions import (
     DeserializationError,
@@ -103,7 +103,7 @@ dumps = _main_impl.dumps
 loads = _main_impl.loads
 dumpb = _main_impl.dumpb
 loadb = _main_impl.loadb
-JsonSerializable = _main_impl.JsonSerializable
+JsonSerializable = classes.JsonSerializable
 set_serializer = _main_impl.set_serializer
 set_deserializer = _main_impl.set_deserializer
 

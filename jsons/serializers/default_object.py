@@ -1,5 +1,5 @@
 from typing import Optional, Callable
-from jsons._main_impl import JsonSerializable
+from jsons.classes import JsonSerializable
 from jsons.serializers.default_dict import default_dict_serializer
 
 
