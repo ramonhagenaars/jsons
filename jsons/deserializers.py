@@ -250,9 +250,7 @@ def default_object_deserializer(
             'key_transformer': key_transformer
         }
     concat_kwargs['strict'] = strict
-    constructor_args, getters = _get_constructor_args(obj,
-                                                      cls,
-                                                      **concat_kwargs)
+    constructor_args = _get_constructor_args(obj, cls, **concat_kwargs)
     remaining_attrs = {attr_name: obj[attr_name] for attr_name in obj
                        if attr_name not in constructor_args}
     if strict and remaining_attrs:
@@ -265,10 +263,7 @@ def default_object_deserializer(
     return instance
 
 
-def _get_constructor_args(obj,
-                          cls,
-                          attr_getters=None,
-                          **kwargs):
+def _get_constructor_args(obj, cls, attr_getters=None, **kwargs):
     # Loop through the signature of cls: the type we try to deserialize to. For
     # every required parameter, we try to get the corresponding value from
     # json_obj.
@@ -279,7 +274,7 @@ def _get_constructor_args(obj,
     args_gen = (value_for_attr_part(sig_key=sig_key, sig=sig) for sig_key, sig
                 in signature_parameters.items() if sig_key != 'self')
     constructor_args_in_obj = {key: value for key, value in args_gen if key}
-    return constructor_args_in_obj, attr_getters
+    return constructor_args_in_obj
 
 
 def _get_value_for_attr(obj, cls, sig_key, sig, attr_getters, **kwargs):
