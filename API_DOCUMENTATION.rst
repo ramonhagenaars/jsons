@@ -32,6 +32,7 @@ INDEX
     - default_datetime_deserializer_
     - default_list_deserializer_
     - default_tuple_deserializer_
+    - default_namedtuple_deserializer_
     - default_union_deserializer_
     - default_set_deserializer_
     - default_dict_deserializer_
@@ -49,6 +50,38 @@ Main functions
 
 | **Function: dump**
 |
+
+This is the main serialization function of ``jsons``. It will look for the best fitting
+serializer function that is registered and use that to turn the given object to a JSON
+compatible type.
+
+Any parameter of a serializer function, can be set using the keyword arguments of ``dump``.
+Here is an overview of the standard options:
+
++--------------------+--------------------------+--------------------------------------------------------+
+| **Parameter**      | **Type**                 | **Description**                                        |
++--------------------+--------------------------+--------------------------------------------------------+
+| strip_microseconds | ``bool``                 | Microseconds are not included in serialized datetimes. |
++--------------------+--------------------------+--------------------------------------------------------+
+| strip_nulls        | ``bool``                 | The resulting JSON will not contain attributes         |
+|                    |                          | with values that are ``null``.                         |
++--------------------+--------------------------+--------------------------------------------------------+
+| strip_privates     | ``bool``                 | Private attributes (starting with ``_``)               |
+|                    |                          | are omitted.                                           |
++--------------------+--------------------------+--------------------------------------------------------+
+| strip_properties   | ``bool``                 | Properties (``@property``) are omitted.                |
++--------------------+--------------------------+--------------------------------------------------------+
+| use_enum_name      | ``bool``                 | When ``True``, enums are serialized as their           |
+|                    |                          | names. Otherwise their values are used.                |
++--------------------+--------------------------+--------------------------------------------------------+
+| key_transformer    | ``Callable[[str], str]`` | Transforms the keys of the resulting dict.             |
+|                    |                          | For example, ``jsons.KEY_TRANSFORMER_CAMELCASE``       |
+|                    |                          | turns all keys in 'camelCase'.                         |
++--------------------+--------------------------+--------------------------------------------------------+
+
+For more info, check out the parameters of the `serializers`_.
+
+*Function signature:*
 
 +----------------+-------------------------------------------------------------------------------------------------------------------+
 | *Function:*    | ``jsons.dump``                                                                                                    |
@@ -863,7 +896,7 @@ Serializers
 |                | ``strip_nulls: bool``                               | When ``True``, the resulting dict won't contain 'null values'.  |
 +                +-----------------------------------------------------+-----------------------------------------------------------------+
 |                | ``key_transformer: Optional[Callable[[str], str]]`` | A function that will be applied to all keys in the              |
-|                |                                                     | resuling dict.                                                  |
+|                |                                                     | resulting dict.                                                 |
 +                +-----------------------------------------------------+-----------------------------------------------------------------+
 |                | ``kwargs``                                          | Any keyword arguments that are passed through the               |
 |                |                                                     | serialization process.                                          |
@@ -896,7 +929,7 @@ Serializers
 |                |                                                     | otherwise the value is used.                        |
 +                +-----------------------------------------------------+-----------------------------------------------------+
 |                | ``key_transformer: Optional[Callable[[str], str]]`` | A function that will be applied to all keys in the  |
-|                |                                                     | resuling dict.                                      |
+|                |                                                     | resulting dict.                                     |
 +----------------+-----------------------------------------------------+-----------------------------------------------------+
 | *Returns:*     | ``str``                                             | A serialized ``obj`` in string format.              |
 +----------------+-----------------------------------------------------+-----------------------------------------------------+
@@ -1046,7 +1079,7 @@ Deserializers
 | *Description:* | Deserialize a (JSON) list into a tuple by deserializing all items                    |
 |                | of that list.                                                                        |
 +----------------+-------------------------+------------------------------------------------------------+
-| *Arguments:*   | ``obj: tuple``          | The tuple that needs deserializing                         |
+| *Arguments:*   | ``obj: list``           | The tuple that needs deserializing                         |
 +                +-------------------------+------------------------------------------------------------+
 |                | ``cls: type``           | The type, optionally with a generic                        |
 |                |                         | (e.g. Tuple[str, int]).                                    |
@@ -1061,6 +1094,40 @@ Deserializers
 |                |     >>> jsons.default_tuple_deserializer(('2019-02-23T22:28:00Z',), Tuple[datetime]) |
 |                |     (datetime.datetime(2019, 2, 23, 22, 28, tzinfo=datetime.timezone.utc),)          |
 +----------------+--------------------------------------------------------------------------------------+
+
+.. _default_namedtuple_deserializer:
+
+|
+|
+| **Function: default_namedtuple_deserializer**
+|
+
++----------------+--------------------------------------------------------------------------------------------+
+| *Function:*    | ``jsons.default_namedtuple_deserializer``                                                  |
++----------------+--------------------------------------------------------------------------------------------+
+| *Description:* | Deserialize a (JSON) list into a named tuple by deserializing all items of that list.      |
+|                |                                                                                            |
+|                | This deserializer is called by the ``default_tuple_deserializer`` when it notices that     |
+|                | a named tuple (rather than a tuple) is involved.                                           |
++----------------+--------------------------------------------------------------------------------------------+
+| *Arguments:*   | ``obj: list`` | The tuple that needs deserializing.                                        |
++                +---------------+----------------------------------------------------------------------------+
+|                | ``cls: type`` | The NamedTuple class.                                                      |
++                +---------------+----------------------------------------------------------------------------+
+|                | ``kwargs``    | Any keyword arguments that are passed through the deserialization process. |
++----------------+---------------+----------------------------------------------------------------------------+
+| *Returns:*     | ``datetime``  | A deserialized named tuple (i.e. an instance of a class).                  |
++----------------+---------------+----------------------------------------------------------------------------+
+| *Example:*     | ::                                                                                         |
+|                |                                                                                            |
+|                |     >>> class NT(NamedTuple):                                                              |
+|                |     ...     a: int                                                                         |
+|                |     ...     c: str = 'I am default'                                                        |
+|                |     >>> jsons.load([42], NT)                                                               |
+|                |     NT(a=42, c='I am default')                                                             |
++----------------+--------------------------------------------------------------------------------------------+
+
+
 
 .. _default_union_deserializer:
 
