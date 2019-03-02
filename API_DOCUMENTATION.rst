@@ -79,6 +79,18 @@ Here is an overview of the standard options:
 |                    |                          | turns all keys in 'camelCase'.                         |
 +--------------------+--------------------------+--------------------------------------------------------+
 
+Here is an example:
+
+::
+    
+    >>> @dataclass
+    ... class C:
+    ...     _foo: int
+    ...     bar: int
+    >>> c = C(1, 2)
+    >>> jsons.dump(c, strip_privates=True)
+    {'bar': 2}
+
 For more info, check out the parameters of the `serializers`_.
 
 *Function signature:*
