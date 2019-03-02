@@ -375,6 +375,7 @@ Recent updates
 0.7.1
 +++++
 - Bugfix: Deserializing named tuples raised an exception
+- Impl: Restructure of the code (splitted functions, moved to packages, ...)
 
 0.7.0
 +++++
