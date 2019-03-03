@@ -36,7 +36,7 @@
 
 ::
 
-    jsons.dump(Person('Guido van Rossum', guido_datetime))
+    jsons.dump(Person('Guido van Rossum', birthday_guido))
 
 **Output after serialization:**
 
