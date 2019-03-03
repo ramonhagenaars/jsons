@@ -16,33 +16,34 @@
 *~ Any Python objects to/from JSON, easily! ~*
 
 
-* *Python 3.5+*
-* *Minimal effort to use!*
-* *No magic, just you, Python and jsons!*
-* *Human readible JSON without pollution!*
-* *Easily customizable and extendable!*
-* *Type hints for the win!*
-
-**Example of a model to be serialized:**
-
-::
-
-    @dataclass
-    class Person:
-        name: str
-        birthday: datetime
-        
-**Example of the serialization:**
-
-::
-
-    jsons.dump(Person('Guido van Rossum', birthday_guido))
-
-**Output after serialization:**
-
-::
-
-    {'birthday': '1956-01-31T12:00:00Z', 'name': 'Guido van Rossum'}
++--------------------------------------------------------+----------------------------------------------------------------------+
+| * *Python 3.5+*                                        | **Example of a model to be serialized:**                             |
+|                                                        |                                                                      |
+| * *Minimal effort to use!*                             | ::                                                                   |
+|                                                        |                                                                      |
+| * *No magic, just you, Python and jsons!*              |                                                                      |
+|                                                        |     @dataclass                                                       |
+| * *Human readible JSON without pollution!*             |     class Person:                                                    |
+|                                                        |         name: str                                                    |
+| * *Easily customizable and extendable!*                |         birthday: datetime                                           |
+|                                                        |                                                                      |
+| * *Type hints for the win!*                            | **Example of the serialization:**                                    |
+|                                                        |                                                                      |
+|                                                        |                                                                      |
+|                                                        | ::                                                                   |
+|                                                        |                                                                      |
+|                                                        |                                                                      |
+|                                                        |     jsons.dump(Person('Guido van Rossum', birthday_guido))           |
+|                                                        |                                                                      |
+|                                                        |                                                                      |
+|                                                        | **Output after serialization:**                                      |
+|                                                        |                                                                      |
+|                                                        |                                                                      |
+|                                                        | ::                                                                   |
+|                                                        |                                                                      |
+|                                                        |                                                                      |
+|                                                        |     {'birthday': '1956-01-31T12:00:00Z', 'name': 'Guido van Rossum'} |
++--------------------------------------------------------+----------------------------------------------------------------------+
     
 Read the `documentation <https://jsons.readthedocs.io/en/latest/>`_    
 
