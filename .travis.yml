@@ -3,7 +3,11 @@ language: python
 python:
   - "3.5"
   - "3.6"
-  # - "3.7"  Travis does not support 3.7 yet.
+#   - "3.7"   Travis does not support 3.7 yet.
 
 script:
-  - pytest
+  - pip install coverage
+  - pip install codecov
+  - python -m unittest discover .
+  - coverage run -m unittest discover .
+  - codecov

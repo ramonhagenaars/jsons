@@ -1,46 +1,51 @@
-|PyPI version| |Docs| |Build Status| |Scrutinizer Code Quality|
+|PyPI version| |Docs| |Build Status| |Code Coverage| |Scrutinizer Code Quality|
 |Maintainability|
 
-=====
-jsons
-=====
+::
 
+       _                     
+      (_)                    
+       _ ___  ___  _ __  ___ 
+      | / __|/ _ \| '_ \/ __|
+      | \__ | (_) | | | \__ \
+      | |___/\___/|_| |_|___/
+     _/ | JSON SERIALIZATION                   
+    |__/      MADE EASY!               
+
+    
 *~ Any Python objects to/from JSON, easily! ~*
 
-A Python (3.5+) lib for easily and deeply serializing Python objects to dicts
-or strings and for deserializing dicts or strings to Python objects using type
-hints.
 
-With ``jsons``, you can serialize/deserialize most objects already. You
-can also easily extend ``jsons`` yourself by defining a custom
-serializer/deserializer for a certain type. Furthermore, any default
-serializer/deserializer can be overridden. Some
-serializers/deserializers accept extra parameters to allow you to tune
-the serialization/deserialization process to your need.
-
-``jsons`` generates human-readable dicts or JSON strings that are not
-polluted with metadata.
-
-*******************************************
-Why not use ``__dict__`` for serialization?
-*******************************************
--  The ``__dict__`` attribute only creates a *shallow* dict of an
-   instance. Any contained object is not serialized to a dict.
--  The ``__dict__`` does not take ``@property`` methods in account.
--  Not all objects have a ``__dict__`` attribute (e.g. ``datetime`` does
-   not).
--  The serialization process of ``__dict__`` cannot easily be tuned.
--  There is no means to deserialize with ``__dict__``.
-
-******************************************
-Why not use the standard ``json`` library?
-******************************************
-
-- It's quite a hassle to (de)serialize custom types: you need to
-  write a subclass of ``json.JSONEncoder`` with specific
-  serialization/deserialization code per custom class.
-- You will need to provide that subclass of ``json.JSONEncoder`` to
-  ``json.dumps``/``json.loads`` every single time.
++--------------------------------------------------------+----------------------------------------------------------------------+
+| * *Python 3.5+*                                        | **Example of a model to be serialized:**                             |
+|                                                        |                                                                      |
+| * *Minimal effort to use!*                             | ::                                                                   |
+|                                                        |                                                                      |
+| * *No magic, just you, Python and jsons!*              |                                                                      |
+|                                                        |     @dataclass                                                       |
+| * *Human readible JSON without pollution!*             |     class Person:                                                    |
+|                                                        |         name: str                                                    |
+| * *Easily customizable and extendable!*                |         birthday: datetime                                           |
+|                                                        |                                                                      |
+| * *Type hints for the win!*                            | **Example of the serialization:**                                    |
+|                                                        |                                                                      |
+|                                                        |                                                                      |
+|                                                        | ::                                                                   |
+|                                                        |                                                                      |
+|                                                        |                                                                      |
+|                                                        |     jsons.dump(Person('Guido van Rossum', birthday_guido))           |
+|                                                        |                                                                      |
+|                                                        |                                                                      |
+|                                                        | **Output after serialization:**                                      |
+|                                                        |                                                                      |
+|                                                        |                                                                      |
+|                                                        | ::                                                                   |
+|                                                        |                                                                      |
+|                                                        |                                                                      |
+|                                                        |     {'birthday': '1956-01-31T12:00:00Z', 'name': 'Guido van Rossum'} |
++--------------------------------------------------------+----------------------------------------------------------------------+
+    
+Read the `documentation <https://jsons.readthedocs.io/en/latest/>`_    
 
 ************
 Installation
@@ -74,12 +79,33 @@ In some cases, you have instances that contain other instances that need
    list_of_tuples = jsons.load(some_dict, List[Tuple[AClass, AnotherClass]])
 
 *****************
-API DOCUMENTATION
+API Documentation
 *****************
 
 See the separate documentation page:
 
-`Documentation <https://github.com/ramonhagenaars/jsons/blob/master/API_DOCUMENTATION.rst>`_
+`Documentation <https://jsons.readthedocs.io/en/latest/>`_
+
+*******************************************
+Why not use ``__dict__`` for serialization?
+*******************************************
+-  The ``__dict__`` attribute only creates a *shallow* dict of an
+   instance. Any contained object is not serialized to a dict.
+-  The ``__dict__`` does not take ``@property`` methods in account.
+-  Not all objects have a ``__dict__`` attribute (e.g. ``datetime`` does
+   not).
+-  The serialization process of ``__dict__`` cannot easily be tuned.
+-  There is no means to deserialize with ``__dict__``.
+
+******************************************
+Why not use the standard ``json`` library?
+******************************************
+
+- It's quite a hassle to (de)serialize custom types: you need to
+  write a subclass of ``json.JSONEncoder`` with specific
+  serialization/deserialization code per custom class.
+- You will need to provide that subclass of ``json.JSONEncoder`` to
+  ``json.dumps``/``json.loads`` every single time.
 
 ********
 Examples
@@ -408,7 +434,12 @@ Special thanks to the following contributors:
 
 .. |Build Status| image:: https://api.travis-ci.org/ramonhagenaars/jsons.svg?branch=master
    :target: https://travis-ci.org/ramonhagenaars/jsons
+   
+.. |Code Coverage| image:: https://codecov.io/gh/ramonhagenaars/jsons/branch/master/graph/badge.svg
+  :target: https://codecov.io/gh/ramonhagenaars/jsons
+   
 .. |Scrutinizer Code Quality| image:: https://scrutinizer-ci.com/g/ramonhagenaars/jsons/badges/quality-score.png?b=master
    :target: https://scrutinizer-ci.com/g/ramonhagenaars/jsons/?branch=master
+   
 .. |Maintainability| image:: https://api.codeclimate.com/v1/badges/17d997068b3387c2f2c3/maintainability
    :target: https://codeclimate.com/github/ramonhagenaars/jsons/maintainability

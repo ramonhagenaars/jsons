@@ -1,9 +1,19 @@
-=======================
-jsons API documentation
-=======================
+
+::
+
+       _                     
+      (_)                    
+       _ ___  ___  _ __  ___ 
+      | / __|/ _ \| '_ \/ __|
+      | \__ | (_) | | | \__ \
+      | |___/\___/|_| |_|___/
+     _/ | JSON SERIALIZATION                   
+    |__/      MADE EASY!               
+
+      Official Documentation  
 
 *****
-INDEX
+Index
 *****
 - `Main functions`_
     - dump_
@@ -78,6 +88,18 @@ Here is an overview of the standard options:
 |                    |                          | For example, ``jsons.KEY_TRANSFORMER_CAMELCASE``       |
 |                    |                          | turns all keys in 'camelCase'.                         |
 +--------------------+--------------------------+--------------------------------------------------------+
+
+Here is an example:
+
+::
+    
+    >>> @dataclass
+    ... class C:
+    ...     _foo: int
+    ...     bar: int
+    >>> c = C(1, 2)
+    >>> jsons.dump(c, strip_privates=True)
+    {'bar': 2}
 
 For more info, check out the parameters of the `serializers`_.
 
