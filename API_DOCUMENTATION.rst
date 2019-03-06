@@ -359,7 +359,7 @@ This class can be used as a base class for your models.
 ::
 
     @dataclass
-    class Car(JsonSerializable:
+    class Car(JsonSerializable):
         color: str
         owner: str
 
