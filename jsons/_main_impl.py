@@ -118,18 +118,7 @@ def load(json_obj: object,
     """
     if not strict and (json_obj is None or type(json_obj) == cls):
         return json_obj
-    if type(json_obj) not in VALID_TYPES:
-        raise DeserializationError(
-            'Invalid type: "{}", only arguments of the following types are '
-            'allowed: {}'.format(get_class_name(type(json_obj)),
-                                 ", ".join(get_class_name(typ)
-                                           for typ in VALID_TYPES)),
-            json_obj,
-            cls)
-    if json_obj is None:
-        raise DeserializationError('Cannot load None with strict=True',
-                                   json_obj, cls)
-    cls = cls or type(json_obj)
+    cls = _check_and_get_type(json_obj, cls)
     deserializer = _get_deserializer(cls, fork_inst)
     kwargs_ = {
         'strict': strict,
@@ -381,3 +370,19 @@ def lispcase(str_: str) -> str:
     :return: a string in lisp-case.
     """
     return snakecase(str_).replace('_', '-')
+
+
+def _check_and_get_type(json_obj: object, cls: type) -> type:
+    # Check if json_obj is of a valid type and return the cls.
+    if type(json_obj) not in VALID_TYPES:
+        raise DeserializationError(
+            'Invalid type: "{}", only arguments of the following types are '
+            'allowed: {}'.format(get_class_name(type(json_obj)),
+                                 ", ".join(get_class_name(typ)
+                                           for typ in VALID_TYPES)),
+            json_obj,
+            cls)
+    if json_obj is None:
+        raise DeserializationError('Cannot load None with strict=True',
+                                   json_obj, cls)
+    return cls or type(json_obj)
