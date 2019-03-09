@@ -22,7 +22,7 @@ def get_class_name(cls: type,
         cls_name = get_class_name(origin)
     if not cls_name:
         cls_name = str(cls)
-    if cls_name and transformer:
+    if transformer:
         cls_name = transformer(cls_name)
     return cls_name
 

@@ -808,7 +808,7 @@ Serializers
 |                | the RFC3339 pattern. If the datetime is a local time, an                                      |
 |                | offset is provided. If datetime is in UTC, the result is                                      |
 |                | suffixed with a 'Z'.                                                                          |
-+----------------+-----------------------------------------------------------------------------------------------+
++----------------+----------------------------------------+------------------------------------------------------+
 | *Arguments:*   | ``obj: datetime``                      | The datetime instance that is to be                  |
 |                |                                        | serialized.                                          |
 +                +----------------------------------------+------------------------------------------------------+
@@ -1250,8 +1250,10 @@ Deserializers
 +----------------+-----------------------------------------------------------------------------------------------------------+
 | *Function:*    | ``jsons.default_enum_deserializer``                                                                       |
 +----------------+-----------------------------------------------------------------------------------------------------------+
-| *Description:* | Deserialize an enum value to an enum instance. The serialized value mustcan be the name of the enum       |
-|                | element or the value; dependent on``use_enum_name``.                                                      |
+| *Description:* | Deserialize an enum value to an enum instance. The serialized value can be either the name or the key of  |
+|                | an enum entry. If ``use_enum_name`` is set to ``True``, then the value *must* be the key of the enum      |
+|                | entry. If ``use_enum_name`` is set to ``False``, the value *must* be the value of the enum entry. By      |
+|                | default, this deserializer tries both.                                                                    |
 +----------------+---------------------+-------------------------------------------------------------------------------------+
 | *Arguments:*   | ``obj: str``        | The serialized enum.                                                                |
 +                +---------------------+-------------------------------------------------------------------------------------+

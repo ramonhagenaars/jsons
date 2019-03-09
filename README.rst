@@ -398,6 +398,14 @@ Meta
 Recent updates
 ==============
 
+0.7.3
++++++
+- Feature: Loading enums without `use_enum_name` can be with names or values.
+
+0.7.2
++++++
+- Bugfix:
+
 0.7.1
 +++++
 - Bugfix: Deserializing named tuples raised an exception
