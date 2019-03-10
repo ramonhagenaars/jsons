@@ -4,7 +4,7 @@ deserialization process of a particular type as follows:
 
 ``jsons.set_deserializer(custom_deserializer, SomeClass)``
 """
-from jsons._main_impl import snakecase, camelcase, pascalcase, lispcase
+from jsons._key_transformers import snakecase, camelcase, pascalcase, lispcase
 from jsons.deserializers.default_datetime import default_datetime_deserializer
 from jsons.deserializers.default_dict import default_dict_deserializer
 from jsons.deserializers.default_enum import default_enum_deserializer

@@ -13,7 +13,7 @@ from jsons import (
     DeserializationError
 )
 from jsons._common_impl import StateHolder
-from jsons._main_impl import snakecase, camelcase, pascalcase, lispcase
+from jsons._key_transformers import snakecase, camelcase, pascalcase, lispcase
 from jsons.decorators import dumped, loaded
 from jsons.exceptions import (
     UnfulfilledArgumentError,

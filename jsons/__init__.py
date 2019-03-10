@@ -89,7 +89,7 @@ from datetime import datetime
 from enum import Enum
 from typing import Union
 from jsons import _main_impl, deserializers, serializers, classes
-from jsons._main_impl import snakecase, camelcase, pascalcase, lispcase
+from jsons._key_transformers import snakecase, camelcase, pascalcase, lispcase
 from jsons.exceptions import (
     DeserializationError,
     DecodeError,
