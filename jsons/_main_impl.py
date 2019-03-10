@@ -9,30 +9,26 @@ import re
 from importlib import import_module
 from json import JSONDecodeError
 from typing import Dict, Callable, Optional, Union, Tuple
-from jsons._common_impl import get_class_name, get_parents, META_ATTR
+from jsons._common_impl import (
+    get_class_name,
+    get_parents,
+    META_ATTR,
+    StateHolder
+)
 from jsons.exceptions import (
     DecodeError,
     DeserializationError,
     JsonsError,
-    SerializationError, UnknownClassError)
+    SerializationError, UnknownClassError
+)
 
 VALID_TYPES = (str, int, float, bool, list, tuple, set, dict, type(None))
 RFC3339_DATETIME_PATTERN = '%Y-%m-%dT%H:%M:%S'
 
 
-class _StateHolder:
-    """
-    This class holds the registered serializers and deserializers.
-    """
-    _classes_serializers = list()
-    _classes_deserializers = list()
-    _serializers = dict()
-    _deserializers = dict()
-
-
 def dump(obj: object,
          cls: Optional[type] = None,
-         fork_inst: Optional[type] = _StateHolder,
+         fork_inst: Optional[type] = StateHolder,
          **kwargs) -> object:
     """
     Serialize the given ``obj`` to a JSON equivalent type (e.g. dict, list,
@@ -72,7 +68,7 @@ def dump(obj: object,
 def load(json_obj: object,
          cls: Optional[type] = None,
          strict: bool = False,
-         fork_inst: Optional[type] = _StateHolder,
+         fork_inst: Optional[type] = StateHolder,
          attr_getters: Optional[Dict[str, Callable[[], object]]] = None,
          **kwargs) -> object:
     """
@@ -136,14 +132,14 @@ def load(json_obj: object,
 
 
 def _get_serializer(cls: type,
-                    fork_inst: Optional[type] = _StateHolder) -> callable:
+                    fork_inst: Optional[type] = StateHolder) -> callable:
     serializer = _get_lizer(cls, fork_inst._serializers,
                             fork_inst._classes_serializers)
     return serializer
 
 
 def _get_deserializer(cls: type,
-                      fork_inst: Optional[type] = _StateHolder) -> callable:
+                      fork_inst: Optional[type] = StateHolder) -> callable:
     deserializer = _get_lizer(cls, fork_inst._deserializers,
                               fork_inst._classes_deserializers)
     return deserializer
@@ -270,7 +266,7 @@ def loadb(bytes_: bytes,
 def set_serializer(func: callable,
                    cls: type,
                    high_prio: bool = True,
-                   fork_inst: type = _StateHolder) -> None:
+                   fork_inst: type = StateHolder) -> None:
     """
     Set a serializer function for the given type. You may override the default
     behavior of ``jsons.load`` by setting a custom serializer.
@@ -301,7 +297,7 @@ def set_serializer(func: callable,
 def set_deserializer(func: callable,
                      cls: Union[type, str],
                      high_prio: bool = True,
-                     fork_inst: type = _StateHolder) -> None:
+                     fork_inst: type = StateHolder) -> None:
     """
     Set a deserializer function for the given type. You may override the
     default behavior of ``jsons.dump`` by setting a custom deserializer.

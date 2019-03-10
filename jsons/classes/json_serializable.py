@@ -1,7 +1,6 @@
 from typing import Optional
-from jsons._common_impl import get_class_name
+from jsons._common_impl import get_class_name, StateHolder
 from jsons._main_impl import (
-    _StateHolder,
     dump,
     dumps,
     dumpb,
@@ -13,7 +12,7 @@ from jsons._main_impl import (
 )
 
 
-class JsonSerializable(_StateHolder):
+class JsonSerializable(StateHolder):
     """
     This class offers an alternative to using the ``jsons.load`` and
     ``jsons.dump`` methods. An instance of a class that inherits from

@@ -10,6 +10,16 @@ from typing import Callable, Optional
 META_ATTR = '-meta'  # The name of the attribute holding meta info.
 
 
+class StateHolder:
+    """
+    This class holds the registered serializers and deserializers.
+    """
+    _classes_serializers = list()
+    _classes_deserializers = list()
+    _serializers = dict()
+    _deserializers = dict()
+
+
 def get_class_name(cls: type,
                    transformer: Optional[Callable[[str], str]] = None,
                    fully_qualified: bool = False) -> Optional[str]:
