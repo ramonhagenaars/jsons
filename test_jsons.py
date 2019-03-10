@@ -190,7 +190,7 @@ class TestJsons(TestCase):
                 self.b = b
 
         c = C(B(A(42)))
-        dumped = jsons.dump(c, verbose=True)
+        dumped = jsons.dump(c, verbose=jsons.Verbosity.WITH_CLASS_INFO)
         expectation = {
             'classes': {
                 '/': 'test_jsons.C',
@@ -211,7 +211,7 @@ class TestJsons(TestCase):
             }
         }
 
-        dumped2 = jsons.dump(c, verbose=True)
+        dumped2 = jsons.dump(c, verbose=jsons.Verbosity.WITH_CLASS_INFO)
         self.assertDictEqual(expectation2, dumped2['-meta'])
 
     def test_dump_object_strip_properties(self):

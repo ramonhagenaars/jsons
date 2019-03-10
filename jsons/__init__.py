@@ -113,6 +113,8 @@ KEY_TRANSFORMER_CAMELCASE = camelcase
 KEY_TRANSFORMER_PASCALCASE = pascalcase
 KEY_TRANSFORMER_LISPCASE = lispcase
 
+Verbosity = serializers.default_object.Verbosity
+
 default_list_serializer = serializers.default_list_serializer
 default_tuple_serializer = serializers.default_tuple_serializer
 default_dict_serializer = serializers.default_dict_serializer

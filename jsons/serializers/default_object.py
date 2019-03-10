@@ -1,7 +1,42 @@
+from datetime import datetime, timezone
+from enum import Flag
 from typing import Optional, Callable
 from jsons._common_impl import get_class_name, META_ATTR
 from jsons.classes import JsonSerializable
+from jsons.serializers import default_datetime_serializer
 from jsons.serializers.default_dict import default_dict_serializer
+
+
+class Verbosity(Flag):
+    """
+    An enum that defines the level of verbosity of the serialization of an
+    object.
+    """
+    WITH_NOTHING = 0
+    WITH_CLASS_INFO = 10
+    WITH_DUMP_TIME = 20
+    WITH_EVERYTHING = WITH_CLASS_INFO | WITH_DUMP_TIME
+
+    @staticmethod
+    def from_value(value: any) -> 'Verbosity':
+        """
+        Return a ``Verbosity`` instance from the given value.
+        :param value:
+        :return: a ``Verbosity`` instance corresponding to ``value``.
+        """
+        if isinstance(value, Verbosity):
+            return value
+        if value in (False, None):
+            return Verbosity.WITH_NOTHING
+        if value is True:
+            return Verbosity.WITH_EVERYTHING
+        if isinstance(value, int):
+            return Verbosity[value]
+        if isinstance(value, str):
+            return Verbosity(value)
+        if value:
+            return Verbosity.WITH_EVERYTHING
+        return Verbosity.WITH_NOTHING
 
 
 def default_object_serializer(
@@ -11,7 +46,7 @@ def default_object_serializer(
         strip_privates: bool = False,
         strip_properties: bool = False,
         strip_class_variables: bool = False,
-        verbose: bool = False,
+        verbose: Optional[Verbosity] = None,
         **kwargs) -> dict:
     """
     Serialize the given ``obj`` to a dict. All values within ``obj`` are also
@@ -38,7 +73,8 @@ def default_object_serializer(
     obj_dict = _get_dict_from_obj(obj, strip_privates, strip_properties,
                                   strip_class_variables, **kwargs)
     kwargs_ = {**kwargs}
-    if verbose:
+    verbose = Verbosity.from_value(verbose)
+    if Verbosity.WITH_CLASS_INFO in verbose:
         kwargs_['store_cls'] = True
     result = default_dict_serializer(
         obj_dict,
@@ -52,8 +88,8 @@ def default_object_serializer(
                               fork_inst=kwargs['fork_inst'])
     if kwargs.get('store_cls'):
         result['-cls'] = cls_name
-    elif verbose:
-        result = _get_dict_with_meta(result, cls_name)
+    else:
+        result = _get_dict_with_meta(result, cls_name, verbose)
     return result
 
 
@@ -91,29 +127,36 @@ def _get_complete_class_dict(cls):
     return cls_dict
 
 
-def _get_dict_with_meta(obj: dict, cls_name: str) -> dict:
+def _get_dict_with_meta(obj: dict, cls_name: str, verbose: Verbosity) -> dict:
     # This function will add a -meta section to the given obj (provided that
     # the given obj has -cls attributes for all children).
-    def _fill_collection_of_types(obj_: dict,
-                                  cls_name_: Optional[str],
-                                  prefix: str,
-                                  collection_of_types_: dict) -> str:
-        # This function loops through obj to fill collection_of_types_ with the
-        # class names.
-        cls_name_ = cls_name_ or obj_.pop('-cls')
-        for attr in obj_:
-            if isinstance(obj_[attr], dict):
-                attr_class = _fill_collection_of_types(obj_[attr],
-                                                       None,
-                                                       prefix + attr + '/',
-                                                       collection_of_types_)
-                collection_of_types_[prefix + attr] = attr_class
-        return cls_name_
+    if verbose is Verbosity.WITH_NOTHING:
+        return obj
 
-    collection_of_types = {}
-    _fill_collection_of_types(obj, cls_name, '/', collection_of_types)
-    collection_of_types['/'] = cls_name
-    obj[META_ATTR] = {
-        'classes': collection_of_types
-    }
+    obj[META_ATTR] = {}
+    if Verbosity.WITH_CLASS_INFO in verbose:
+        collection_of_types = {}
+        _fill_collection_of_types(obj, cls_name, '/', collection_of_types)
+        collection_of_types['/'] = cls_name
+        obj[META_ATTR]['classes'] = collection_of_types
+    if Verbosity.WITH_DUMP_TIME in verbose:
+        dump_time = default_datetime_serializer(datetime.now(tz=timezone.utc))
+        obj[META_ATTR]['dump_time'] = dump_time
     return obj
+
+
+def _fill_collection_of_types(obj_: dict,
+                              cls_name_: Optional[str],
+                              prefix: str,
+                              collection_of_types_: dict) -> str:
+    # This function loops through obj to fill collection_of_types_ with the
+    # class names.
+    cls_name_ = cls_name_ or obj_.pop('-cls')
+    for attr in obj_:
+        if attr != META_ATTR and isinstance(obj_[attr], dict):
+            attr_class = _fill_collection_of_types(obj_[attr],
+                                                   None,
+                                                   prefix + attr + '/',
+                                                   collection_of_types_)
+            collection_of_types_[prefix + attr] = attr_class
+    return cls_name_
