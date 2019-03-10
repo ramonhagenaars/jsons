@@ -12,6 +12,7 @@ from jsons import (
     KEY_TRANSFORMER_SNAKECASE,
     DeserializationError
 )
+from jsons._common_impl import StateHolder
 from jsons._main_impl import snakecase, camelcase, pascalcase, lispcase
 from jsons.decorators import dumped, loaded
 from jsons.exceptions import (
@@ -706,6 +707,12 @@ class TestJsons(TestCase):
                          c.list_b[1].list_dates[0].minute)
         self.assertEqual(loaded_c.list_b[1].list_dates[0].second,
                          c.list_b[1].list_dates[0].second)
+
+    def test_dump_load_object_verbose(self):
+        h = StateHolder()
+        dumped = jsons.dump(h, verbose=True)
+        loaded = jsons.load(dumped)
+        self.assertEqual(type(h), type(loaded))
 
     def test_load_object_properties(self):
         class WithoutSetter:
