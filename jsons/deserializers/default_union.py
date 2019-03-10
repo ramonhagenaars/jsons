@@ -21,7 +21,9 @@ def default_union_deserializer(obj: object, cls: Union, **kwargs) -> object:
         except JsonsError:
             pass  # Try the next one.
     else:
-        args_msg = ', '.join([get_class_name(cls_) for cls_ in cls.__args__])
+        fork_inst = kwargs['fork_inst']
+        args_msg = ', '.join([get_class_name(cls_, fork_inst=fork_inst)
+                              for cls_ in cls.__args__])
         err_msg = ('Could not match the object of type "{}" to any type of '
                    'the Union: {}'.format(str(cls), args_msg))
         raise DeserializationError(err_msg, obj, cls)

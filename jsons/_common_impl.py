@@ -18,25 +18,32 @@ class StateHolder:
     _classes_deserializers = list()
     _serializers = dict()
     _deserializers = dict()
+    _announced_classes = dict()
 
 
 def get_class_name(cls: type,
                    transformer: Optional[Callable[[str], str]] = None,
-                   fully_qualified: bool = False) -> Optional[str]:
+                   fully_qualified: bool = False,
+                   fork_inst: Optional[type] = StateHolder) -> Optional[str]:
     """
     Return the name of a class.
     :param cls: the class of which the name if to be returned.
     :param transformer: any string transformer, e.g. ``str.lower``.
     :param fully_qualified: if ``True`` return the fully qualified name (i.e.
     complete with module name).
+    :param fork_inst if given, it uses this fork of ``JsonSerializable`` for
+    finding the class name.
     :return: the name of ``cls``, transformed if a transformer is given.
     """
+    if cls in fork_inst._announced_classes:
+        return fork_inst._announced_classes[cls]
     cls_name = getattr(cls, '__name__', getattr(cls, '_name', None))
     module = _get_module(cls)
     transformer = transformer or (lambda x: x)
     if not cls_name and hasattr(cls, '__origin__'):
         origin = cls.__origin__
-        cls_name = get_class_name(origin)
+        cls_name = get_class_name(origin, transformer,
+                                  fully_qualified, fork_inst)
     if not cls_name:
         cls_name = str(cls)
     if fully_qualified and module:

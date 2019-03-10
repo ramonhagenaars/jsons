@@ -48,7 +48,8 @@ def default_object_serializer(
         strip_properties=strip_properties,
         strip_class_variables=strip_class_variables,
         **kwargs_)
-    cls_name = get_class_name(cls, fully_qualified=True)
+    cls_name = get_class_name(cls, fully_qualified=True,
+                              fork_inst=kwargs['fork_inst'])
     if kwargs.get('store_cls'):
         result['-cls'] = cls_name
     elif verbose:

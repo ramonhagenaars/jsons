@@ -52,7 +52,7 @@ def dump(obj: object,
         raise SerializationError('Invalid type: "{}". Only types that have a '
                                  '__slots__ defined are allowed when '
                                  'providing "cls".'
-                         .format(get_class_name(cls)))
+                         .format(get_class_name(cls, fork_inst=fork_inst)))
     cls_ = cls or obj.__class__
     serializer = _get_serializer(cls_, fork_inst)
     kwargs_ = {
@@ -115,7 +115,7 @@ def load(json_obj: object,
     """
     if not strict and (json_obj is None or type(json_obj) == cls):
         return json_obj
-    cls = _check_and_get_cls(json_obj, cls)
+    cls = _check_and_get_cls(json_obj, cls, fork_inst)
     deserializer = _get_deserializer(cls, fork_inst)
     kwargs_ = {
         'strict': strict,
@@ -134,26 +134,27 @@ def load(json_obj: object,
 def _get_serializer(cls: type,
                     fork_inst: Optional[type] = StateHolder) -> callable:
     serializer = _get_lizer(cls, fork_inst._serializers,
-                            fork_inst._classes_serializers)
+                            fork_inst._classes_serializers, fork_inst)
     return serializer
 
 
 def _get_deserializer(cls: type,
                       fork_inst: Optional[type] = StateHolder) -> callable:
     deserializer = _get_lizer(cls, fork_inst._deserializers,
-                              fork_inst._classes_deserializers)
+                              fork_inst._classes_deserializers, fork_inst)
     return deserializer
 
 
 def _get_lizer(cls: type,
                lizers: Dict[str, callable],
-               classes_lizers: list) -> callable:
-    cls_name = get_class_name(cls, str.lower)
+               classes_lizers: list,
+               fork_inst: type) -> callable:
+    cls_name = get_class_name(cls, str.lower, fork_inst=fork_inst)
     lizer = lizers.get(cls_name, None)
     if not lizer:
         parents = get_parents(cls, classes_lizers)
         if parents:
-            pname = get_class_name(parents[0], str.lower)
+            pname = get_class_name(parents[0], str.lower, fork_inst=fork_inst)
             lizer = lizers[pname]
     return lizer
 
@@ -288,7 +289,7 @@ def set_serializer(func: callable,
     if cls:
         index = 0 if high_prio else len(fork_inst._classes_serializers)
         fork_inst._classes_serializers.insert(index, cls)
-        cls_name = get_class_name(cls)
+        cls_name = get_class_name(cls, fork_inst=fork_inst)
         fork_inst._serializers[cls_name.lower()] = func
     else:
         fork_inst._serializers['nonetype'] = func
@@ -320,10 +321,28 @@ def set_deserializer(func: callable,
     if cls:
         index = 0 if high_prio else len(fork_inst._classes_deserializers)
         fork_inst._classes_deserializers.insert(index, cls)
-        cls_name = get_class_name(cls)
+        cls_name = get_class_name(cls, fork_inst=fork_inst)
         fork_inst._deserializers[cls_name.lower()] = func
     else:
         fork_inst._deserializers['nonetype'] = func
+
+
+def announce_class(
+        cls: type,
+        cls_name: Optional[str] = None,
+        fork_inst: type = StateHolder):
+    """
+    Announce the given cls to jsons to allow jsons to deserialize a verbose
+    dump into that class.
+    :param cls: the class that is to be announced.
+    :param cls_name: a custom name for that class.
+    :param fork_inst: if given, it uses this fork of ``JsonSerializable``.
+    :return: None.
+    """
+    cls_name = cls_name or get_class_name(cls, fully_qualified=True,
+                                          fork_inst=fork_inst)
+    fork_inst._announced_classes[cls] = cls_name
+    fork_inst._announced_classes[cls_name] = cls
 
 
 def camelcase(str_: str) -> str:
@@ -369,32 +388,34 @@ def lispcase(str_: str) -> str:
     return snakecase(str_).replace('_', '-')
 
 
-def _check_and_get_cls(json_obj: object, cls: type) -> type:
+def _check_and_get_cls(json_obj: object, cls: type, fork_inst: type) -> type:
     # Check if json_obj is of a valid type and return the cls.
     if type(json_obj) not in VALID_TYPES:
-        raise DeserializationError(
-            'Invalid type: "{}", only arguments of the following types are '
-            'allowed: {}'.format(get_class_name(type(json_obj)),
-                                 ", ".join(get_class_name(typ)
-                                           for typ in VALID_TYPES)),
-            json_obj,
-            cls)
+        invalid_type = get_class_name(type(json_obj), fork_inst=fork_inst)
+        valid_types = [get_class_name(typ, fork_inst=fork_inst)
+                       for typ in VALID_TYPES]
+        msg = ('Invalid type: "{}", only arguments of the following types are '
+               'allowed: {}'.format(invalid_type, ", ".join(valid_types)))
+        raise DeserializationError(msg, json_obj, cls)
     if json_obj is None:
         raise DeserializationError('Cannot load None with strict=True',
                                    json_obj, cls)
 
-    cls_from_meta, meta = _get_cls_and_meta(json_obj)
+    cls_from_meta, meta = _get_cls_and_meta(json_obj, fork_inst)
     return cls or cls_from_meta or type(json_obj)
 
 
-def _get_cls_and_meta(json_obj: object) -> Tuple[Optional[type], Optional[dict]]:
+def _get_cls_and_meta(
+        json_obj: object,
+        fork_inst: type) -> Tuple[Optional[type], Optional[dict]]:
     if isinstance(json_obj, dict) and META_ATTR in json_obj:
         cls_str = json_obj[META_ATTR]['classes']['/']
-        return _get_cls_from_str(cls_str, json_obj), json_obj[META_ATTR]
+        cls = _get_cls_from_str(cls_str, json_obj, fork_inst)
+        return cls, json_obj[META_ATTR]
     return None, None
 
 
-def _get_cls_from_str(cls_str: str, source: object) -> type:
+def _get_cls_from_str(cls_str: str, source: object, fork_inst) -> type:
     try:
         # importlib.import_module('jsons.exceptions')
         splitted = cls_str.split('.')
@@ -403,14 +424,19 @@ def _get_cls_from_str(cls_str: str, source: object) -> type:
         cls_module = import_module(module_name)
         cls = getattr(cls_module, cls_name)
         if not cls or not isinstance(cls, type):
-            cls = _lookup_announced_class(cls_str, source)
+            cls = _lookup_announced_class(cls_str, source, fork_inst)
     except (ModuleNotFoundError, AttributeError, ValueError):
-        cls = _lookup_announced_class(cls_str, source)
+        cls = _lookup_announced_class(cls_str, source, fork_inst)
     return cls
 
 
-def _lookup_announced_class(cls_str: str, source: object) -> type:
-    msg = ('Could not find a suitable type for "{}". Make sure it can be '
-           'imported or that is has been announced.'.format(cls_str))
-    raise UnknownClassError(msg, source, cls_str)
-    # TODO implement this.
+def _lookup_announced_class(
+        cls_str: str,
+        source: object,
+        fork_inst: type) -> type:
+    cls = fork_inst._announced_classes.get(cls_str)
+    if not cls:
+        msg = ('Could not find a suitable type for "{}". Make sure it can be '
+               'imported or that is has been announced.'.format(cls_str))
+        raise UnknownClassError(msg, source, cls_str)
+    return cls

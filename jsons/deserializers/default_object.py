@@ -29,7 +29,8 @@ def default_object_deserializer(
     obj, kwargs = _check_and_transform_keys(obj, key_transformer, **kwargs)
     kwargs['strict'] = strict
     constructor_args = _get_constructor_args(obj, cls, **kwargs)
-    remaining_attrs = _get_remaining_args(obj, cls, constructor_args, strict)
+    remaining_attrs = _get_remaining_args(obj, cls, constructor_args,
+                                          strict, kwargs['fork_inst'])
     instance = cls(**constructor_args)
     _set_remaining_attrs(instance, remaining_attrs, **kwargs)
     return instance
@@ -106,14 +107,16 @@ def _check_and_transform_keys(obj: dict,
 def _get_remaining_args(obj: dict,
                         cls: type,
                         constructor_args: dict,
-                        strict: bool) -> dict:
+                        strict: bool,
+                        fork_inst: type) -> dict:
     # Get the remaining args or raise if strict and the signature is unmatched.
     remaining_attrs = {attr_name: obj[attr_name] for attr_name in obj
                        if attr_name not in constructor_args
                        and attr_name != META_ATTR}
     if strict and remaining_attrs:
         unexpected_arg = list(remaining_attrs.keys())[0]
-        err_msg = 'Type "{}" does not expect "{}"'.format(get_class_name(cls),
-                                                          unexpected_arg)
+        err_msg = ('Type "{}" does not expect "{}"'
+                   .format(get_class_name(cls, fork_inst=fork_inst),
+                           unexpected_arg))
         raise SignatureMismatchError(err_msg, unexpected_arg, obj, cls)
     return remaining_attrs

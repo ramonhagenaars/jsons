@@ -32,7 +32,8 @@ class JsonSerializable(StateHolder):
         :return: a new ``type`` based on ``JsonSerializable``.
         """
         cls._fork_counter += 1
-        class_name = name or '{}_fork{}'.format(get_class_name(cls),
+        class_name = name or '{}_fork{}'.format(get_class_name(cls,
+                                                               fork_inst=cls),
                                                 cls._fork_counter)
         result = type(class_name, (cls,), {})
         result._classes_serializers = cls._classes_serializers.copy()

@@ -200,6 +200,19 @@ class TestJsons(TestCase):
 
         self.assertDictEqual(expectation, dumped['-meta'])
 
+        # Now customize the name of the B class.
+        jsons.announce_class(B, 'custom_name')
+        expectation2 = {
+            'classes': {
+                '/': 'test_jsons.C',
+                '/b': 'custom_name',
+                '/b/a': 'test_jsons.A'
+            }
+        }
+
+        dumped2 = jsons.dump(c, verbose=True)
+        self.assertDictEqual(expectation2, dumped2['-meta'])
+
     def test_dump_object_strip_properties(self):
         obj = self.AllDumpable(self.AllDumpable())
         exp = {'_par_c': 10, 'par_v': None,
@@ -609,16 +622,23 @@ class TestJsons(TestCase):
         del jsons.C  # Clean it up again... no big deal though...
         self.assertEqual(42, loaded.b.a.x)
 
+        # Now let's test what happens when we try to load an unknown class.
         dumped2 = {
+            'x': 100,
             '-meta': {
                 'classes': {
-                    '/': 'you_wont_find_me'
+                    '/': 'custom_class'
                 }
             }
         }
 
         with self.assertRaises(UnknownClassError):
             jsons.load(dumped2)
+
+        # Now announce the class and try again; it should work now.
+        jsons.announce_class(A, 'custom_class')
+        loaded2 = jsons.load(dumped2)
+        self.assertEqual(100, loaded2.x)
 
     def test_load_object_with_attr_getters(self):
         class A:
