@@ -18,7 +18,7 @@ from jsons.exceptions import (
     UnfulfilledArgumentError,
     InvalidDecorationError,
     DecodeError,
-    SignatureMismatchError)
+    SignatureMismatchError, UnknownClassError)
 
 
 class TestJsons(TestCase):
@@ -174,6 +174,31 @@ class TestJsons(TestCase):
         exp['child'] = exp.copy()
         dump = jsons.dump(obj)
         self.assertDictEqual(exp, dump)
+
+    def test_dump_object_verbose(self):
+        class A:
+            def __init__(self, x):
+                self.x = x
+
+        class B:
+            def __init__(self, a: A):
+                self.a = a
+
+        class C:
+            def __init__(self, b: B):
+                self.b = b
+
+        c = C(B(A(42)))
+        dumped = jsons.dump(c, verbose=True)
+        expectation = {
+            'classes': {
+                '/': 'test_jsons.C',
+                '/b': 'test_jsons.B',
+                '/b/a': 'test_jsons.A'
+            }
+        }
+
+        self.assertDictEqual(expectation, dumped['-meta'])
 
     def test_dump_object_strip_properties(self):
         obj = self.AllDumpable(self.AllDumpable())
@@ -550,6 +575,50 @@ class TestJsons(TestCase):
         loaded_b = jsons.load({'name': 'B', 'a': {'name': 'A'}}, B)
         self.assertEqual(b.name, loaded_b.name)
         self.assertEqual(b.a.name, loaded_b.a.name)
+
+    def test_load_object_verbose(self):
+        class A:
+            def __init__(self, x):
+                self.x = x
+
+        class B:
+            def __init__(self, a: A):
+                self.a = a
+
+        class C:
+            def __init__(self, b: B):
+                self.b = b
+
+        dumped1 = {
+            'b': {
+                'a': {
+                    'x': 42
+                }
+            },
+            '-meta': {
+                'classes': {
+                    '/': 'jsons.C',
+                    '/b': 'jsons.B',
+                    '/b/a': 'jsons.A'
+                }
+            }
+        }
+
+        jsons.C = C  # Place C on a spot where it can be found.
+        loaded = jsons.load(dumped1)
+        del jsons.C  # Clean it up again... no big deal though...
+        self.assertEqual(42, loaded.b.a.x)
+
+        dumped2 = {
+            '-meta': {
+                'classes': {
+                    '/': 'you_wont_find_me'
+                }
+            }
+        }
+
+        with self.assertRaises(UnknownClassError):
+            jsons.load(dumped2)
 
     def test_load_object_with_attr_getters(self):
         class A:

@@ -6,14 +6,15 @@ as `load` and `dump`.
 """
 import json
 import re
+from importlib import import_module
 from json import JSONDecodeError
-from typing import Dict, Callable, Optional, Union
+from typing import Dict, Callable, Optional, Union, Tuple
 from jsons._common_impl import get_class_name, get_parents
 from jsons.exceptions import (
     DecodeError,
     DeserializationError,
     JsonsError,
-    SerializationError)
+    SerializationError, UnknownClassError)
 
 VALID_TYPES = (str, int, float, bool, list, tuple, set, dict, type(None))
 RFC3339_DATETIME_PATTERN = '%Y-%m-%dT%H:%M:%S'
@@ -118,7 +119,7 @@ def load(json_obj: object,
     """
     if not strict and (json_obj is None or type(json_obj) == cls):
         return json_obj
-    cls = _check_and_get_type(json_obj, cls)
+    cls = _check_and_get_cls(json_obj, cls)
     deserializer = _get_deserializer(cls, fork_inst)
     kwargs_ = {
         'strict': strict,
@@ -372,7 +373,7 @@ def lispcase(str_: str) -> str:
     return snakecase(str_).replace('_', '-')
 
 
-def _check_and_get_type(json_obj: object, cls: type) -> type:
+def _check_and_get_cls(json_obj: object, cls: type) -> type:
     # Check if json_obj is of a valid type and return the cls.
     if type(json_obj) not in VALID_TYPES:
         raise DeserializationError(
@@ -385,4 +386,35 @@ def _check_and_get_type(json_obj: object, cls: type) -> type:
     if json_obj is None:
         raise DeserializationError('Cannot load None with strict=True',
                                    json_obj, cls)
-    return cls or type(json_obj)
+
+    cls_from_meta, meta = _get_cls_and_meta(json_obj)
+    return cls or cls_from_meta or type(json_obj)
+
+
+def _get_cls_and_meta(json_obj: object) -> Tuple[Optional[type], Optional[dict]]:
+    if isinstance(json_obj, dict) and '-meta' in json_obj:
+        cls_str = json_obj['-meta']['classes']['/']
+        return _get_cls_from_str(cls_str, json_obj), json_obj['-meta']
+    return None, None
+
+
+def _get_cls_from_str(cls_str: str, source: object) -> type:
+    try:
+        # importlib.import_module('jsons.exceptions')
+        splitted = cls_str.split('.')
+        module_name = '.'.join(splitted[:-1])
+        cls_name = splitted[-1]
+        cls_module = import_module(module_name)
+        cls = getattr(cls_module, cls_name)
+        if not cls or not isinstance(cls, type):
+            cls = _lookup_announced_class(cls_str, source)
+    except (ModuleNotFoundError, AttributeError, ValueError):
+        cls = _lookup_announced_class(cls_str, source)
+    return cls
+
+
+def _lookup_announced_class(cls_str: str, source: object) -> type:
+    msg = ('Could not find a suitable type for "{}". Make sure it can be '
+           'imported or that is has been announced.'.format(cls_str))
+    raise UnknownClassError(msg, source, cls_str)
+    # TODO implement this.

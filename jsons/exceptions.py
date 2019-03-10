@@ -2,6 +2,7 @@
 Contains the classes that may be raised by jsons.
 """
 from json import JSONDecodeError
+from typing import Optional
 
 
 class JsonsError(Exception):
@@ -44,7 +45,7 @@ class DeserializationError(JsonsError):
     """
     Raised when deserialization failed for some reason.
     """
-    def __init__(self, message: str, source: object, target: type):
+    def __init__(self, message: str, source: object, target: Optional[type]):
         """
         Constructor.
         :param message: the message describing the problem.
@@ -64,7 +65,7 @@ class DeserializationError(JsonsError):
         return self._source
 
     @property
-    def target(self) -> type:
+    def target(self) -> Optional[type]:
         """
         The target type to which `source` was to be deserialized.
         :return: the type to which `source` was to be deserialized.
@@ -118,13 +119,51 @@ class UnfulfilledArgumentError(DeserializationError, ArgumentError):
 
 
 class SignatureMismatchError(DeserializationError, ArgumentError):
+    """
+    Raised when the source could not be deserialized into the target type due
+    to a mismatch between the source's attributes and the target's accepted
+    parameters. This error is raised in "strict-mode" only.
+    """
     def __init__(self,
                  message: str,
                  argument: str,
                  source: object,
                  target: type):
+        """
+        Constructor.
+        :param message: the message of this error.
+        :param argument: the argument that caused the problem.
+        :param source: the object that was to be deserialized.
+        :param target: the type to which `source` was to be deserialized.
+        """
         DeserializationError.__init__(self, message, source, target)
         ArgumentError.__init__(self, message, argument)
+
+
+class UnknownClassError(DeserializationError):
+    """
+    Raised when jsons failed to find a type instance to deserialize to.
+
+    TODO: mention announce_class
+    """
+    def __init__(self, message: str, source: object, target_name: str):
+        """
+        Constructor.
+        :param message: the message of this error.
+        :param source: the object that was to be deserialized.
+        :param target_name: the name of the type that was the target type.
+        """
+        DeserializationError.__init__(self, message, source, None)
+        self._target_name = target_name
+
+    @property
+    def target_name(self) -> str:
+        """
+        The name of the type that was unsuccessfully attempted to deserialize
+        into.
+        :return: the name of the type that was to be the target type.
+        """
+        return self._target_name
 
 
 class InvalidDecorationError(JsonsError):
