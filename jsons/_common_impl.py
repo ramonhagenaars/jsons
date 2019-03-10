@@ -7,6 +7,9 @@ throughout `jsons`.
 from typing import Callable, Optional
 
 
+META_ATTR = '-meta'  # The name of the attribute holding meta info.
+
+
 def get_class_name(cls: type,
                    transformer: Optional[Callable[[str], str]] = None,
                    fully_qualified: bool = False) -> Optional[str]:

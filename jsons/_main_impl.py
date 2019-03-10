@@ -9,7 +9,7 @@ import re
 from importlib import import_module
 from json import JSONDecodeError
 from typing import Dict, Callable, Optional, Union, Tuple
-from jsons._common_impl import get_class_name, get_parents
+from jsons._common_impl import get_class_name, get_parents, META_ATTR
 from jsons.exceptions import (
     DecodeError,
     DeserializationError,
@@ -392,9 +392,9 @@ def _check_and_get_cls(json_obj: object, cls: type) -> type:
 
 
 def _get_cls_and_meta(json_obj: object) -> Tuple[Optional[type], Optional[dict]]:
-    if isinstance(json_obj, dict) and '-meta' in json_obj:
-        cls_str = json_obj['-meta']['classes']['/']
-        return _get_cls_from_str(cls_str, json_obj), json_obj['-meta']
+    if isinstance(json_obj, dict) and META_ATTR in json_obj:
+        cls_str = json_obj[META_ATTR]['classes']['/']
+        return _get_cls_from_str(cls_str, json_obj), json_obj[META_ATTR]
     return None, None
 
 

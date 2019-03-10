@@ -1,5 +1,5 @@
 from typing import Optional, Callable
-from jsons._common_impl import get_class_name
+from jsons._common_impl import get_class_name, META_ATTR
 from jsons.classes import JsonSerializable
 from jsons.serializers.default_dict import default_dict_serializer
 
@@ -112,7 +112,7 @@ def _get_dict_with_meta(obj: dict, cls_name: str) -> dict:
     collection_of_types = {}
     _fill_collection_of_types(obj, cls_name, '/', collection_of_types)
     collection_of_types['/'] = cls_name
-    obj['-meta'] = {
+    obj[META_ATTR] = {
         'classes': collection_of_types
     }
     return obj

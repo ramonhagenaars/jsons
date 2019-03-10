@@ -1,7 +1,7 @@
 import inspect
 from functools import partial
 from typing import Optional, Callable, Tuple
-from jsons._common_impl import get_class_name
+from jsons._common_impl import get_class_name, META_ATTR
 from jsons._main_impl import load
 from jsons.exceptions import SignatureMismatchError, UnfulfilledArgumentError
 
@@ -110,7 +110,7 @@ def _get_remaining_args(obj: dict,
     # Get the remaining args or raise if strict and the signature is unmatched.
     remaining_attrs = {attr_name: obj[attr_name] for attr_name in obj
                        if attr_name not in constructor_args
-                       and attr_name != '-meta'}  # TODO clean this up
+                       and attr_name != META_ATTR}
     if strict and remaining_attrs:
         unexpected_arg = list(remaining_attrs.keys())[0]
         err_msg = 'Type "{}" does not expect "{}"'.format(get_class_name(cls),
