@@ -6,8 +6,9 @@ python:
 #   - "3.7"   Travis does not support 3.7 yet.
 
 script:
+  - pip install .
   - pip install coverage
   - pip install codecov
-  - python -m unittest discover .
-  - coverage run -m unittest discover .
+  - python -m unittest discover tests
+  - coverage run -m unittest discover tests
   - codecov
