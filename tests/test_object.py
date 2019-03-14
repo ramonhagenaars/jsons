@@ -1,19 +1,12 @@
 import datetime
-from enum import Enum
 from typing import List
 from unittest import TestCase
-
 from jsons._common_impl import StateHolder
 from jsons.exceptions import SignatureMismatchError, UnknownClassError
-
 import jsons
 
 
-
-
 class TestObject(TestCase):
-
-
     def test_dump_object(self):
         obj = AllDumpable(AllDumpable())
         exp = {'_par_c': 10, 'par_v': None, 'par_p': 12,
@@ -61,6 +54,24 @@ class TestObject(TestCase):
 
         dumped2 = jsons.dump(c, verbose=jsons.Verbosity.WITH_CLASS_INFO)
         self.assertDictEqual(expectation2, dumped2['-meta'])
+
+        dumped3 = jsons.dump(c, verbose=jsons.Verbosity.WITH_NOTHING)
+        self.assertDictEqual({'b': {'a': {'x': 42}}}, dumped3)
+
+        dumped4 = jsons.dump(c, verbose=jsons.Verbosity.WITH_DUMP_TIME)
+        self.assertTrue('dump_time' in dumped4['-meta'])
+        self.assertTrue('classes' not in dumped4['-meta'])
+
+        dumped5 = jsons.dump(c, verbose=jsons.Verbosity.WITH_EVERYTHING)
+        self.assertTrue('dump_time' in dumped5['-meta'])
+        self.assertTrue('classes' in dumped5['-meta'])
+
+    def test_verbosity_from_value(self):
+        self.assertEqual(jsons.Verbosity.WITH_DUMP_TIME, jsons.Verbosity.from_value(jsons.Verbosity.WITH_DUMP_TIME))
+        self.assertEqual(jsons.Verbosity.WITH_NOTHING, jsons.Verbosity.from_value(False))
+        self.assertEqual(jsons.Verbosity.WITH_NOTHING, jsons.Verbosity.from_value(None))
+        self.assertEqual(jsons.Verbosity.WITH_EVERYTHING, jsons.Verbosity.from_value(True))
+        self.assertEqual(jsons.Verbosity.WITH_EVERYTHING, jsons.Verbosity.from_value([1, 2, 3]))
 
     def test_dump_object_strip_properties(self):
         obj = AllDumpable(AllDumpable())

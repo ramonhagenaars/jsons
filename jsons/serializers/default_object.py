@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 from enum import Flag
-from typing import Optional, Callable
+from typing import Optional, Callable, Union
 from jsons._common_impl import get_class_name, META_ATTR
 from jsons.classes import JsonSerializable
 from jsons.serializers import default_datetime_serializer
@@ -30,10 +30,6 @@ class Verbosity(Flag):
             return Verbosity.WITH_NOTHING
         if value is True:
             return Verbosity.WITH_EVERYTHING
-        if isinstance(value, int):
-            return Verbosity[value]
-        if isinstance(value, str):
-            return Verbosity(value)
         if value:
             return Verbosity.WITH_EVERYTHING
         return Verbosity.WITH_NOTHING
@@ -46,7 +42,7 @@ def default_object_serializer(
         strip_privates: bool = False,
         strip_properties: bool = False,
         strip_class_variables: bool = False,
-        verbose: Optional[Verbosity] = None,
+        verbose: Union[Verbosity, bool] = False,
         **kwargs) -> dict:
     """
     Serialize the given ``obj`` to a dict. All values within ``obj`` are also

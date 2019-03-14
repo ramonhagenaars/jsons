@@ -88,6 +88,13 @@ Here is an overview of the standard options:
 |                    |                          | For example, ``jsons.KEY_TRANSFORMER_CAMELCASE``       |
 |                    |                          | turns all keys in 'camelCase'.                         |
 +--------------------+--------------------------+--------------------------------------------------------+
+| verbose            | ``verbose:               | This parameter allows you to specify whether and how   |
+|                    | Union[Verbosity, bool]`` | meta data should be outputted. If ``WITH_CLASS_INFO``  |
+|                    |                          | or ``WITH_EVERYTHING`` is used, the output contain     |
+|                    |                          | typing info. With that info ``jsons.load`` does not    |
+|                    |                          | need a ``cls`` argument.                               |
++--------------------+--------------------------+--------------------------------------------------------+
+
 
 Here is an example:
 
@@ -1015,6 +1022,9 @@ Serializers
 +                +-----------------------------------------------------+--------------------------------------------------+
 |                | ``strip_properties: bool``                          | If ``True`` the resulting dict will not          |
 |                |                                                     | contain values from @properties.                 |
++                +-----------------------------------------------------+--------------------------------------------------+
+|                | ``verbose: Union[Verbosity, bool]``                 | When set, the output will contain meta data      |
+|                |                                                     | (e.g. data on the types).                        |
 +                +-----------------------------------------------------+--------------------------------------------------+
 |                | ``kwargs``                                          | Any keyword arguments that may be given to the   |
 |                |                                                     | serialization process.                           |
