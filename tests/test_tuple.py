@@ -56,6 +56,18 @@ class TestTuple(TestCase):
             self.assertEqual(T, err.target)
             self.assertEqual('x', err.argument)
 
+    def test_load_namedtuple_without_types(self):
+        T = namedtuple('T', ['x', 'y'])
+        loaded = jsons.load(['100', 200], T)
+        self.assertEqual('100', loaded.x)
+        self.assertEqual(200, loaded.y)
+
+    def test_load_namedtuple_with_empty(self):
+        T = namedtuple('T', ['x', 'y'])
+        loaded = jsons.load(['', ''], T)
+        self.assertEqual('', loaded.x)
+        self.assertEqual('', loaded.y)
+
     def test_load_tuple_with_n_length(self):
         dat = datetime.datetime(year=2018, month=7, day=8, hour=21, minute=34,
                                 tzinfo=datetime.timezone.utc)

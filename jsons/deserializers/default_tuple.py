@@ -38,11 +38,12 @@ def default_namedtuple_deserializer(obj: list, cls: type, **kwargs) -> object:
             field = obj[index]
         else:
             field = cls._field_defaults.get(field_name, None)
-        if not field:
+        if field is None:
             msg = ('No value present in {} for argument "{}"'
                    .format(obj, field_name))
             raise UnfulfilledArgumentError(msg, field_name, obj, cls)
-        cls_ = cls._field_types.get(field_name, None)
+        field_types = getattr(cls, '_field_types', None)
+        cls_ = field_types.get(field_name) if field_types else None
         loaded_field = load(field, cls_, **kwargs)
         args.append(loaded_field)
     inst = cls(*args)
