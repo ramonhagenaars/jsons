@@ -66,13 +66,6 @@ class TestObject(TestCase):
         self.assertTrue('dump_time' in dumped5['-meta'])
         self.assertTrue('classes' in dumped5['-meta'])
 
-    def test_verbosity_from_value(self):
-        self.assertEqual(jsons.Verbosity.WITH_DUMP_TIME, jsons.Verbosity.from_value(jsons.Verbosity.WITH_DUMP_TIME))
-        self.assertEqual(jsons.Verbosity.WITH_NOTHING, jsons.Verbosity.from_value(False))
-        self.assertEqual(jsons.Verbosity.WITH_NOTHING, jsons.Verbosity.from_value(None))
-        self.assertEqual(jsons.Verbosity.WITH_EVERYTHING, jsons.Verbosity.from_value(True))
-        self.assertEqual(jsons.Verbosity.WITH_EVERYTHING, jsons.Verbosity.from_value([1, 2, 3]))
-
     def test_dump_object_strip_properties(self):
         obj = AllDumpable(AllDumpable())
         exp = {'_par_c': 10, 'par_v': None,
