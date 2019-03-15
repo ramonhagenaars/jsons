@@ -398,13 +398,15 @@ Meta
 Recent updates
 ==============
 
-0.7.3
+0.8.0
 +++++
+- Feature: Dumping objects can be verbose.
 - Feature: Loading enums without `use_enum_name` can be with names or values.
+- Bugfix: Loading empty namedtuples caused a problem.
 
 0.7.2
 +++++
-- Bugfix:
+- Bugfix: Package problem.
 
 0.7.1
 +++++
