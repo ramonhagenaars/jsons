@@ -326,6 +326,18 @@ def set_deserializer(func: callable,
         fork_inst._deserializers['nonetype'] = func
 
 
+def suppress_warnings(
+        do_suppress: Optional[bool] = True,
+        fork_inst: Optional[type] = StateHolder):
+    """
+    Suppress (or stop suppressing) warnings.
+    :param do_suppress: if ``True``, warnings will be suppressed from now on.
+    :param fork_inst: if given, it uses this fork of ``JsonSerializable``.
+    :return: None.
+    """
+    fork_inst._suppress_warnings = do_suppress
+
+
 def announce_class(
         cls: type,
         cls_name: Optional[str] = None,

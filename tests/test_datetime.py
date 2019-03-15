@@ -53,3 +53,5 @@ class TestDatetime(TestCase):
                                 tzinfo=tzinfo)
         loaded = jsons.load('2018-07-08T21:34:00-02:00')
         self.assertEqual(loaded, dat)
+
+# TODO add warning if no tz info

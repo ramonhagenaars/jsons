@@ -4,6 +4,7 @@ PRIVATE MODULE: do not import (from) it directly.
 This module contains implementations of common functionality that can be used
 throughout `jsons`.
 """
+import warnings
 from typing import Callable, Optional
 
 
@@ -19,6 +20,12 @@ class StateHolder:
     _serializers = dict()
     _deserializers = dict()
     _announced_classes = dict()
+    _suppress_warnings = False
+
+    @classmethod
+    def _warn(cls, *args, **kwargs):
+        if not cls._suppress_warnings:
+            warnings.warn(*args, **kwargs)
 
 
 def get_class_name(cls: type,
