@@ -107,6 +107,7 @@ JsonSerializable = classes.JsonSerializable
 set_serializer = _main_impl.set_serializer
 set_deserializer = _main_impl.set_deserializer
 announce_class = _main_impl.announce_class
+suppress_warnings = _main_impl.suppress_warnings
 
 KEY_TRANSFORMER_SNAKECASE = snakecase
 KEY_TRANSFORMER_CAMELCASE = camelcase

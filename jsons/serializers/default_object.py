@@ -1,6 +1,7 @@
 from datetime import datetime, timezone
 from typing import Optional, Callable, Union
 from jsons._common_impl import get_class_name, META_ATTR
+from jsons._datetime_impl import to_str
 from jsons.classes import JsonSerializable
 from jsons.classes.verbosity import Verbosity
 from jsons.serializers import default_datetime_serializer
@@ -57,7 +58,8 @@ def default_object_serializer(
     if kwargs.get('store_cls'):
         result['-cls'] = cls_name
     else:
-        result = _get_dict_with_meta(result, cls_name, verbose)
+        result = _get_dict_with_meta(result, cls_name, verbose,
+                                     kwargs['fork_inst'])
     return result
 
 
@@ -95,7 +97,11 @@ def _get_complete_class_dict(cls):
     return cls_dict
 
 
-def _get_dict_with_meta(obj: dict, cls_name: str, verbose: Verbosity) -> dict:
+def _get_dict_with_meta(
+        obj: dict,
+        cls_name: str,
+        verbose: Verbosity,
+        fork_inst: type) -> dict:
     # This function will add a -meta section to the given obj (provided that
     # the given obj has -cls attributes for all children).
     if verbose is Verbosity.WITH_NOTHING:
@@ -108,7 +114,7 @@ def _get_dict_with_meta(obj: dict, cls_name: str, verbose: Verbosity) -> dict:
         collection_of_types['/'] = cls_name
         obj[META_ATTR]['classes'] = collection_of_types
     if Verbosity.WITH_DUMP_TIME in verbose:
-        dump_time = default_datetime_serializer(datetime.now(tz=timezone.utc))
+        dump_time = to_str(datetime.now(tz=timezone.utc), True, fork_inst)
         obj[META_ATTR]['dump_time'] = dump_time
     return obj
 

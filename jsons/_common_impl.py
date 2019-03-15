@@ -23,9 +23,11 @@ class StateHolder:
     _suppress_warnings = False
 
     @classmethod
-    def _warn(cls, *args, **kwargs):
+    def _warn(cls, msg, *args, **kwargs):
         if not cls._suppress_warnings:
-            warnings.warn(*args, **kwargs)
+            msg_ = ('{} You can suppress warnings like this using '
+                    'jsons.suppress_warnings().'.format(msg))
+            warnings.warn(msg_, *args, **kwargs)
 
 
 def get_class_name(cls: type,

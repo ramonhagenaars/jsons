@@ -1,4 +1,5 @@
 import datetime
+import warnings
 from unittest import TestCase
 import jsons
 
@@ -21,6 +22,28 @@ class TestDatetime(TestCase):
         dumped = jsons.dump(d)
         # utcnow generates a datetime without tzinfo.
         self.assertTrue(dumped.endswith('Z'))
+
+    def test_dump_datetime_without_tz(self):
+        # By default, naive datetimes trigger a warning.
+        with warnings.catch_warnings(record=True) as w:
+            jsons.dump(datetime.datetime.now())
+            self.assertEqual(1, len(w))
+            self.assertTrue(issubclass(w[0].category, UserWarning))
+
+        jsons.suppress_warnings()
+
+        # Warnings are now suppressed.
+        with warnings.catch_warnings(record=True) as w:
+            jsons.dump(datetime.datetime.now())
+            self.assertEqual(0, len(w))
+
+        jsons.suppress_warnings(False)
+
+        # The warnings are back on now.
+        with warnings.catch_warnings(record=True) as w:
+            jsons.dump(datetime.datetime.now())
+            self.assertEqual(1, len(w))
+            self.assertTrue(issubclass(w[0].category, UserWarning))
 
     def test_dump_datetime_with_stripped_microseconds(self):
         d = datetime.datetime(year=2018, month=7, day=8, hour=21, minute=34,
@@ -53,5 +76,3 @@ class TestDatetime(TestCase):
                                 tzinfo=tzinfo)
         loaded = jsons.load('2018-07-08T21:34:00-02:00')
         self.assertEqual(loaded, dat)
-
-# TODO add warning if no tz info
