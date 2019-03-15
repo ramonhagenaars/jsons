@@ -24,8 +24,10 @@ Index
     - loadb_
     - set_serializer_
     - set_deserializer_
+    - suppress_warnings_
 - `Classes`_
     - JsonSerializable_
+    - Verbosity_
 - `Decorators`_
     - loaded_
     - dumped_
@@ -353,6 +355,38 @@ For more info, check out the parameters of the `serializers`_.
 |                |     >>> jsons.load('any string')                                                                   |
 |                |     123                                                                                            |
 +----------------+----------------------------------------------------------------------------------------------------+
+
+.. _suppress_warnings:
+
+|
+|
+| **Function: suppress_warnings**
+|
+
++----------------+-----------------------------------------------------------------------------------------------------------------+
+| *Function:*    | ``jsons.set_deserializer``                                                                                      |
++----------------+-----------------------------------------------------------------------------------------------------------------+
+| *Description:* | Suppress (or stop suppressing) warnings.                                                                        |
+|                |                                                                                                                 |
++----------------+----------------------------------+------------------------------------------------------------------------------+
+| *Arguments:*   | ``do_suppress: Optional[bool]``  | if ``True``, warnings will be suppressed from now on.                        |
++                +----------------------------------+------------------------------------------------------------------------------+
+|                | ``cls: type``                    | The type that ``func`` can deserialize.                                      |
++                +----------------------------------+------------------------------------------------------------------------------+
+|                | ``high_prio: bool``              | If ``True``, then ``func`` will take precedence over any other deserializer  |
+|                |                                  | function that serializes ``cls``.                                            |
++                +----------------------------------+------------------------------------------------------------------------------+
+|                | ``fork_inst``                    | If given, it only suppresses (or stops suppressing) warnings of the given    |
+|                |                                  | fork.                                                                        |
++----------------+----------------------------------+------------------------------------------------------------------------------+
+| *Returns:*     | ``None``                         |                                                                              |
++----------------+----------------------------------+------------------------------------------------------------------------------+
+| *Example:*     | ::                                                                                                              |
+|                |                                                                                                                 |
+|                |     >>> jsons.suppress_warnings()                                                                               |
++----------------+-----------------------------------------------------------------------------------------------------------------+
+
+
 
 *******
 Classes
@@ -796,6 +830,94 @@ Decorators
 |                |     'str'                                                                                                       |
 +----------------+-----------------------------------------------------------------------------------------------------------------+
 
+
+'''''''''
+Verbosity
+'''''''''
+An enum that defines the level of verbosity of a serialized object. You can
+provide an instance of this enum to the ``dump`` function.
+
+Example:
+
+::
+
+    @dataclass
+    class Car:
+        color: str
+        owner: str
+
+
+    c = Car('red', 'me')
+    dumped = jsons.dump(c, verbose=Verbosity.WITH_EVERYTHING)
+
+    # You can also combine Verbosity instances as follows:
+    # WITH_CLASS_INFO | WITH_DUMP_TIME
+
+This would result in the following value for ``dumped``:
+
+::
+
+    {
+      'color': 'red',
+      'owner': 'me',
+      '-meta': {
+        'classes': {
+          '/': '__main__.Car'
+        },
+        'dump_time': '2019-03-15T19:59:37Z'
+      }
+    }
+
+And with this, you can deserialize ``dumped`` without having to specify its
+class:
+
+::
+
+    jsons.load(dumped)
+
+    # Instead of: jsons.load(dumped, cls=Car)
+
+
+.. _Verbosity:
+
+The following are members of ``Verbosity``:
+
++-----------------+-----------+----------------------------------------------+
+| **Attribute**   | **value** | **Description**                              |
++-----------------+-----------+----------------------------------------------+
+| WITH_NOTHING    | ``0``     | No meta data is outputted at all.            |
++-----------------+-----------+----------------------------------------------+
+| WITH_CLASS_INFO | ``10``    | Just the types of the classes are outputted. |
++-----------------+-----------+----------------------------------------------+
+| WITH_DUMP_TIME  | ``20``    | The date/time of dumping is outputted        |
++-----------------+-----------+----------------------------------------------+
+| WITH_EVERYTHING | ``30``    | All meta data is outputted.                  |
++-----------------+-----------+----------------------------------------------+
+
+|
+|
+| **Method: from_value**
+|
+
++----------------+---------------------------------------------------------------------------+
+| *Method:*      | *@staticmethod*                                                           |
+|                |                                                                           |
+|                | ``Verbosity.from_value``                                                  |
++----------------+---------------------------------------------------------------------------+
+| *Description:* | Get a ``Verbosity`` instance from a value.                                |
++----------------+----------------+----------------------------------------------------------+
+| *Arguments:*   | ``value: any`` | The name of the new fork (accessable with ``__name__``). |
++----------------+----------------+----------------------------------------------------------+
+| *Returns:*     | ``Verbosity``  | A new ``type`` based on ``JsonSerializable``.            |
++----------------+----------------+----------------------------------------------------------+
+| *Example:*     | ::                                                                        |
+|                |                                                                           |
+|                |     >>> Verbosity.from_value(True)                                        |
+|                |     Verbosity.WITH_EVERYTHING                                             |
+|                |                                                                           |
+|                |     >>> Verbosity.from_value(None)                                        |
+|                |     Verbosity.WITH_NOTHING                                                |
++----------------+---------------------------------------------------------------------------+
 
 ***********
 Serializers
