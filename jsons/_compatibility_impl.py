@@ -36,9 +36,15 @@ class Flag(Enum):
 
 
 def tuple_with_ellipsis(tup: type) -> bool:
-    # Tuples in Python3.5 have __tuple_use_ellipsis__
-    # Tuples in Python3.7 have __args__
+    # Python3.5: Tuples have __tuple_use_ellipsis__
+    # Python3.7: Tuples have __args__
     use_el = getattr(tup, '__tuple_use_ellipsis__', None)
     if use_el is None:
         use_el = tup.__args__[-1] is ...
     return use_el
+
+
+def get_union_params(un: type) -> list:
+    # Python3.5: Unions have __union_params__
+    # Python3.7: Unions have __args__
+    return getattr(un, '__union_params__', getattr(un, '__args__'))
