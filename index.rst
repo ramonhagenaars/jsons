@@ -1,1 +1,1 @@
-.. include:: API_DOCUMENTATION.rst
+.. include:: doc/api.rst

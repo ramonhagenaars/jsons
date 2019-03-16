@@ -12,9 +12,9 @@
 
       Official Documentation  
 
-*****
-Index
-*****
+*********
+API INDEX
+*********
 - `Main functions`_
     - dump_
     - load_
