@@ -33,3 +33,12 @@ class Flag(Enum):
         return item.value == self.value & item.value
 
     __ror__ = __or__
+
+
+def tuple_with_ellipsis(tup: type) -> bool:
+    # Tuples in Python3.5 have __tuple_use_ellipsis__
+    # Tuples in Python3.7 have __args__
+    use_el = getattr(tup, '__tuple_use_ellipsis__', None)
+    if use_el is None:
+        use_el = tup.__args__[-1] is ...
+    return use_el
