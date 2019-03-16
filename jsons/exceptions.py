@@ -142,9 +142,8 @@ class SignatureMismatchError(DeserializationError, ArgumentError):
 
 class UnknownClassError(DeserializationError):
     """
-    Raised when jsons failed to find a type instance to deserialize to.
-
-    TODO: mention announce_class
+    Raised when jsons failed to find a type instance to deserialize to. If this
+    error occurs, consider using ``jsons.announce_class``.
     """
     def __init__(self, message: str, source: object, target_name: str):
         """
