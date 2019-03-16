@@ -15,8 +15,8 @@ def default_tuple_deserializer(obj: list,
     """
     if hasattr(cls, '_fields'):
         return default_namedtuple_deserializer(obj, cls, **kwargs)
-    tuple_types = getattr(cls, '__tuple_params__', cls.__args__)
-    if len(tuple_types) > 1 and tuple_types[1] is ...:
+    tuple_types = getattr(cls, '__tuple_params__', getattr(cls, '__args__', []))
+    if cls.__tuple_use_ellipsis__:
         tuple_types = [tuple_types[0]] * len(obj)
     list_ = [load(value, tuple_types[i], **kwargs)
              for i, value in enumerate(obj)]

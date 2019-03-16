@@ -1,4 +1,7 @@
-from enum import Flag
+try:
+    from enum import Flag
+except ImportError:
+    from jsons._compatibility_impl import Flag
 
 
 class Verbosity(Flag):

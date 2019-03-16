@@ -15,7 +15,7 @@ def default_union_deserializer(obj: object, cls: Union, **kwargs) -> object:
     :return: An object of the first type of the Union that could be
     deserialized successfully.
     """
-    for sub_type in cls.__args__:
+    for sub_type in cls.__union_params__:
         try:
             return load(obj, sub_type, **kwargs)
         except JsonsError:

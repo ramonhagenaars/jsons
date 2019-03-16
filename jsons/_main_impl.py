@@ -18,7 +18,8 @@ from jsons.exceptions import (
     DecodeError,
     DeserializationError,
     JsonsError,
-    SerializationError, UnknownClassError
+    SerializationError,
+    UnknownClassError
 )
 
 VALID_TYPES = (str, int, float, bool, list, tuple, set, dict, type(None))
@@ -393,7 +394,7 @@ def _get_cls_from_str(cls_str: str, source: object, fork_inst) -> type:
         cls = getattr(cls_module, cls_name)
         if not cls or not isinstance(cls, type):
             cls = _lookup_announced_class(cls_str, source, fork_inst)
-    except (ModuleNotFoundError, AttributeError, ValueError):
+    except (ImportError, AttributeError, ValueError):
         cls = _lookup_announced_class(cls_str, source, fork_inst)
     return cls
 
