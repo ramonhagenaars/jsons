@@ -46,7 +46,7 @@ def get_class_name(cls: type,
     """
     if cls in fork_inst._announced_classes:
         return fork_inst._announced_classes[cls]
-    cls_name = getattr(cls, '__name__', getattr(cls, '_name', None))
+    cls_name = _get_simple_name(cls)
     module = _get_module(cls)
     transformer = transformer or (lambda x: x)
     if not cls_name and hasattr(cls, '__origin__'):
@@ -58,6 +58,17 @@ def get_class_name(cls: type,
     if fully_qualified and module:
         cls_name = '{}.{}'.format(module, cls_name)
     cls_name = transformer(cls_name)
+    return cls_name
+
+
+def _get_simple_name(cls: type) -> str:
+    cls_name = getattr(cls, '__name__', None)
+    if not cls_name:
+        cls_name = getattr(cls, '_name', None)
+    if not cls_name:
+        cls_name = repr(cls)
+        cls_name = cls_name.split('[')[0]  # Remove generic types.
+        cls_name = cls_name.split('.')[-1]  # Remove any . caused by repr.
     return cls_name
 
 
