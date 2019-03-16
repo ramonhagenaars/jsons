@@ -47,4 +47,4 @@ def tuple_with_ellipsis(tup: type) -> bool:
 def get_union_params(un: type) -> list:
     # Python3.5: Unions have __union_params__
     # Python3.7: Unions have __args__
-    return getattr(un, '__union_params__', getattr(un, '__args__'))
+    return getattr(un, '__union_params__', getattr(un, '__args__', None))
