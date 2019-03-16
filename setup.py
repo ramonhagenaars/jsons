@@ -17,7 +17,14 @@ setup(name='jsons',
                 'jsons.serializers'],
       zip_safe=False,
       classifiers=(
-          'Programming Language :: Python :: 3',
+          'Intended Audience :: Developers',
+          'License :: OSI Approved :: MIT License',
           'Operating System :: OS Independent'
+          'Natural Language :: English',
+          'Programming Language :: Python',
+          'Programming Language :: Python :: 3',
+          'Programming Language :: Python :: 3.5',
+          'Programming Language :: Python :: 3.6',
+          'Programming Language :: Python :: 3.7'
       )
 )
