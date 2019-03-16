@@ -1,12 +1,11 @@
 import datetime
 from typing import Optional, Union
 from unittest import TestCase
-
 import jsons
 from jsons import DeserializationError
 
 
-class TestSet(TestCase):
+class TestUnion(TestCase):
     def test_load_union(self):
         class A:
             def __init__(self, x):
