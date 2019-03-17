@@ -7,8 +7,12 @@ from jsons import JsonSerializable, dump, load, loads, loadb, dumps, dumpb
 from jsons.exceptions import InvalidDecorationError
 
 
-def loaded(parameters=True, returnvalue=True, fork_inst=JsonSerializable,
-           loader=load, **kwargs):
+def loaded(
+        parameters=True,
+        returnvalue=True,
+        fork_inst=JsonSerializable,
+        loader=load,
+        **kwargs):
     """
     Return a decorator that can call `jsons.load` upon all parameters and the
     return value of the decorated function.
@@ -36,12 +40,18 @@ def loaded(parameters=True, returnvalue=True, fork_inst=JsonSerializable,
     ``loads``, ``loadb``)
     :return: a decorator that can be placed on a function.
     """
-    assert loader in (load, loads, loadb)
+    if loader not in (load, loads, loadb):
+        raise InvalidDecorationError("The 'loader' argument must be one of: "
+                                     "jsons.load, jsons.loads, jsons.loadb")
     return _get_decorator(parameters, returnvalue, fork_inst, loader, kwargs)
 
 
-def dumped(parameters=True, returnvalue=True, fork_inst=JsonSerializable,
-           dumper=dump, **kwargs):
+def dumped(
+        parameters=True,
+        returnvalue=True,
+        fork_inst=JsonSerializable,
+        dumper=dump,
+        **kwargs):
     """
     Return a decorator that can call `jsons.dump` upon all parameters and the
     return value of the decorated function.
@@ -69,8 +79,60 @@ def dumped(parameters=True, returnvalue=True, fork_inst=JsonSerializable,
     ``dumps``, ``dumpb``)
     :return: a decorator that can be placed on a function.
     """
-    assert dumper in (dump, dumps, dumpb)
+    if dumper not in (dump, dumps, dumpb):
+        raise InvalidDecorationError("The 'dumper' argument must be one of: "
+                                     "jsons.dump, jsons.dumps, jsons.dumpb")
     return _get_decorator(parameters, returnvalue, fork_inst, dumper, kwargs)
+
+
+def _get_decorator(parameters, returnvalue, fork_inst, mapper, mapper_kwargs):
+    def _decorator(decorated):
+        _validate_decoration(decorated, fork_inst)
+        args = [decorated, parameters, returnvalue,
+                fork_inst, mapper, mapper_kwargs]
+        wrapper = (_get_async_wrapper(*args) if iscoroutinefunction(decorated)
+                   else _get_wrapper(*args))
+        return wrapper
+    return _decorator
+
+
+def _get_wrapper(
+        decorated,
+        parameters,
+        returnvalue,
+        fork_inst,
+        mapper,
+        mapper_kwargs):
+    def _wrapper(*args, **kwargs):
+        result = _run_decorated(decorated, mapper if parameters else None,
+                                fork_inst, args, kwargs, mapper_kwargs)
+        if returnvalue:
+            result = _map_returnvalue(result, decorated, fork_inst, mapper,
+                                      mapper_kwargs)
+        return result
+
+    return _wrapper
+
+
+def _get_async_wrapper(
+        decorated,
+        parameters,
+        returnvalue,
+        fork_inst,
+        mapper,
+        mapper_kwargs):
+
+    async def _async_wrapper(*args, **kwargs):
+        result = _run_decorated(decorated, mapper if parameters else None,
+                                fork_inst, args, kwargs, mapper_kwargs)
+        if isawaitable(result):
+            result = await result
+        if returnvalue:
+            result = _map_returnvalue(result, decorated, fork_inst, mapper,
+                                      mapper_kwargs)
+        return result
+
+    return _async_wrapper
 
 
 def _get_params_sig(args, func):
@@ -112,34 +174,14 @@ def _run_decorated(decorated, mapper, fork_inst, args, kwargs, mapper_kwargs):
     return result
 
 
-def _get_decorator(parameters, returnvalue, fork_inst, mapper, mapper_kwargs):
-    def _decorator(decorated):
-        def _wrapper(*args, **kwargs):
-            result = _run_decorated(decorated, mapper if parameters else None,
-                                    fork_inst, args, kwargs, mapper_kwargs)
-            if returnvalue:
-                result = _map_returnvalue(result, decorated, fork_inst, mapper,
-                                          mapper_kwargs)
-            return result
-
-        async def _async_wrapper(*args, **kwargs):
-            result = _run_decorated(decorated, mapper if parameters else None,
-                                    fork_inst, args, kwargs, mapper_kwargs)
-            if isawaitable(result):
-                result = await result
-            if returnvalue:
-                result = _map_returnvalue(result, decorated, fork_inst, mapper,
-                                          mapper_kwargs)
-            return result
-        if isinstance(decorated, staticmethod):
-            fork_inst._warn('You cannot decorate a static- or classmethod. '
-                            'You can still obtain the desired behavior by '
-                            'decorating your method first and then place '
-                            '@staticmethod/@classmethod on top (switching the '
-                            'order).')
-            raise InvalidDecorationError(
-                'Cannot decorate a static- or classmethod.')
-        if isinstance(decorated, type):
-            raise InvalidDecorationError('Cannot decorate a class.')
-        return _async_wrapper if iscoroutinefunction(decorated) else _wrapper
-    return _decorator
+def _validate_decoration(decorated, fork_inst):
+    if isinstance(decorated, staticmethod):
+        fork_inst._warn('You cannot decorate a static- or classmethod. '
+                        'You can still obtain the desired behavior by '
+                        'decorating your method first and then place '
+                        '@staticmethod/@classmethod on top (switching the '
+                        'order).')
+        raise InvalidDecorationError(
+            'Cannot decorate a static- or classmethod.')
+    if isinstance(decorated, type):
+        raise InvalidDecorationError('Cannot decorate a class.')
