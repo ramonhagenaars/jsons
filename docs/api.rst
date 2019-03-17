@@ -691,10 +691,21 @@ Example:
 
 
     c = Car('red', 'me')
+
+Dump it as follows:
+
+::
+
     dumped = jsons.dump(c, verbose=Verbosity.WITH_EVERYTHING)
 
     # You can also combine Verbosity instances as follows:
     # WITH_CLASS_INFO | WITH_DUMP_TIME
+
+Or the equivalent to ``WITH_EVERYTHING``:
+
+::
+
+    dumped = jsons.dump(c, verbose=True)
 
 This would result in the following value for ``dumped``:
 
