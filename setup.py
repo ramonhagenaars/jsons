@@ -19,7 +19,7 @@ setup(name='jsons',
       classifiers=(
           'Intended Audience :: Developers',
           'License :: OSI Approved :: MIT License',
-          'Operating System :: OS Independent'
+          'Operating System :: OS Independent',
           'Natural Language :: English',
           'Programming Language :: Python',
           'Programming Language :: Python :: 3',
