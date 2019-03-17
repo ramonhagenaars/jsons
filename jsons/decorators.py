@@ -2,7 +2,6 @@
 This module contains decorators that facilitate the `jsons` functions in an
 alternative fashion.
 """
-import warnings
 from inspect import signature, Parameter, isawaitable, iscoroutinefunction
 from jsons import JsonSerializable, dump, load, loads, loadb, dumps, dumpb
 from jsons.exceptions import InvalidDecorationError
