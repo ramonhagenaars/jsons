@@ -4,27 +4,79 @@ PRIVATE MODULE: do not import (from) it directly.
 This module contains implementations of common functionality that can be used
 throughout `jsons`.
 """
+import warnings
 from typing import Callable, Optional
 
 
+META_ATTR = '-meta'  # The name of the attribute holding meta info.
+
+
+class StateHolder:
+    """
+    This class holds the registered serializers and deserializers.
+    """
+    _classes_serializers = list()
+    _classes_deserializers = list()
+    _serializers = dict()
+    _deserializers = dict()
+    _announced_classes = dict()
+    _suppress_warnings = False
+
+    @classmethod
+    def _warn(cls, msg, *args, **kwargs):
+        if not cls._suppress_warnings:
+            msg_ = ('{} You can suppress warnings like this using '
+                    'jsons.suppress_warnings().'.format(msg))
+            warnings.warn(msg_, *args, **kwargs)
+
+
 def get_class_name(cls: type,
-                   transformer: Optional[Callable[[str], str]] = None) \
-        -> Optional[str]:
+                   transformer: Optional[Callable[[str], str]] = None,
+                   fully_qualified: bool = False,
+                   fork_inst: Optional[type] = StateHolder) -> Optional[str]:
     """
     Return the name of a class.
     :param cls: the class of which the name if to be returned.
     :param transformer: any string transformer, e.g. ``str.lower``.
+    :param fully_qualified: if ``True`` return the fully qualified name (i.e.
+    complete with module name).
+    :param fork_inst if given, it uses this fork of ``JsonSerializable`` for
+    finding the class name.
     :return: the name of ``cls``, transformed if a transformer is given.
     """
-    cls_name = getattr(cls, '__name__', getattr(cls, '_name', None))
+    if cls in fork_inst._announced_classes:
+        return fork_inst._announced_classes[cls]
+    cls_name = _get_simple_name(cls)
+    module = _get_module(cls)
+    transformer = transformer or (lambda x: x)
     if not cls_name and hasattr(cls, '__origin__'):
         origin = cls.__origin__
-        cls_name = get_class_name(origin)
+        cls_name = get_class_name(origin, transformer,
+                                  fully_qualified, fork_inst)
     if not cls_name:
         cls_name = str(cls)
-    if cls_name and transformer:
-        cls_name = transformer(cls_name)
+    if fully_qualified and module:
+        cls_name = '{}.{}'.format(module, cls_name)
+    cls_name = transformer(cls_name)
     return cls_name
+
+
+def _get_simple_name(cls: type) -> str:
+    cls_name = getattr(cls, '__name__', None)
+    if not cls_name:
+        cls_name = getattr(cls, '_name', None)
+    if not cls_name:
+        cls_name = repr(cls)
+        cls_name = cls_name.split('[')[0]  # Remove generic types.
+        cls_name = cls_name.split('.')[-1]  # Remove any . caused by repr.
+    return cls_name
+
+
+def _get_module(cls: type) -> Optional[str]:
+    builtin_module = str.__class__.__module__
+    module = cls.__module__
+    if module and module != builtin_module:
+        return module
 
 
 def get_parents(cls: type, lizers: list) -> list:

@@ -1,6 +1,6 @@
 from datetime import datetime
 from typing import Optional
-from jsons._datetime_impl import get_offset_str
+from jsons._datetime_impl import to_str
 from jsons._main_impl import RFC3339_DATETIME_PATTERN
 
 
@@ -17,8 +17,5 @@ def default_datetime_serializer(obj: datetime,
     :param kwargs: not used.
     :return: ``datetime`` as an RFC3339 string.
     """
-    pattern = RFC3339_DATETIME_PATTERN
-    offset = get_offset_str(obj)
-    if not strip_microseconds and obj.microsecond:
-        pattern += '.%f'
-    return obj.strftime("{}{}".format(pattern, offset))
+    return to_str(obj, strip_microseconds, kwargs['fork_inst'],
+                  RFC3339_DATETIME_PATTERN)

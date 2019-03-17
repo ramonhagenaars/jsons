@@ -1,7 +1,6 @@
 from typing import Optional
-from jsons._common_impl import get_class_name
+from jsons._common_impl import get_class_name, StateHolder
 from jsons._main_impl import (
-    _StateHolder,
     dump,
     dumps,
     dumpb,
@@ -13,7 +12,7 @@ from jsons._main_impl import (
 )
 
 
-class JsonSerializable(_StateHolder):
+class JsonSerializable(StateHolder):
     """
     This class offers an alternative to using the ``jsons.load`` and
     ``jsons.dump`` methods. An instance of a class that inherits from
@@ -33,7 +32,8 @@ class JsonSerializable(_StateHolder):
         :return: a new ``type`` based on ``JsonSerializable``.
         """
         cls._fork_counter += 1
-        class_name = name or '{}_fork{}'.format(get_class_name(cls),
+        class_name = name or '{}_fork{}'.format(get_class_name(cls,
+                                                               fork_inst=cls),
                                                 cls._fork_counter)
         result = type(class_name, (cls,), {})
         result._classes_serializers = cls._classes_serializers.copy()

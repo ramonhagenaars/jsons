@@ -1,7 +1,7 @@
 import inspect
 from functools import partial
-from typing import Optional, Callable
-from jsons._common_impl import get_class_name
+from typing import Optional, Callable, Tuple
+from jsons._common_impl import get_class_name, META_ATTR
 from jsons._main_impl import load
 from jsons.exceptions import SignatureMismatchError, UnfulfilledArgumentError
 
@@ -26,28 +26,17 @@ def default_object_deserializer(
     deserializers.
     :return: an instance of type ``cls``.
     """
-    concat_kwargs = kwargs
-    if key_transformer:
-        obj = {key_transformer(key): obj[key] for key in obj}
-        concat_kwargs = {
-            **kwargs,
-            'key_transformer': key_transformer
-        }
-    concat_kwargs['strict'] = strict
-    constructor_args = _get_constructor_args(obj, cls, **concat_kwargs)
-    remaining_attrs = {attr_name: obj[attr_name] for attr_name in obj
-                       if attr_name not in constructor_args}
-    if strict and remaining_attrs:
-        unexpected_arg = list(remaining_attrs.keys())[0]
-        err_msg = 'Type "{}" does not expect "{}"'.format(get_class_name(cls),
-                                                          unexpected_arg)
-        raise SignatureMismatchError(err_msg, unexpected_arg, obj, cls)
+    obj, kwargs = _check_and_transform_keys(obj, key_transformer, **kwargs)
+    kwargs['strict'] = strict
+    constructor_args = _get_constructor_args(obj, cls, **kwargs)
+    remaining_attrs = _get_remaining_args(obj, cls, constructor_args,
+                                          strict, kwargs['fork_inst'])
     instance = cls(**constructor_args)
     _set_remaining_attrs(instance, remaining_attrs, **kwargs)
     return instance
 
 
-def _get_constructor_args(obj, cls, attr_getters=None, **kwargs):
+def _get_constructor_args(obj, cls, attr_getters=None, **kwargs) -> dict:
     # Loop through the signature of cls: the type we try to deserialize to. For
     # every required parameter, we try to get the corresponding value from
     # json_obj.
@@ -101,3 +90,33 @@ def _set_remaining_attrs(instance,
             pass  # This is raised when a @property does not have a setter.
     for attr_name, getter in attr_getters.items():
         setattr(instance, attr_name, getter())
+
+
+def _check_and_transform_keys(obj: dict,
+                              key_transformer: Optional[Callable[[str], str]],
+                              **kwargs) -> Tuple[dict, dict]:
+    if key_transformer:
+        obj = {key_transformer(key): obj[key] for key in obj}
+        kwargs = {
+            **kwargs,
+            'key_transformer': key_transformer
+        }
+    return obj, kwargs
+
+
+def _get_remaining_args(obj: dict,
+                        cls: type,
+                        constructor_args: dict,
+                        strict: bool,
+                        fork_inst: type) -> dict:
+    # Get the remaining args or raise if strict and the signature is unmatched.
+    remaining_attrs = {attr_name: obj[attr_name] for attr_name in obj
+                       if attr_name not in constructor_args
+                       and attr_name != META_ATTR}
+    if strict and remaining_attrs:
+        unexpected_arg = list(remaining_attrs.keys())[0]
+        err_msg = ('Type "{}" does not expect "{}"'
+                   .format(get_class_name(cls, fork_inst=fork_inst),
+                           unexpected_arg))
+        raise SignatureMismatchError(err_msg, unexpected_arg, obj, cls)
+    return remaining_attrs

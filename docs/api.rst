@@ -12,54 +12,18 @@
 
       Official Documentation  
 
-*****
-Index
-*****
-- `Main functions`_
-    - dump_
-    - load_
-    - dumps_
-    - loads_
-    - dumpb_
-    - loadb_
-    - set_serializer_
-    - set_deserializer_
-- `Classes`_
-    - JsonSerializable_
-- `Decorators`_
-    - loaded_
-    - dumped_
-- `Serializers`_
-    - default_datetime_serializer_
-    - default_iterable_serializer_
-    - default_list_serializer_
-    - default_tuple_serializer_
-    - default_dict_serializer_
-    - default_enum_serializer_
-    - default_primitive_serializer_
-    - default_object_serializer_
-- `Deserializers`_
-    - default_datetime_deserializer_
-    - default_list_deserializer_
-    - default_tuple_deserializer_
-    - default_namedtuple_deserializer_
-    - default_union_deserializer_
-    - default_set_deserializer_
-    - default_dict_deserializer_
-    - default_enum_deserializer_
-    - default_string_deserializer_
-    - default_primitive_deserializer_
-    - default_object_deserializer_
+###
+API
+###
 
 
 **************
 Main functions
 **************
 
-.. _dump:
-
-| **Function: dump**
-|
+====
+dump
+====
 
 This is the main serialization function of ``jsons``. It will look for the best fitting
 serializer function that is registered and use that to turn the given object to a JSON
@@ -88,6 +52,13 @@ Here is an overview of the standard options:
 |                    |                          | For example, ``jsons.KEY_TRANSFORMER_CAMELCASE``       |
 |                    |                          | turns all keys in 'camelCase'.                         |
 +--------------------+--------------------------+--------------------------------------------------------+
+| verbose            | ``verbose:               | This parameter allows you to specify whether and how   |
+|                    | Union[Verbosity, bool]`` | meta data should be outputted. If ``WITH_CLASS_INFO``  |
+|                    |                          | or ``WITH_EVERYTHING`` is used, the output contain     |
+|                    |                          | typing info. With that info ``jsons.load`` does not    |
+|                    |                          | need a ``cls`` argument.                               |
++--------------------+--------------------------+--------------------------------------------------------+
+
 
 Here is an example:
 
@@ -127,12 +98,9 @@ For more info, check out the parameters of the `serializers`_.
 |                |     '2019-02-16T20:33:36Z'                                                                                        |
 +----------------+-------------------------------------------------------------------------------------------------------------------+
 
-.. _load:
-
-|
-|
-| **Function: load**
-|
+====
+load
+====
 
 +----------------+---------------------------------------------------------------------------------------------------------------------------------------------------+
 | *Function:*    | ``jsons.load``                                                                                                                                    |
@@ -159,12 +127,9 @@ For more info, check out the parameters of the `serializers`_.
 |                |     datetime.datetime(2019, 2, 16, 20, 33, 36, tzinfo=datetime.timezone.utc)                                                                      |
 +----------------+---------------------------------------------------------------------------------------------------------------------------------------------------+
 
-.. _dumps:
-
-|
-|
-| **Function: dumps**
-|
+=====
+dumps
+=====
 
 +----------------+--------------------------------------------------------------------------------------------+
 | *Function:*    | ``jsons.dumps``                                                                            |
@@ -187,12 +152,9 @@ For more info, check out the parameters of the `serializers`_.
 |                |     '[1, 2, 3]'                                                                            |
 +----------------+--------------------------------------------------------------------------------------------+
 
-.. _loads:
-
-|
-|
-| **Function: loads**
-|
+=====
+loads
+=====
 
 +----------------+--------------------------------------------------------------------------------------------------------+
 | *Function:*    | ``jsons.loads``                                                                                        |
@@ -217,12 +179,9 @@ For more info, check out the parameters of the `serializers`_.
 |                |     [1, 2, 3]                                                                                          |
 +----------------+--------------------------------------------------------------------------------------------------------+
 
-.. _dumpb:
-
-|
-|
-| **Function: dumpb**
-|
+=====
+dumpb
+=====
 
 +----------------+---------------------------------------------------------------------------------------------+
 | *Function:*    | ``jsons.dumpb``                                                                             |
@@ -247,12 +206,9 @@ For more info, check out the parameters of the `serializers`_.
 |                |     b'[1, 2, 3]'                                                                            |
 +----------------+---------------------------------------------------------------------------------------------+
 
-.. _loadb:
-
-|
-|
-| **Function: loadb**
-|
+=====
+loadb
+=====
 
 +----------------+-----------------------------------------------------------------------------------------------------------------+
 | *Function:*    | ``jsons.loadb``                                                                                                 |
@@ -279,12 +235,9 @@ For more info, check out the parameters of the `serializers`_.
 |                |     [1, 2, 3]                                                                                                   |
 +----------------+-----------------------------------------------------------------------------------------------------------------+
 
-.. _set_serializer:
-
-|
-|
-| **Function: set_serializer**
-|
+==============
+set_serializer
+==============
 
 +----------------+----------------------------------------------------------------------------------------------------+
 | *Function:*    | ``jsons.set_serializer``                                                                           |
@@ -313,12 +266,9 @@ For more info, check out the parameters of the `serializers`_.
 |                |     123                                                                                            |
 +----------------+----------------------------------------------------------------------------------------------------+
 
-.. _set_deserializer:
-
-|
-|
-| **Function: set_deserializer**
-|
+================
+set_deserializer
+================
 
 +----------------+----------------------------------------------------------------------------------------------------+
 | *Function:*    | ``jsons.set_deserializer``                                                                         |
@@ -347,13 +297,40 @@ For more info, check out the parameters of the `serializers`_.
 |                |     123                                                                                            |
 +----------------+----------------------------------------------------------------------------------------------------+
 
+=================
+suppress_warnings
+=================
+
++----------------+-----------------------------------------------------------------------------------------------------------------+
+| *Function:*    | ``jsons.set_deserializer``                                                                                      |
++----------------+-----------------------------------------------------------------------------------------------------------------+
+| *Description:* | Suppress (or stop suppressing) warnings.                                                                        |
+|                |                                                                                                                 |
++----------------+----------------------------------+------------------------------------------------------------------------------+
+| *Arguments:*   | ``do_suppress: Optional[bool]``  | if ``True``, warnings will be suppressed from now on.                        |
++                +----------------------------------+------------------------------------------------------------------------------+
+|                | ``cls: type``                    | The type that ``func`` can deserialize.                                      |
++                +----------------------------------+------------------------------------------------------------------------------+
+|                | ``high_prio: bool``              | If ``True``, then ``func`` will take precedence over any other deserializer  |
+|                |                                  | function that serializes ``cls``.                                            |
++                +----------------------------------+------------------------------------------------------------------------------+
+|                | ``fork_inst``                    | If given, it only suppresses (or stops suppressing) warnings of the given    |
+|                |                                  | fork.                                                                        |
++----------------+----------------------------------+------------------------------------------------------------------------------+
+| *Returns:*     | ``None``                         |                                                                              |
++----------------+----------------------------------+------------------------------------------------------------------------------+
+| *Example:*     | ::                                                                                                              |
+|                |                                                                                                                 |
+|                |     >>> jsons.suppress_warnings()                                                                               |
++----------------+-----------------------------------------------------------------------------------------------------------------+
+
 *******
 Classes
 *******
 
-''''''''''''''''
+================
 JsonSerializable
-''''''''''''''''
+================
 This class can be used as a base class for your models.
 
 ::
@@ -377,12 +354,9 @@ The JSON data can now also be loaded using your model:
 
     loaded = Car.from_json(dumped)  # == jsons.load(dumped, Car)
 
-.. _fork:
-
-|
-|
-| **Method: fork**
-|
+----
+fork
+----
 
 +----------------+-------------------------------------------------------------------------------------------+
 | *Method:*      | *@classmethod*                                                                            |
@@ -407,12 +381,9 @@ The JSON data can now also be loaded using your model:
 |                |     'Fork!'                                                                               |
 +----------------+-------------------------------------------------------------------------------------------+
 
-.. _with_dump:
-
-|
-|
-| **Method: with_dump**
-|
+---------
+with_dump
+---------
 
 +----------------+------------------------------------------------------------------------------------------+
 | *Method:*      | *@classmethod*                                                                           |
@@ -443,12 +414,9 @@ The JSON data can now also be loaded using your model:
 |                |     {'firstName': 'Johnny', 'lastName': 'Jones'}                                         |
 +----------------+------------------------------------------------------------------------------------------+
 
-.. _json:
-
-|
-|
-| **Method: json**
-|
+----
+json
+----
 
 +----------------+-----------------------------------------------+
 | *Method:*      | @property                                     |
@@ -470,10 +438,9 @@ The JSON data can now also be loaded using your model:
 |                |     {"name": "Johnny"}                        |
 +----------------+-----------------------------------------------+
 
-|
-|
-| **Method: dump**
-|
+----
+dump
+----
 
 +----------------+-----------------------------------------------+
 | *Method:*      | ``jsons.JsonSerializable.dump``               |
@@ -493,10 +460,9 @@ The JSON data can now also be loaded using your model:
 |                |     {"name": "Johnny"}                        |
 +----------------+-----------------------------------------------+
 
-|
-|
-| **Method: dumps**
-|
+-----
+dumps
+-----
 
 +----------------+------------------------------------------------+
 | *Method:*      | ``jsons.JsonSerializable.dumps``               |
@@ -516,10 +482,9 @@ The JSON data can now also be loaded using your model:
 |                |     '{"name": "Johnny"}'                       |
 +----------------+------------------------------------------------+
 
-|
-|
-| **Method: dumpb**
-|
+-----
+dumpb
+-----
 
 +----------------+------------------------------------------------+
 | *Method:*      | ``jsons.JsonSerializable.dumpb``               |
@@ -539,10 +504,9 @@ The JSON data can now also be loaded using your model:
 |                |     b'{"name": "Johnny"}'                      |
 +----------------+------------------------------------------------+
 
-|
-|
-| **Method: from_json**
-|
+---------
+from_json
+---------
 
 +----------------+-----------------------------------------------+
 | *Method:*      | *@classmethod*                                |
@@ -566,10 +530,9 @@ The JSON data can now also be loaded using your model:
 |                |     '{"name": "Johnny"}'                      |
 +----------------+-----------------------------------------------+
 
-|
-|
-| **Method: load**
-|
+----
+load
+----
 
 +----------------+-----------------------------------------------+
 | *Method:*      | *@classmethod*                                |
@@ -593,10 +556,9 @@ The JSON data can now also be loaded using your model:
 |                |     '{"name": "Johnny"}'                      |
 +----------------+-----------------------------------------------+
 
-|
-|
-| **Method: loads**
-|
+-----
+loads
+-----
 
 +----------------+------------------------------------------------+
 | *Method:*      | *@classmethod*                                 |
@@ -620,10 +582,9 @@ The JSON data can now also be loaded using your model:
 |                |     '{"name": "Johnny"}'                       |
 +----------------+------------------------------------------------+
 
-|
-|
-| **Method: loadb**
-|
+-----
+loadb
+-----
 
 +----------------+------------------------------------------------+
 | *Method:*      | *@classmethod*                                 |
@@ -647,10 +608,9 @@ The JSON data can now also be loaded using your model:
 |                |     '{"name": "Johnny"}'                       |
 +----------------+------------------------------------------------+
 
-|
-|
-| **Method: set_serializer**
-|
+--------------
+set_serializer
+--------------
 
 +----------------+--------------------------------------------------------------------------------------------------------------+
 | *Method:*      | @classmethod                                                                                                 |
@@ -681,10 +641,9 @@ The JSON data can now also be loaded using your model:
 |                |     {'name': 'ARNOLD'}                                                                                       |
 +----------------+--------------------------------------------------------------------------------------------------------------+
 
-|
-|
-| **Method: set_deserializer**
-|
+----------------
+set_deserializer
+----------------
 
 +----------------+----------------------------------------------------------------------------------------------------------------+
 | *Method:*      | @classmethod                                                                                                   |
@@ -715,14 +674,97 @@ The JSON data can now also be loaded using your model:
 |                |     {'name': 'ARNOLD'}                                                                                         |
 +----------------+----------------------------------------------------------------------------------------------------------------+
 
+=========
+Verbosity
+=========
+An enum that defines the level of verbosity of a serialized object. You can
+provide an instance of this enum to the ``dump`` function.
+
+Example:
+
+::
+
+    @dataclass
+    class Car:
+        color: str
+        owner: str
+
+
+    c = Car('red', 'me')
+    dumped = jsons.dump(c, verbose=Verbosity.WITH_EVERYTHING)
+
+    # You can also combine Verbosity instances as follows:
+    # WITH_CLASS_INFO | WITH_DUMP_TIME
+
+This would result in the following value for ``dumped``:
+
+::
+
+    {
+      'color': 'red',
+      'owner': 'me',
+      '-meta': {
+        'classes': {
+          '/': '__main__.Car'
+        },
+        'dump_time': '2019-03-15T19:59:37Z'
+      }
+    }
+
+And with this, you can deserialize ``dumped`` without having to specify its
+class:
+
+::
+
+    jsons.load(dumped)
+
+    # Instead of: jsons.load(dumped, cls=Car)
+
+The following are members of ``Verbosity``:
+
++-----------------+-----------+----------------------------------------------+
+| **Attribute**   | **value** | **Description**                              |
++-----------------+-----------+----------------------------------------------+
+| WITH_NOTHING    | ``0``     | No meta data is outputted at all.            |
++-----------------+-----------+----------------------------------------------+
+| WITH_CLASS_INFO | ``10``    | Just the types of the classes are outputted. |
++-----------------+-----------+----------------------------------------------+
+| WITH_DUMP_TIME  | ``20``    | The date/time of dumping is outputted        |
++-----------------+-----------+----------------------------------------------+
+| WITH_EVERYTHING | ``30``    | All meta data is outputted.                  |
++-----------------+-----------+----------------------------------------------+
+
+----------
+from_value
+----------
+
++----------------+---------------------------------------------------------------------------+
+| *Method:*      | *@staticmethod*                                                           |
+|                |                                                                           |
+|                | ``Verbosity.from_value``                                                  |
++----------------+---------------------------------------------------------------------------+
+| *Description:* | Get a ``Verbosity`` instance from a value.                                |
++----------------+----------------+----------------------------------------------------------+
+| *Arguments:*   | ``value: any`` | The name of the new fork (accessable with ``__name__``). |
++----------------+----------------+----------------------------------------------------------+
+| *Returns:*     | ``Verbosity``  | A new ``type`` based on ``JsonSerializable``.            |
++----------------+----------------+----------------------------------------------------------+
+| *Example:*     | ::                                                                        |
+|                |                                                                           |
+|                |     >>> Verbosity.from_value(True)                                        |
+|                |     Verbosity.WITH_EVERYTHING                                             |
+|                |                                                                           |
+|                |     >>> Verbosity.from_value(None)                                        |
+|                |     Verbosity.WITH_NOTHING                                                |
++----------------+---------------------------------------------------------------------------+
+
 **********
 Decorators
 **********
 
-.. _loaded:
-
-| **Decorator: loaded**
-|
+======
+loaded
+======
 
 +----------------+---------------------------------------------------------------------------------------------------------------+
 | *Decorator:*   | ``jsons.decorators.loaded``                                                                                   |
@@ -753,12 +795,9 @@ Decorators
 |                |     'datetime'                                                                                                |
 +----------------+---------------------------------------------------------------------------------------------------------------+
 
-.. _dumped:
-
-|
-|
-| **Decorator: dumped**
-|
+======
+dumped
+======
 
 +----------------+-----------------------------------------------------------------------------------------------------------------+
 | *Decorator:*   | ``jsons.decorators.dumped``                                                                                     |
@@ -789,17 +828,13 @@ Decorators
 |                |     'str'                                                                                                       |
 +----------------+-----------------------------------------------------------------------------------------------------------------+
 
-
 ***********
 Serializers
 ***********
 
-.. _default_datetime_serializer:
-
-|
-|
-| **Function: default_datetime_serializer**
-|
+===========================
+default_datetime_serializer
+===========================
 
 +----------------+-----------------------------------------------------------------------------------------------+
 | *Function:*    | ``jsons.default_datetime_serializer``                                                         |
@@ -808,7 +843,7 @@ Serializers
 |                | the RFC3339 pattern. If the datetime is a local time, an                                      |
 |                | offset is provided. If datetime is in UTC, the result is                                      |
 |                | suffixed with a 'Z'.                                                                          |
-+----------------+-----------------------------------------------------------------------------------------------+
++----------------+----------------------------------------+------------------------------------------------------+
 | *Arguments:*   | ``obj: datetime``                      | The datetime instance that is to be                  |
 |                |                                        | serialized.                                          |
 +                +----------------------------------------+------------------------------------------------------+
@@ -825,12 +860,9 @@ Serializers
 |                |     '2019-02-28T20:37:42Z'                                                                    |
 +----------------+-----------------------------------------------------------------------------------------------+
 
-.. _default_iterable_serializer:
-
-|
-|
-| **Function: default_iterable_serializer**
-|
+===========================
+default_iterable_serializer
+===========================
 
 +----------------+----------------------------------------------------------------------------------------------+
 | *Function:*    | ``jsons.default_iterable_serializer``                                                        |
@@ -850,12 +882,9 @@ Serializers
 |                |     [1, 2, 3]                                                                                |
 +----------------+------------------------------------------------+---------------------------------------------+
 
-.. _default_list_serializer:
-
-|
-|
-| **Function: default_list_serializer**
-|
+=======================
+default_list_serializer
+=======================
 
 +----------------+--------------------------------------------------------------------------------------------+
 | *Function:*    | ``jsons.default_list_serializer``                                                          |
@@ -875,12 +904,9 @@ Serializers
 |                |     [1, 2, '2019-02-19T18:41:47Z']                                                         |
 +----------------+--------------------------------------------------------------------------------------------+
 
-.. _default_tuple_serializer:
-
-|
-|
-| **Function: default_tuple_serializer**
-|
+========================
+default_tuple_serializer
+========================
 
 +----------------+--------------------------------------------------------------------------------------------+
 | Function:*     | ``jsons.default_tuple_serializer``                                                         |
@@ -900,12 +926,9 @@ Serializers
 |                |     [1, 2, '2019-02-19T18:41:47Z']                                                         |
 +----------------+--------------------------------------------------------------------------------------------+
 
-.. _default_dict_serializer:
-
-|
-|
-| **Function: default_dict_serializer**
-|
+=======================
+default_dict_serializer
+=======================
 
 +----------------+-----------------------------------------------------------------------------------------------------------------------+
 | *Function:*    | ``jsons.default_dict_serializer``                                                                                     |
@@ -931,12 +954,9 @@ Serializers
 |                |     {'x': '2019-02-23T13:46:10.650772+01:00'}                                                                         |
 +----------------+-----------------------------------------------------------------------------------------------------------------------+
 
-.. _default_enum_serializer:
-
-|
-|
-| **Function: default_enum_serializer**
-|
+=======================
+default_enum_serializer
+=======================
 
 +----------------+-----------------------------------------------------------------------------------------------------------+
 | *Function:*    | ``jsons.default_enum_serializer``                                                                         |
@@ -964,12 +984,9 @@ Serializers
 |                |     'RED'                                                                                                 |
 +----------------+-----------------------------------------------------------------------------------------------------------+
 
-.. _default_primitive_serializer:
-
-|
-|
-| **Function: default_primitive_serializer**
-|
+============================
+default_primitive_serializer
+============================
 
 +----------------+---------------------------------------------------------------------------------------+
 | *Function:*    | ``jsons.default_primitive_serializer``                                                |
@@ -988,12 +1005,9 @@ Serializers
 |                |     42                                                                                |
 +----------------+---------------------------------------------------------------------------------------+
 
-.. _default_object_serializer:
-
-|
-|
-| **Function: default_object_serializer**
-|
+=========================
+default_object_serializer
+=========================
 
 +----------------+--------------------------------------------------------------------------------------------------------+
 | *Function:*    | ``jsons.default_object_serializer``                                                                    |
@@ -1016,6 +1030,9 @@ Serializers
 |                | ``strip_properties: bool``                          | If ``True`` the resulting dict will not          |
 |                |                                                     | contain values from @properties.                 |
 +                +-----------------------------------------------------+--------------------------------------------------+
+|                | ``verbose: Union[Verbosity, bool]``                 | When set, the output will contain meta data      |
+|                |                                                     | (e.g. data on the types).                        |
++                +-----------------------------------------------------+--------------------------------------------------+
 |                | ``kwargs``                                          | Any keyword arguments that may be given to the   |
 |                |                                                     | serialization process.                           |
 +----------------+-----------------------------------------------------+--------------------------------------------------+
@@ -1036,12 +1053,9 @@ Serializers
 Deserializers
 *************
 
-.. _default_datetime_deserializer:
-
-|
-|
-| **Function: default_datetime_deserializer**
-|
+=============================
+default_datetime_deserializer
+=============================
 
 +----------------+--------------------------------------------------------------------------+
 | *Function:*    | ``jsons.default_datetime_deserializer``                                  |
@@ -1062,12 +1076,9 @@ Deserializers
 |                |     datetime.datetime(2019, 2, 23, 22, 28, tzinfo=datetime.timezone.utc) |
 +----------------+--------------------------------------------------------------------------+
 
-.. _default_list_deserializer:
-
-|
-|
-| **Function: default_list_deserializer**
-|
+=========================
+default_list_deserializer
+=========================
 
 +----------------+----------------------------------------------------------------------------+
 | *Function:*    | ``jsons.default_list_deserializer``                                        |
@@ -1088,12 +1099,9 @@ Deserializers
 |                |     [datetime.datetime(2019, 2, 23, 22, 28, tzinfo=datetime.timezone.utc)] |
 +----------------+----------------------------------------------------------------------------+
 
-.. _default_tuple_deserializer:
-
-|
-|
-| **Function: default_tuple_deserializer**
-|
+==========================
+default_tuple_deserializer
+==========================
 
 +----------------+--------------------------------------------------------------------------------------+
 | *Function:*    | ``jsons.default_tuple_deserializer``                                                 |
@@ -1117,12 +1125,9 @@ Deserializers
 |                |     (datetime.datetime(2019, 2, 23, 22, 28, tzinfo=datetime.timezone.utc),)          |
 +----------------+--------------------------------------------------------------------------------------+
 
-.. _default_namedtuple_deserializer:
-
-|
-|
-| **Function: default_namedtuple_deserializer**
-|
+===============================
+default_namedtuple_deserializer
+===============================
 
 +----------------+--------------------------------------------------------------------------------------------+
 | *Function:*    | ``jsons.default_namedtuple_deserializer``                                                  |
@@ -1149,14 +1154,9 @@ Deserializers
 |                |     NT(a=42, c='I am default')                                                             |
 +----------------+--------------------------------------------------------------------------------------------+
 
-
-
-.. _default_union_deserializer:
-
-|
-|
-| **Function: default_union_deserializer**
-|
+==========================
+default_union_deserializer
+==========================
 
 +----------------+---------------------------------------------------------------------------------------------------------------------+
 | *Function:*    | ``jsons.default_union_deserializer``                                                                                |
@@ -1180,12 +1180,9 @@ Deserializers
 |                |     datetime.datetime(2019, 2, 23, 22, 28, tzinfo=datetime.timezone.utc)                                            |
 +----------------+---------------------------------------------------------------------------------------------------------------------+
 
-.. _default_set_deserializer:
-
-|
-|
-| **Function: default_set_deserializer**
-|
+========================
+default_set_deserializer
+========================
 
 +----------------+-----------------------------------------------------------------------------------------------------------------------------------+
 | *Function:*    | ``jsons.default_set_deserializer``                                                                                                |
@@ -1208,12 +1205,9 @@ Deserializers
 |                |     {datetime.datetime(2019, 2, 24, 17, 43, tzinfo=datetime.timezone.utc)}                                                        |
 +----------------+-----------------------------------------------------------------------------------------------------------------------------------+
 
-.. _default_dict_deserializer:
-
-|
-|
-| **Function: default_dict_deserializer**
-|
+=========================
+default_dict_deserializer
+=========================
 
 +----------------+---------------------------------------------------------------------------------------------+
 | *Function:*    | ``jsons.default_dict_deserializer``                                                         |
@@ -1240,18 +1234,17 @@ Deserializers
 |                |     {'a': datetime.datetime(2019, 2, 24, 17, 43, tzinfo=datetime.timezone.utc)}             |
 +----------------+---------------------------------------------------------------------------------------------+
 
-.. _default_enum_deserializer:
-
-|
-|
-| **Function: default_enum_deserializer**
-|
+=========================
+default_enum_deserializer
+=========================
 
 +----------------+-----------------------------------------------------------------------------------------------------------+
 | *Function:*    | ``jsons.default_enum_deserializer``                                                                       |
 +----------------+-----------------------------------------------------------------------------------------------------------+
-| *Description:* | Deserialize an enum value to an enum instance. The serialized value mustcan be the name of the enum       |
-|                | element or the value; dependent on``use_enum_name``.                                                      |
+| *Description:* | Deserialize an enum value to an enum instance. The serialized value can be either the name or the key of  |
+|                | an enum entry. If ``use_enum_name`` is set to ``True``, then the value *must* be the key of the enum      |
+|                | entry. If ``use_enum_name`` is set to ``False``, the value *must* be the value of the enum entry. By      |
+|                | default, this deserializer tries both.                                                                    |
 +----------------+---------------------+-------------------------------------------------------------------------------------+
 | *Arguments:*   | ``obj: str``        | The serialized enum.                                                                |
 +                +---------------------+-------------------------------------------------------------------------------------+
@@ -1274,12 +1267,9 @@ Deserializers
 |                |     Color.RED                                                                                             |
 +----------------+-----------------------------------------------------------------------------------------------------------+
 
-.. _default_string_deserializer:
-
-|
-|
-| **Function: default_string_deserializer**
-|
+===========================
+default_string_deserializer
+===========================
 
 +----------------+-----------------------------------------------------------------------------------------------+
 | *Function:*    | ``jsons.default_string_deserializer``                                                         |
@@ -1301,12 +1291,9 @@ Deserializers
 |                |     2019-02-24 21:33:00+00:00                                                                 |
 +----------------+-----------------------------------------------------------------------------------------------+
 
-.. _default_primitive_deserializer:
-
-|
-|
-| **Function: default_primitive_deserializer**
-|
+==============================
+default_primitive_deserializer
+==============================
 
 +----------------+-----------------------------------------------------------------------------------------+
 | *Function:*    | ``jsons.default_primitive_deserializer``                                                |
@@ -1328,12 +1315,9 @@ Deserializers
 |                |     42                                                                                  |
 +----------------+-----------------------------------------------------------------------------------------+
 
-.. _default_object_deserializer:
-
-|
-|
-| **Function: default_object_deserializer**
-|
+===========================
+default_object_deserializer
+===========================
 
 +----------------+---------------------------------------------------------------------------------------------------------+
 | *Function:*    | ``jsons.default_object_deserializer``                                                                   |

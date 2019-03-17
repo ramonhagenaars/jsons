@@ -1,5 +1,6 @@
 from typing import Union
 from jsons._common_impl import get_class_name
+from jsons._compatibility_impl import get_union_params
 from jsons._main_impl import load
 from jsons.exceptions import JsonsError, DeserializationError
 
@@ -15,13 +16,15 @@ def default_union_deserializer(obj: object, cls: Union, **kwargs) -> object:
     :return: An object of the first type of the Union that could be
     deserialized successfully.
     """
-    for sub_type in cls.__args__:
+    for sub_type in get_union_params(cls):
         try:
             return load(obj, sub_type, **kwargs)
         except JsonsError:
             pass  # Try the next one.
     else:
-        args_msg = ', '.join([get_class_name(cls_) for cls_ in cls.__args__])
+        fork_inst = kwargs['fork_inst']
+        args_msg = ', '.join([get_class_name(cls_, fork_inst=fork_inst)
+                              for cls_ in cls.__args__])
         err_msg = ('Could not match the object of type "{}" to any type of '
                    'the Union: {}'.format(str(cls), args_msg))
         raise DeserializationError(err_msg, obj, cls)

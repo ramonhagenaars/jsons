@@ -5,9 +5,21 @@ This module contains functionality for ``datetime`` related stuff.
 """
 from datetime import datetime, timezone, timedelta, time, date
 from typing import Union
+from jsons._main_impl import RFC3339_DATETIME_PATTERN
 
 
-def get_offset_str(obj: Union[datetime, timedelta]) -> str:
+def to_str(
+        dt: datetime,
+        strip_microseconds: bool,
+        fork_inst: type,
+        pattern: str = RFC3339_DATETIME_PATTERN) -> str:
+    offset = get_offset_str(dt, fork_inst)
+    if not strip_microseconds and dt.microsecond:
+        pattern += '.%f'
+    return dt.strftime("{}{}".format(pattern, offset))
+
+
+def get_offset_str(obj: Union[datetime, timedelta], fork_inst: type) -> str:
     """
     Return the textual offset of the given ``obj``.
     :param obj: a datetime or timedelta instance.
@@ -15,7 +27,7 @@ def get_offset_str(obj: Union[datetime, timedelta]) -> str:
     """
     func = (_datetime_offset_str if isinstance(obj, datetime)
             else _timedelta_offset_str)
-    return func(obj)
+    return func(obj, fork_inst)
 
 
 def get_datetime_inst(obj: str, pattern: str) -> datetime:
@@ -29,7 +41,7 @@ def get_datetime_inst(obj: str, pattern: str) -> datetime:
     return func(obj, pattern)
 
 
-def _datetime_offset_str(obj: datetime) -> str:
+def _datetime_offset_str(obj: datetime, fork_inst: type) -> str:
     """
     Return a textual offset (e.g. +01:00 or Z) for the given datetime.
     :param obj: the datetime instance.
@@ -38,17 +50,19 @@ def _datetime_offset_str(obj: datetime) -> str:
     tzone = obj.tzinfo
     if not tzone:
         # datetimes without tzinfo are treated as local times.
+        fork_inst._warn('The use of datetimes without timezone is dangerous '
+                        'and can lead to undesired results.')
         tzone = datetime.now(timezone.utc).astimezone().tzinfo
         if tzone is timezone.utc or tzone.utc is timezone.utc:
             return '+00:00'
     offset = 'Z'
     if tzone.tzname(None) not in ('UTC', 'UTC+00:00'):
         tdelta = tzone.utcoffset(None) or tzone.adjusted_offset
-        offset = _timedelta_offset_str(tdelta)
+        offset = _timedelta_offset_str(tdelta, fork_inst)
     return offset
 
 
-def _timedelta_offset_str(tdelta: timedelta) -> str:
+def _timedelta_offset_str(tdelta: timedelta, fork_inst: type) -> str:
     """
     Return a textual offset (e.g. +01:00 or Z) for the given timedelta.
     :param tdelta: the timedelta instance.
@@ -94,7 +108,8 @@ def _datetime_offset_inst(obj: str, pattern: str) -> datetime:
     return _new_datetime(dattim_obj.date(), dattim_obj.time(), tz)
 
 
-def _new_datetime(date_inst: date, time_inst: time, tzinfo: timezone):
+def _new_datetime(date_inst: date, time_inst: time, tzinfo: timezone) \
+        -> datetime:
     """
     Return a datetime instance from a date, time and timezone.
 

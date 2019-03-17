@@ -4,7 +4,7 @@ with open('README.rst', 'r') as fh:
     long_description = fh.read()
 
 setup(name='jsons',
-      version='0.7.2',
+      version='0.8.0',
       author='Ramon Hagenaars',
       author_email='ramon.hagenaars@gmail.com',
       description='For serializing Python objects to JSON (dicts) and back',
@@ -17,7 +17,14 @@ setup(name='jsons',
                 'jsons.serializers'],
       zip_safe=False,
       classifiers=(
-          'Programming Language :: Python :: 3',
+          'Intended Audience :: Developers',
+          'License :: OSI Approved :: MIT License',
           'Operating System :: OS Independent'
+          'Natural Language :: English',
+          'Programming Language :: Python',
+          'Programming Language :: Python :: 3',
+          'Programming Language :: Python :: 3.5',
+          'Programming Language :: Python :: 3.6',
+          'Programming Language :: Python :: 3.7'
       )
 )

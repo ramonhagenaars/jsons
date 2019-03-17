@@ -1,3 +1,4 @@
+from jsons._compatibility_impl import tuple_with_ellipsis
 from jsons.exceptions import UnfulfilledArgumentError
 from jsons._main_impl import load
 
@@ -15,8 +16,8 @@ def default_tuple_deserializer(obj: list,
     """
     if hasattr(cls, '_fields'):
         return default_namedtuple_deserializer(obj, cls, **kwargs)
-    tuple_types = getattr(cls, '__tuple_params__', cls.__args__)
-    if len(tuple_types) > 1 and tuple_types[1] is ...:
+    tuple_types = getattr(cls, '__tuple_params__', getattr(cls, '__args__', []))
+    if tuple_with_ellipsis(cls):
         tuple_types = [tuple_types[0]] * len(obj)
     list_ = [load(value, tuple_types[i], **kwargs)
              for i, value in enumerate(obj)]
@@ -38,11 +39,12 @@ def default_namedtuple_deserializer(obj: list, cls: type, **kwargs) -> object:
             field = obj[index]
         else:
             field = cls._field_defaults.get(field_name, None)
-        if not field:
+        if field is None:
             msg = ('No value present in {} for argument "{}"'
                    .format(obj, field_name))
             raise UnfulfilledArgumentError(msg, field_name, obj, cls)
-        cls_ = cls._field_types.get(field_name, None)
+        field_types = getattr(cls, '_field_types', None)
+        cls_ = field_types.get(field_name) if field_types else None
         loaded_field = load(field, cls_, **kwargs)
         args.append(loaded_field)
     inst = cls(*args)

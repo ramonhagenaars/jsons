@@ -5,33 +5,30 @@ This module contains the implementation of the main functions of jsons, such
 as `load` and `dump`.
 """
 import json
-import re
+from importlib import import_module
 from json import JSONDecodeError
-from typing import Dict, Callable, Optional, Union
-from jsons._common_impl import get_class_name, get_parents
+from typing import Dict, Callable, Optional, Union, Tuple
+from jsons._common_impl import (
+    get_class_name,
+    get_parents,
+    META_ATTR,
+    StateHolder
+)
 from jsons.exceptions import (
     DecodeError,
     DeserializationError,
     JsonsError,
-    SerializationError)
+    SerializationError,
+    UnknownClassError
+)
 
 VALID_TYPES = (str, int, float, bool, list, tuple, set, dict, type(None))
 RFC3339_DATETIME_PATTERN = '%Y-%m-%dT%H:%M:%S'
 
 
-class _StateHolder:
-    """
-    This class holds the registered serializers and deserializers.
-    """
-    _classes_serializers = list()
-    _classes_deserializers = list()
-    _serializers = dict()
-    _deserializers = dict()
-
-
 def dump(obj: object,
          cls: Optional[type] = None,
-         fork_inst: Optional[type] = _StateHolder,
+         fork_inst: Optional[type] = StateHolder,
          **kwargs) -> object:
     """
     Serialize the given ``obj`` to a JSON equivalent type (e.g. dict, list,
@@ -55,7 +52,7 @@ def dump(obj: object,
         raise SerializationError('Invalid type: "{}". Only types that have a '
                                  '__slots__ defined are allowed when '
                                  'providing "cls".'
-                         .format(get_class_name(cls)))
+                         .format(get_class_name(cls, fork_inst=fork_inst)))
     cls_ = cls or obj.__class__
     serializer = _get_serializer(cls_, fork_inst)
     kwargs_ = {
@@ -71,7 +68,7 @@ def dump(obj: object,
 def load(json_obj: object,
          cls: Optional[type] = None,
          strict: bool = False,
-         fork_inst: Optional[type] = _StateHolder,
+         fork_inst: Optional[type] = StateHolder,
          attr_getters: Optional[Dict[str, Callable[[], object]]] = None,
          **kwargs) -> object:
     """
@@ -118,18 +115,7 @@ def load(json_obj: object,
     """
     if not strict and (json_obj is None or type(json_obj) == cls):
         return json_obj
-    if type(json_obj) not in VALID_TYPES:
-        raise DeserializationError(
-            'Invalid type: "{}", only arguments of the following types are '
-            'allowed: {}'.format(get_class_name(type(json_obj)),
-                                 ", ".join(get_class_name(typ)
-                                           for typ in VALID_TYPES)),
-            json_obj,
-            cls)
-    if json_obj is None:
-        raise DeserializationError('Cannot load None with strict=True',
-                                   json_obj, cls)
-    cls = cls or type(json_obj)
+    cls = _check_and_get_cls(json_obj, cls, fork_inst)
     deserializer = _get_deserializer(cls, fork_inst)
     kwargs_ = {
         'strict': strict,
@@ -146,28 +132,29 @@ def load(json_obj: object,
 
 
 def _get_serializer(cls: type,
-                    fork_inst: Optional[type] = _StateHolder) -> callable:
+                    fork_inst: Optional[type] = StateHolder) -> callable:
     serializer = _get_lizer(cls, fork_inst._serializers,
-                            fork_inst._classes_serializers)
+                            fork_inst._classes_serializers, fork_inst)
     return serializer
 
 
 def _get_deserializer(cls: type,
-                      fork_inst: Optional[type] = _StateHolder) -> callable:
+                      fork_inst: Optional[type] = StateHolder) -> callable:
     deserializer = _get_lizer(cls, fork_inst._deserializers,
-                              fork_inst._classes_deserializers)
+                              fork_inst._classes_deserializers, fork_inst)
     return deserializer
 
 
 def _get_lizer(cls: type,
                lizers: Dict[str, callable],
-               classes_lizers: list) -> callable:
-    cls_name = get_class_name(cls, str.lower)
+               classes_lizers: list,
+               fork_inst: type) -> callable:
+    cls_name = get_class_name(cls, str.lower, fork_inst=fork_inst)
     lizer = lizers.get(cls_name, None)
     if not lizer:
         parents = get_parents(cls, classes_lizers)
         if parents:
-            pname = get_class_name(parents[0], str.lower)
+            pname = get_class_name(parents[0], str.lower, fork_inst=fork_inst)
             lizer = lizers[pname]
     return lizer
 
@@ -280,7 +267,7 @@ def loadb(bytes_: bytes,
 def set_serializer(func: callable,
                    cls: type,
                    high_prio: bool = True,
-                   fork_inst: type = _StateHolder) -> None:
+                   fork_inst: type = StateHolder) -> None:
     """
     Set a serializer function for the given type. You may override the default
     behavior of ``jsons.load`` by setting a custom serializer.
@@ -302,7 +289,7 @@ def set_serializer(func: callable,
     if cls:
         index = 0 if high_prio else len(fork_inst._classes_serializers)
         fork_inst._classes_serializers.insert(index, cls)
-        cls_name = get_class_name(cls)
+        cls_name = get_class_name(cls, fork_inst=fork_inst)
         fork_inst._serializers[cls_name.lower()] = func
     else:
         fork_inst._serializers['nonetype'] = func
@@ -311,7 +298,7 @@ def set_serializer(func: callable,
 def set_deserializer(func: callable,
                      cls: Union[type, str],
                      high_prio: bool = True,
-                     fork_inst: type = _StateHolder) -> None:
+                     fork_inst: type = StateHolder) -> None:
     """
     Set a deserializer function for the given type. You may override the
     default behavior of ``jsons.dump`` by setting a custom deserializer.
@@ -334,50 +321,91 @@ def set_deserializer(func: callable,
     if cls:
         index = 0 if high_prio else len(fork_inst._classes_deserializers)
         fork_inst._classes_deserializers.insert(index, cls)
-        cls_name = get_class_name(cls)
+        cls_name = get_class_name(cls, fork_inst=fork_inst)
         fork_inst._deserializers[cls_name.lower()] = func
     else:
         fork_inst._deserializers['nonetype'] = func
 
 
-def camelcase(str_: str) -> str:
+def suppress_warnings(
+        do_suppress: Optional[bool] = True,
+        fork_inst: Optional[type] = StateHolder):
     """
-    Return ``s`` in camelCase.
-    :param str_: the string that is to be transformed.
-    :return: a string in camelCase.
+    Suppress (or stop suppressing) warnings.
+    :param do_suppress: if ``True``, warnings will be suppressed from now on.
+    :param fork_inst: if given, it uses this fork of ``JsonSerializable``.
+    :return: None.
     """
-    str_ = str_.replace('-', '_')
-    splitted = str_.split('_')
-    if len(splitted) > 1:
-        str_ = ''.join([x.title() for x in splitted])
-    return str_[0].lower() + str_[1:]
+    fork_inst._suppress_warnings = do_suppress
 
 
-def snakecase(str_: str) -> str:
+def announce_class(
+        cls: type,
+        cls_name: Optional[str] = None,
+        fork_inst: type = StateHolder):
     """
-    Return ``s`` in snake_case.
-    :param str_: the string that is to be transformed.
-    :return: a string in snake_case.
+    Announce the given cls to jsons to allow jsons to deserialize a verbose
+    dump into that class.
+    :param cls: the class that is to be announced.
+    :param cls_name: a custom name for that class.
+    :param fork_inst: if given, it uses this fork of ``JsonSerializable``.
+    :return: None.
     """
-    str_ = str_.replace('-', '_')
-    str_ = str_[0].lower() + str_[1:]
-    return re.sub(r'([a-z])([A-Z])', '\\1_\\2', str_).lower()
+    cls_name = cls_name or get_class_name(cls, fully_qualified=True,
+                                          fork_inst=fork_inst)
+    fork_inst._announced_classes[cls] = cls_name
+    fork_inst._announced_classes[cls_name] = cls
 
 
-def pascalcase(str_: str) -> str:
-    """
-    Return ``s`` in PascalCase.
-    :param str_: the string that is to be transformed.
-    :return: a string in PascalCase.
-    """
-    camelcase_str = camelcase(str_)
-    return camelcase_str[0].upper() + camelcase_str[1:]
+def _check_and_get_cls(json_obj: object, cls: type, fork_inst: type) -> type:
+    # Check if json_obj is of a valid type and return the cls.
+    if type(json_obj) not in VALID_TYPES:
+        invalid_type = get_class_name(type(json_obj), fork_inst=fork_inst)
+        valid_types = [get_class_name(typ, fork_inst=fork_inst)
+                       for typ in VALID_TYPES]
+        msg = ('Invalid type: "{}", only arguments of the following types are '
+               'allowed: {}'.format(invalid_type, ", ".join(valid_types)))
+        raise DeserializationError(msg, json_obj, cls)
+    if json_obj is None:
+        raise DeserializationError('Cannot load None with strict=True',
+                                   json_obj, cls)
+
+    cls_from_meta, meta = _get_cls_and_meta(json_obj, fork_inst)
+    return cls or cls_from_meta or type(json_obj)
 
 
-def lispcase(str_: str) -> str:
-    """
-    Return ``s`` in lisp-case.
-    :param str_: the string that is to be transformed.
-    :return: a string in lisp-case.
-    """
-    return snakecase(str_).replace('_', '-')
+def _get_cls_and_meta(
+        json_obj: object,
+        fork_inst: type) -> Tuple[Optional[type], Optional[dict]]:
+    if isinstance(json_obj, dict) and META_ATTR in json_obj:
+        cls_str = json_obj[META_ATTR]['classes']['/']
+        cls = _get_cls_from_str(cls_str, json_obj, fork_inst)
+        return cls, json_obj[META_ATTR]
+    return None, None
+
+
+def _get_cls_from_str(cls_str: str, source: object, fork_inst) -> type:
+    try:
+        # importlib.import_module('jsons.exceptions')
+        splitted = cls_str.split('.')
+        module_name = '.'.join(splitted[:-1])
+        cls_name = splitted[-1]
+        cls_module = import_module(module_name)
+        cls = getattr(cls_module, cls_name)
+        if not cls or not isinstance(cls, type):
+            cls = _lookup_announced_class(cls_str, source, fork_inst)
+    except (ImportError, AttributeError, ValueError):
+        cls = _lookup_announced_class(cls_str, source, fork_inst)
+    return cls
+
+
+def _lookup_announced_class(
+        cls_str: str,
+        source: object,
+        fork_inst: type) -> type:
+    cls = fork_inst._announced_classes.get(cls_str)
+    if not cls:
+        msg = ('Could not find a suitable type for "{}". Make sure it can be '
+               'imported or that is has been announced.'.format(cls_str))
+        raise UnknownClassError(msg, source, cls_str)
+    return cls

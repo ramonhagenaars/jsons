@@ -89,7 +89,7 @@ from datetime import datetime
 from enum import Enum
 from typing import Union
 from jsons import _main_impl, deserializers, serializers, classes
-from jsons._main_impl import snakecase, camelcase, pascalcase, lispcase
+from jsons._key_transformers import snakecase, camelcase, pascalcase, lispcase
 from jsons.exceptions import (
     DeserializationError,
     DecodeError,
@@ -106,11 +106,15 @@ loadb = _main_impl.loadb
 JsonSerializable = classes.JsonSerializable
 set_serializer = _main_impl.set_serializer
 set_deserializer = _main_impl.set_deserializer
+announce_class = _main_impl.announce_class
+suppress_warnings = _main_impl.suppress_warnings
 
 KEY_TRANSFORMER_SNAKECASE = snakecase
 KEY_TRANSFORMER_CAMELCASE = camelcase
 KEY_TRANSFORMER_PASCALCASE = pascalcase
 KEY_TRANSFORMER_LISPCASE = lispcase
+
+Verbosity = classes.verbosity.Verbosity
 
 default_list_serializer = serializers.default_list_serializer
 default_tuple_serializer = serializers.default_tuple_serializer
