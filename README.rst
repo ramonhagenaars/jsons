@@ -398,6 +398,10 @@ Meta
 Recent updates
 ==============
 
+0.8.1
++++++
+- Bugfix: Loading a verbose dump worked only shallow.
+
 0.8.0
 +++++
 - Feature: Dumping objects can be verbose.
