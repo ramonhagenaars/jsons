@@ -165,6 +165,33 @@ class TestObject(TestCase):
         self.assertEqual(b.a.name, loaded_b.a.name)
 
     def test_load_object_verbose(self):
+        class BarBase:
+            pass
+
+        class BarA(BarBase):
+            def __init__(self, a: int):
+                self.a = a
+
+        class BarB(BarBase):
+            def __init__(self, b: int):
+                self.b = b
+
+        class Foo(BarBase):
+            def __init__(self, bar: BarBase):
+                self.bar = bar
+
+        jsons.announce_class(Foo)
+        jsons.announce_class(BarA)
+        jsons.announce_class(BarB)
+
+        foo = Foo(bar=BarA(a=5))
+        dumped = jsons.dump(foo, verbose=True)
+        loaded = jsons.load(dumped)
+
+        self.assertTrue(isinstance(loaded, Foo))
+        self.assertTrue(isinstance(loaded.bar, BarA))
+
+    def test_load_object_without_type_hints_verbose(self):
         class A:
             def __init__(self, x):
                 self.x = x
@@ -192,9 +219,15 @@ class TestObject(TestCase):
             }
         }
 
-        jsons.C = C  # Place C on a spot where it can be found.
+        # Place the classes where they can be found.
+        jsons.A = A
+        jsons.B = B
+        jsons.C = C
         loaded = jsons.load(dumped1)
-        del jsons.C  # Clean it up again... no big deal though...
+        # Clean it up again...
+        del jsons.A
+        del jsons.B
+        del jsons.C
         self.assertEqual(42, loaded.b.a.x)
 
         # Now let's test what happens when we try to load an unknown class.

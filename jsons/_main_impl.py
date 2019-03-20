@@ -5,15 +5,14 @@ This module contains the implementation of the main functions of jsons, such
 as `load` and `dump`.
 """
 import json
-from importlib import import_module
 from json import JSONDecodeError
 from typing import Dict, Callable, Optional, Union, Tuple
 from jsons._common_impl import (
     get_class_name,
     get_parents,
     META_ATTR,
-    StateHolder
-)
+    StateHolder,
+    get_cls_from_str)
 from jsons.exceptions import (
     DecodeError,
     DeserializationError,
@@ -115,12 +114,14 @@ def load(json_obj: object,
     """
     if not strict and (json_obj is None or type(json_obj) == cls):
         return json_obj
-    cls = _check_and_get_cls(json_obj, cls, fork_inst)
+    cls, meta_hints = _check_and_get_cls_and_meta_hints(json_obj, cls,
+                                                        fork_inst)
     deserializer = _get_deserializer(cls, fork_inst)
     kwargs_ = {
         'strict': strict,
         'fork_inst': fork_inst,
         'attr_getters': attr_getters,
+        'meta_hints': meta_hints,
         **kwargs
     }
     try:
@@ -357,7 +358,10 @@ def announce_class(
     fork_inst._announced_classes[cls_name] = cls
 
 
-def _check_and_get_cls(json_obj: object, cls: type, fork_inst: type) -> type:
+def _check_and_get_cls_and_meta_hints(
+        json_obj: object,
+        cls: type,
+        fork_inst: type) -> Tuple[type, Optional[dict]]:
     # Check if json_obj is of a valid type and return the cls.
     if type(json_obj) not in VALID_TYPES:
         invalid_type = get_class_name(type(json_obj), fork_inst=fork_inst)
@@ -371,7 +375,9 @@ def _check_and_get_cls(json_obj: object, cls: type, fork_inst: type) -> type:
                                    json_obj, cls)
 
     cls_from_meta, meta = _get_cls_and_meta(json_obj, fork_inst)
-    return cls or cls_from_meta or type(json_obj)
+    meta_hints = meta.get('classes', {}) if meta else {}
+    # Providing cls takes precedence over cls_from_meta.
+    return (cls or cls_from_meta or type(json_obj)), meta_hints
 
 
 def _get_cls_and_meta(
@@ -379,24 +385,9 @@ def _get_cls_and_meta(
         fork_inst: type) -> Tuple[Optional[type], Optional[dict]]:
     if isinstance(json_obj, dict) and META_ATTR in json_obj:
         cls_str = json_obj[META_ATTR]['classes']['/']
-        cls = _get_cls_from_str(cls_str, json_obj, fork_inst)
+        cls = get_cls_from_str(cls_str, json_obj, fork_inst)
         return cls, json_obj[META_ATTR]
     return None, None
-
-
-def _get_cls_from_str(cls_str: str, source: object, fork_inst) -> type:
-    try:
-        # importlib.import_module('jsons.exceptions')
-        splitted = cls_str.split('.')
-        module_name = '.'.join(splitted[:-1])
-        cls_name = splitted[-1]
-        cls_module = import_module(module_name)
-        cls = getattr(cls_module, cls_name)
-        if not cls or not isinstance(cls, type):
-            cls = _lookup_announced_class(cls_str, source, fork_inst)
-    except (ImportError, AttributeError, ValueError):
-        cls = _lookup_announced_class(cls_str, source, fork_inst)
-    return cls
 
 
 def _lookup_announced_class(

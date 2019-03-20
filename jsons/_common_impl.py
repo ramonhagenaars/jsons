@@ -5,8 +5,9 @@ This module contains implementations of common functionality that can be used
 throughout `jsons`.
 """
 import warnings
+from importlib import import_module
 from typing import Callable, Optional
-
+from jsons.exceptions import UnknownClassError
 
 META_ATTR = '-meta'  # The name of the attribute holding meta info.
 
@@ -59,6 +60,32 @@ def get_class_name(cls: type,
         cls_name = '{}.{}'.format(module, cls_name)
     cls_name = transformer(cls_name)
     return cls_name
+
+
+def get_cls_from_str(cls_str: str, source: object, fork_inst) -> type:
+    try:
+        splitted = cls_str.split('.')
+        module_name = '.'.join(splitted[:-1])
+        cls_name = splitted[-1]
+        cls_module = import_module(module_name)
+        cls = getattr(cls_module, cls_name)
+        if not cls or not isinstance(cls, type):
+            cls = _lookup_announced_class(cls_str, source, fork_inst)
+    except (ImportError, AttributeError, ValueError):
+        cls = _lookup_announced_class(cls_str, source, fork_inst)
+    return cls
+
+
+def _lookup_announced_class(
+        cls_str: str,
+        source: object,
+        fork_inst: type) -> type:
+    cls = fork_inst._announced_classes.get(cls_str)
+    if not cls:
+        msg = ('Could not find a suitable type for "{}". Make sure it can be '
+               'imported or that is has been announced.'.format(cls_str))
+        raise UnknownClassError(msg, source, cls_str)
+    return cls
 
 
 def _get_simple_name(cls: type) -> str:
