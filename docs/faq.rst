@@ -170,6 +170,23 @@ When loading a verbose object, you may omit the expected class:
 
     car_inst = jsons.load(car_json)
 
+Why not just use ``__dict__``?
+------------------------------
+For the following reasons:
+
+* The __dict__ attribute only creates a shallow dict of an instance. Any contained object is not serialized to a dict.
+* The __dict__ does not take @property methods in account.
+* Not all objects have a __dict__ attribute (e.g. datetime does not).
+* The serialization process of __dict__ cannot easily be tuned.
+* There is no means to deserialize with __dict__.
+
+Why not use the standard ``json`` library?
+------------------------------------------
+For the following reasons:
+
+* It's quite a hassle to (de)serialize custom types: you need to write a subclass of json.JSONEncoder with specific serialization/deserialization code per custom class.
+* You will need to provide that subclass of json.JSONEncoder to json.dumps/json.loads every single time.
+
 Aren't there already libraries for serialization to json?
 ---------------------------------------------------------
 There are.
@@ -235,6 +252,85 @@ Compared to that of ``jsons``:
 
 So yes. There are already libraries for serializing Python to json. There may
 be some advantages for each library, so you should do your homework.
+
+My json contains camelcase, how can I transform to the right case?
+------------------------------------------------------------------
+You can have the keys transformed by the serialization or deserialization
+process by providing a transformer function that takes a string and returns a
+string.
+
+.. code:: python
+
+    result = jsons.dump(some_obj, key_transformer=jsons.KEY_TRANSFORMER_CAMELCASE)
+    # result could be something like: {'thisIsTransformed': 123}
+
+    result = jsons.load(some_dict, SomeClass,
+                        key_transformer=jsons.KEY_TRANSFORMER_SNAKECASE)
+    # result could be something like: {'this_is_transformed': 123}
+
+The following casing styles are supported:
+
+.. code:: python
+
+    KEY_TRANSFORMER_SNAKECASE   # snake_case
+    KEY_TRANSFORMER_CAMELCASE   # camelCase
+    KEY_TRANSFORMER_PASCALCASE  # PascalCase
+    KEY_TRANSFORMER_LISPCASE    # lisp-case
+
+
+How do the jsons decorators work?
+---------------------------------
+Use ``loaded`` to automatically apply ``jsons.load`` to the parameters and/or
+the return value.
+
+Here is an example:
+
+.. code:: python
+
+    from datetime import datetime
+    from jsons.decorators import loaded
+
+
+    @loaded()
+    def some_func(x: datetime) -> datetime:
+        # x is now of type datetime.
+        return '2018-10-07T19:05:00+02:00'
+
+    result = some_func('2018-10-07T19:05:00+02:00')
+    # result is now of type datetime.
+
+In the above case, the type hint could be omitted for the same result: jsons
+will recognize the timestamp from the string automatically. In case of a custom
+type, you do need a type hint. The same goes for the return type; it could be
+omitted in this case as well.
+
+Similarly, you can decorate a function or method with ``@dumped`` as is done
+below:
+
+.. code:: python
+
+    from datetime import datetime
+    from jsons.decorators import dumped
+
+
+    class SomeClass:
+        @classmethod
+        @dumped()
+        def some_meth(cls, x):
+            # x is now of type str, cls remains untouched.
+            return datetime.now()
+
+    result = SomeClass.some_meth(datetime.now())
+    # result is now of type str.
+
+In case of methods, like in the example above, the special self or cls
+parameters are not touched by the decorators ``@loaded()`` or ``@dumped()``.
+Additionally, you can provide a type hint for any parameter (except self or
+cls) or the return value. Doing so will make jsons attempt to dump into that
+particular type, just like with ``jsons.dump(some_obj, cls=ParticularType)``.
+
+For more info, see the
+`api doc <https://jsons.readthedocs.io/en/latest/api.html#decorators>`_.
 
 Can I just participate in discussions on the issues?
 ----------------------------------------------------
