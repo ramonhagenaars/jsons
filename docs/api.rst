@@ -62,7 +62,7 @@ Here is an overview of the standard options:
 
 Here is an example:
 
-::
+.. code:: python
     
     >>> @dataclass
     ... class C:
@@ -91,7 +91,7 @@ For more info, check out the parameters of the `serializers`_.
 +----------------+-------------------------------+-----------------------------------------------------------------------------------+
 | *Returns:*     | ``object``                    | The serialized ``obj`` as a JSON type.                                            |
 +----------------+-------------------------------+-----------------------------------------------------------------------------------+
-| *Example:*     | ::                                                                                                                |
+| *Example:*     | .. code:: python                                                                                                  |
 |                |                                                                                                                   |
 |                |     >>> some_utcdate = datetime.now(tz=timezone.utc)                                                              |
 |                |     >>> jsons.dump(some_utcdate)                                                                                  |
@@ -121,7 +121,7 @@ load
 +----------------+-------------------------------------------------------------+-------------------------------------------------------------------------------------+
 | *Returns:*     | ``object``                                                  | An object of a Python equivalent type or of ``cls``.                                |
 +----------------+-------------------------------------------------------------+-------------------------------------------------------------------------------------+
-| *Example:*     | ::                                                                                                                                                |
+| *Example:*     | .. code:: python                                                                                                                                  |
 |                |                                                                                                                                                   |
 |                |     >>> jsons.load('2019-02-16T20:33:36Z', datetime)                                                                                              |
 |                |     datetime.datetime(2019, 2, 16, 20, 33, 36, tzinfo=datetime.timezone.utc)                                                                      |
@@ -146,7 +146,7 @@ dumps
 +----------------+------------------+-------------------------------------------------------------------------+
 | *Returns:*     | ``object``       | An object of a Python equivalent type or of ``cls``.                    |
 +----------------+------------------+-------------------------------------------------------------------------+
-| *Example:*     | ::                                                                                         |
+| *Example:*     | .. code:: python                                                                           |
 |                |                                                                                            |
 |                |     >>> jsons.dumps([1, 2, 3])                                                             |
 |                |     '[1, 2, 3]'                                                                            |
@@ -173,7 +173,7 @@ loads
 +----------------+----------------------------+---------------------------------------------------------------------------+
 | *Returns:*     | ``object``                 | An object of a Python equivalent type or of ``cls``.                      |
 +----------------+----------------------------+---------------------------------------------------------------------------+
-| *Example:*     | ::                                                                                                     |
+| *Example:*     | .. code:: python                                                                                       |
 |                |                                                                                                        |
 |                |     >>> jsons.loads('[1, 2, 3]')                                                                       |
 |                |     [1, 2, 3]                                                                                          |
@@ -200,7 +200,7 @@ dumpb
 +----------------+-------------------+-------------------------------------------------------------------------+
 | *Returns:*     | ``bytes``         | A serialized ``obj`` in bytes.                                          |
 +----------------+-------------------+-------------------------------------------------------------------------+
-| *Example:*     | ::                                                                                          |
+| *Example:*     | .. code:: python                                                                            |
 |                |                                                                                             |
 |                |     >>> jsons.dumpb([1, 2, 3])                                                              |
 |                |     b'[1, 2, 3]'                                                                            |
@@ -229,7 +229,7 @@ loadb
 +----------------+--------------------------------+--------------------------------------------------------------------------------+
 | *Returns:*     | ``object``                     | An object of a Python equivalent type or of ``cls``.                           |
 +----------------+--------------------------------+--------------------------------------------------------------------------------+
-| *Example:*     | ::                                                                                                              |
+| *Example:*     | .. code:: python                                                                                                |
 |                |                                                                                                                 |
 |                |     >>> jsons.loadb(b'[1, 2, 3]')                                                                               |
 |                |     [1, 2, 3]                                                                                                   |
@@ -259,7 +259,7 @@ set_serializer
 +----------------+---------------------+------------------------------------------------------------------------------+
 | *Returns:*     | ``None``            |                                                                              |
 +----------------+---------------------+------------------------------------------------------------------------------+
-| *Example:*     | ::                                                                                                 |
+| *Example:*     | .. code:: python                                                                                   |
 |                |                                                                                                    |
 |                |     >>> jsons.set_serializer(lambda obj, **_: 123, str)                                            |
 |                |     >>> jsons.dump('any string')                                                                   |
@@ -290,7 +290,7 @@ set_deserializer
 +----------------+---------------------+------------------------------------------------------------------------------+
 | *Returns:*     | ``None``            |                                                                              |
 +----------------+---------------------+------------------------------------------------------------------------------+
-| *Example:*     | ::                                                                                                 |
+| *Example:*     | .. code:: python                                                                                   |
 |                |                                                                                                    |
 |                |     >>> jsons.set_deserializer(lambda obj, cls, **_: 123, str)                                     |
 |                |     >>> jsons.load('any string')                                                                   |
@@ -319,7 +319,7 @@ suppress_warnings
 +----------------+----------------------------------+------------------------------------------------------------------------------+
 | *Returns:*     | ``None``                         |                                                                              |
 +----------------+----------------------------------+------------------------------------------------------------------------------+
-| *Example:*     | ::                                                                                                              |
+| *Example:*     | .. code:: python                                                                                                |
 |                |                                                                                                                 |
 |                |     >>> jsons.suppress_warnings()                                                                               |
 +----------------+-----------------------------------------------------------------------------------------------------------------+
@@ -333,7 +333,7 @@ JsonSerializable
 ================
 This class can be used as a base class for your models.
 
-::
+.. code:: python
 
     @dataclass
     class Car(JsonSerializable):
@@ -342,7 +342,7 @@ This class can be used as a base class for your models.
 
 You can now dump your model using the ``json`` property:
 
-::
+.. code:: python
 
     car = Car('red', 'Gary')
     dumped = car.json  # == jsons.dump(car)
@@ -350,7 +350,7 @@ You can now dump your model using the ``json`` property:
 
 The JSON data can now also be loaded using your model:
 
-::
+.. code:: python
 
     loaded = Car.from_json(dumped)  # == jsons.load(dumped, Car)
 
@@ -370,7 +370,7 @@ fork
 +----------------+-----------------------------+-------------------------------------------------------------+
 | *Returns:*     | ``type``                    | A new ``type`` based on ``JsonSerializable``.               |
 +----------------+-----------------------------+-------------------------------------------------------------+
-| *Example:*     | ::                                                                                        |
+| *Example:*     | .. code:: python                                                                          |
 |                |                                                                                           |
 |                |     >>> fork = jsons.JsonSerializable.fork()                                              |
 |                |     >>> jsons.set_deserializer(lambda obj, *_, **__: 'Regular!', str)                     |
@@ -402,7 +402,7 @@ with_dump
 | *Returns:*     | ``type``                 | Returns the ``JsonSerializable`` class or its fork (to allow  |
 |                |                          | you to stack).                                                |
 +----------------+--------------------------+---------------------------------------------------------------+
-| *Example:*     | ::                                                                                       |
+| *Example:*     | .. code:: python                                                                         |
 |                |                                                                                          |
 |                |     >>> @dataclass                                                                       |
 |                |     ... class Person(JsonSerializable                                                    |
@@ -429,7 +429,7 @@ json
 +----------------+------------------------+----------------------+
 | *Returns:*     | ``object``             | See ``jsons.dump``.  |
 +----------------+------------------------+----------------------+
-| *Example:*     | ::                                            |
+| *Example:*     | .. code:: python                              |
 |                |                                               |
 |                |     >>> @dataclass                            |
 |                |     ... class Person(jsons.JsonSerializable): |
@@ -451,7 +451,7 @@ dump
 +----------------+------------------------+----------------------+
 | *Returns:*     | ``object``             | See ``jsons.dump``.  |
 +----------------+------------------------+----------------------+
-| *Example:*     | ::                                            |
+| *Example:*     | .. code:: python                              |
 |                |                                               |
 |                |     >>> @dataclass                            |
 |                |     ... class Person(jsons.JsonSerializable): |
@@ -473,7 +473,7 @@ dumps
 +----------------+------------------------+-----------------------+
 | *Returns:*     | ``object``             | See ``jsons.dumps``.  |
 +----------------+------------------------+-----------------------+
-| *Example:*     | ::                                             |
+| *Example:*     | .. code:: python                               |
 |                |                                                |
 |                |     >>> @dataclass                             |
 |                |     ... class Person(jsons.JsonSerializable):  |
@@ -495,7 +495,7 @@ dumpb
 +----------------+------------------------+-----------------------+
 | *Returns:*     | ``object``             | See ``jsons.dumpb``.  |
 +----------------+------------------------+-----------------------+
-| *Example:*     | ::                                             |
+| *Example:*     | .. code:: python                               |
 |                |                                                |
 |                |     >>> @dataclass                             |
 |                |     ... class Person(jsons.JsonSerializable):  |
@@ -521,7 +521,7 @@ from_json
 +----------------+------------------------+----------------------+
 | *Returns:*     | ``object``             | See ``jsons.load``.  |
 +----------------+------------------------+----------------------+
-| *Example:*     | ::                                            |
+| *Example:*     | .. code:: python                              |
 |                |                                               |
 |                |     >>> @dataclass                            |
 |                |     ... class Person(jsons.JsonSerializable): |
@@ -547,7 +547,7 @@ load
 +----------------+------------------------+----------------------+
 | *Returns:*     | ``object``             | See ``jsons.load``.  |
 +----------------+------------------------+----------------------+
-| *Example:*     | ::                                            |
+| *Example:*     | .. code:: python                              |
 |                |                                               |
 |                |     >>> @dataclass                            |
 |                |     ... class Person(jsons.JsonSerializable): |
@@ -573,7 +573,7 @@ loads
 +----------------+------------------------+-----------------------+
 | *Returns:*     | ``object``             | See ``jsons.loads``.  |
 +----------------+------------------------+-----------------------+
-| *Example:*     | ::                                             |
+| *Example:*     | .. code:: python                               |
 |                |                                                |
 |                |     >>> @dataclass                             |
 |                |     ... class Person(jsons.JsonSerializable):  |
@@ -599,7 +599,7 @@ loadb
 +----------------+------------------------+-----------------------+
 | *Returns:*     | ``object``             | See ``jsons.loadb``.  |
 +----------------+------------------------+-----------------------+
-| *Example:*     | ::                                             |
+| *Example:*     | .. code:: python                               |
 |                |                                                |
 |                |     >>> @dataclass                             |
 |                |     ... class Person(jsons.JsonSerializable):  |
@@ -629,7 +629,7 @@ set_serializer
 +----------------+-------------------------------+------------------------------------------------------------------------------+
 | *Returns:*     | ``type``                      | Returns the ``JsonSerializable`` class or its fork (to allow you to stack).  |
 +----------------+-------------------------------+------------------------------------------------------------------------------+
-| *Example:*     | ::                                                                                                           |
+| *Example:*     | .. code:: python                                                                                             |
 |                |                                                                                                              |
 |                |     >>> class BaseModel(JsonSerializable                                                                     |
 |                |     ...                 .set_serializer(lambda obj, cls, **_: obj.upper(), str)):                            |
@@ -662,7 +662,7 @@ set_deserializer
 +----------------+-------------------------------+--------------------------------------------------------------------------------+
 | *Returns:*     | ``type``                      | Returns the ``JsonSerializable`` class or its fork (to allow you to stack).    |
 +----------------+-------------------------------+--------------------------------------------------------------------------------+
-| *Example:*     | ::                                                                                                             |
+| *Example:*     | .. code:: python                                                                                               |
 |                |                                                                                                                |
 |                |     >>> class BaseModel(JsonSerializable                                                                       |
 |                |     ...                 .set_deserializer(lambda obj, cls, **_: obj.upper(), str)):                            |
@@ -682,7 +682,7 @@ provide an instance of this enum to the ``dump`` function.
 
 Example:
 
-::
+.. code:: python
 
     @dataclass
     class Car:
@@ -694,7 +694,7 @@ Example:
 
 Dump it as follows:
 
-::
+.. code:: python
 
     dumped = jsons.dump(c, verbose=Verbosity.WITH_EVERYTHING)
 
@@ -703,13 +703,13 @@ Dump it as follows:
 
 Or the equivalent to ``WITH_EVERYTHING``:
 
-::
+.. code:: python
 
     dumped = jsons.dump(c, verbose=True)
 
 This would result in the following value for ``dumped``:
 
-::
+.. code:: python
 
     {
       'color': 'red',
@@ -725,7 +725,7 @@ This would result in the following value for ``dumped``:
 And with this, you can deserialize ``dumped`` without having to specify its
 class:
 
-::
+.. code:: python
 
     jsons.load(dumped)
 
@@ -760,7 +760,7 @@ from_value
 +----------------+----------------+----------------------------------------------------------+
 | *Returns:*     | ``Verbosity``  | A new ``type`` based on ``JsonSerializable``.            |
 +----------------+----------------+----------------------------------------------------------+
-| *Example:*     | ::                                                                        |
+| *Example:*     | .. code:: python                                                          |
 |                |                                                                           |
 |                |     >>> Verbosity.from_value(True)                                        |
 |                |     Verbosity.WITH_EVERYTHING                                             |
@@ -795,7 +795,7 @@ loaded
 |                +---------------------------------+-----------------------------------------------------------------------------+
 |                | ``kwargs``                      | any keyword arguments that should be passed on to ``jsons.load``            |
 +----------------+---------------------------------+-----------------------------------------------------------------------------+
-| *Example:*     | ::                                                                                                            |
+| *Example:*     | .. code:: python                                                                                              |
 |                |                                                                                                               |
 |                |     >>> @loaded()                                                                                             |
 |                |     ... def func(arg: datetime) -> datetime:                                                                  |
@@ -828,7 +828,7 @@ dumped
 +                +----------------------------------+------------------------------------------------------------------------------+
 |                | ``kwargs``                       | any keyword arguments that should be passed on to ``jsons.dump``             |
 +----------------+----------------------------------+------------------------------------------------------------------------------+
-| *Example:*     | ::                                                                                                              |
+| *Example:*     | .. code:: python                                                                                                |
 |                |                                                                                                                 |
 |                |     >>> @dumped()                                                                                               |
 |                |     ... def func(arg):                                                                                          |
@@ -864,7 +864,7 @@ default_datetime_serializer
 +----------------+----------------------------------------+------------------------------------------------------+
 | *Returns:*     | ``datetime``                           | ``datetime`` as an RFC3339 string.                   |
 +----------------+----------------------------------------+------------------------------------------------------+
-| *Example:*     | ::                                                                                            |
+| *Example:*     | .. code:: python                                                                              |
 |                |                                                                                               |
 |                |     >>> dt = datetime.now(tz=timezone.utc)                                                    |
 |                |     >>> default_datetime_serializer(dt)                                                       |
@@ -887,7 +887,7 @@ default_iterable_serializer
 +----------------+------------------+---------------------------------------------------------------------------+
 | *Returns:*     | ``list``         | A list of which all elements are serialized.                              |
 +----------------+------------------+---------------------------------------------------------------------------+
-| *Example:*     | ::                                                                                           |
+| *Example:*     | .. code:: python                                                                             |
 |                |                                                                                              |
 |                |     >>> default_iterable_serializer((1, 2, 3))                                               |
 |                |     [1, 2, 3]                                                                                |
@@ -909,7 +909,7 @@ default_list_serializer
 +----------------+----------------+---------------------------------------------------------------------------+
 | *Returns:*     | ``list``       | A list of which all elements are serialized.                              |
 +----------------+----------------+---------------------------------------------------------------------------+
-| *Example:*     | ::                                                                                         |
+| *Example:*     | .. code:: python                                                                           |
 |                |                                                                                            |
 |                |     >>> default_iterable_serializer([1, 2, datetime.now(tz=timezone.utc)])                 |
 |                |     [1, 2, '2019-02-19T18:41:47Z']                                                         |
@@ -931,7 +931,7 @@ default_tuple_serializer
 +----------------+----------------+---------------------------------------------------------------------------+
 | *Returns:*     | ``list``       | A list of which all elements are serialized.                              |
 +----------------+----------------+---------------------------------------------------------------------------+
-| *Example:*     | ::                                                                                         |
+| *Example:*     | .. code:: python                                                                           |
 |                |                                                                                            |
 |                |     >>> default_tuple_serializer((1, 2, datetime.now(tz=timezone.utc)))                    |
 |                |     [1, 2, '2019-02-19T18:41:47Z']                                                         |
@@ -953,7 +953,7 @@ default_namedtuple_serializer
 +----------------+----------------+---------------------------------------------------------------------------+
 | *Returns:*     | ``dict``       | A dict of which all elements are serialized.                              |
 +----------------+----------------+---------------------------------------------------------------------------+
-| *Example:*     | ::                                                                                         |
+| *Example:*     | .. code:: python                                                                           |
 |                |                                                                                            |
 |                |     >>> Point = namedtuple('Point', ['x', 'y'])                                            |
 |                |     >>> default_namedtuple_serializer(Point(10, 20))                                       |
@@ -982,7 +982,7 @@ default_dict_serializer
 +----------------+-----------------------------------------------------+-----------------------------------------------------------------+
 | *Returns:*     | ``dict``                                            | A dict of which all elements are serialized.                    |
 +----------------+-----------------------------------------------------+-----------------------------------------------------------------+
-| *Example:*     | ::                                                                                                                    |
+| *Example:*     | .. code:: python                                                                                                      |
 |                |                                                                                                                       |
 |                |     >>> default_dict_serializer({'x': datetime.now()})                                                                |
 |                |     {'x': '2019-02-23T13:46:10.650772+01:00'}                                                                         |
@@ -1009,7 +1009,7 @@ default_enum_serializer
 +----------------+-----------------------------------------------------+-----------------------------------------------------+
 | *Returns:*     | ``str``                                             | A serialized ``obj`` in string format.              |
 +----------------+-----------------------------------------------------+-----------------------------------------------------+
-| *Example:*     | ::                                                                                                        |
+| *Example:*     | .. code:: python                                                                                          |
 |                |                                                                                                           |
 |                |     >>> class Color(Enum):                                                                                |
 |                |     ...     RED = 1                                                                                       |
@@ -1033,7 +1033,7 @@ default_primitive_serializer
 +----------------+----------------------------------------+----------------------------------------------+
 | *Returns:*     | ``object``                             | ``obj``.                                     |
 +----------------+----------------------------------------+----------------------------------------------+
-| *Example:*     | ::                                                                                    |
+| *Example:*     | .. code:: python                                                                      |
 |                |                                                                                       |
 |                |     >>> jsons.default_primitive_serializer(42)                                        |
 |                |     42                                                                                |
@@ -1072,7 +1072,7 @@ default_object_serializer
 +----------------+-----------------------------------------------------+--------------------------------------------------+
 | *Returns:*     | ``object``                                          | ``obj``.                                         |
 +----------------+-----------------------------------------------------+--------------------------------------------------+
-| *Example:*     | ::                                                                                                     |
+| *Example:*     | .. code:: python                                                                                       |
 |                |                                                                                                        |
 |                |     >>> class Person:                                                                                  |
 |                |     ...     def __init__(self, name: str, friends: Optional[List['Person']] = None):                   |
@@ -1104,7 +1104,7 @@ default_datetime_deserializer
 +----------------+-------------------------+------------------------------------------------+
 | *Returns:*     | ``object``              | ``datetime``.                                  |
 +----------------+-------------------------+------------------------------------------------+
-| *Example:*     | ::                                                                       |
+| *Example:*     | .. code:: python                                                         |
 |                |                                                                          |
 |                |     >>> jsons.default_datetime_deserializer('2019-02-23T22:28:00Z')      |
 |                |     datetime.datetime(2019, 2, 23, 22, 28, tzinfo=datetime.timezone.utc) |
@@ -1127,7 +1127,7 @@ default_list_deserializer
 +----------------+----------------------------+-----------------------------------------------+
 | *Returns:*     | ``list``                   | A deserialized list instance.                 |
 +----------------+----------------------------+-----------------------------------------------+
-| *Example:*     | ::                                                                         |
+| *Example:*     | .. code:: python                                                           |
 |                |                                                                            |
 |                |     >>> jsons.default_list_deserializer(['2019-02-23T22:28:00Z'])          |
 |                |     [datetime.datetime(2019, 2, 23, 22, 28, tzinfo=datetime.timezone.utc)] |
@@ -1153,7 +1153,7 @@ default_tuple_deserializer
 +----------------+-------------------------+------------------------------------------------------------+
 | *Returns:*     | ``tuple``               | A deserialized tuple instance.                             |
 +----------------+-------------------------+------------------------------------------------------------+
-| *Example:*     | ::                                                                                   |
+| *Example:*     | .. code:: python                                                                     |
 |                |                                                                                      |
 |                |     >>> jsons.default_tuple_deserializer(('2019-02-23T22:28:00Z',), Tuple[datetime]) |
 |                |     (datetime.datetime(2019, 2, 23, 22, 28, tzinfo=datetime.timezone.utc),)          |
@@ -1176,11 +1176,12 @@ default_namedtuple_deserializer
 +                +----------------------------+---------------------------------------------------------------+
 |                | ``cls: type``              | The NamedTuple class.                                         |
 +                +----------------------------+---------------------------------------------------------------+
-|                | ``kwargs``                 | Any keyword arguments that are passed through the             |                            | deserialization process. |
+|                | ``kwargs``                 | Any keyword arguments that are passed through the             |
+|                |                            | deserialization process.                                      |
 +----------------+----------------------------+---------------------------------------------------------------+
 | *Returns:*     | ``datetime``               | A deserialized named tuple (i.e. an instance of a class).     |
 +----------------+----------------------------+---------------------------------------------------------------+
-| *Example:*     | ::                                                                                         |
+| *Example:*     | .. code:: python                                                                           |
 |                |                                                                                            |
 |                |     >>> class NT(NamedTuple):                                                              |
 |                |     ...     a: int                                                                         |
@@ -1209,7 +1210,7 @@ default_union_deserializer
 | *Returns:*     | ``object``                             | An object of the first type of the Union that could                        |
 |                |                                        | be deserialized successfully.                                              |
 +----------------+----------------------------------------+----------------------------------------------------------------------------+
-| *Example:*     | ::                                                                                                                  |
+| *Example:*     | .. code:: python                                                                                                    |
 |                |                                                                                                                     |
 |                |     >>> jsons.default_union_deserializer('2019-02-23T22:28:00Z', Union[List[datetime], datetime])                   |
 |                |     datetime.datetime(2019, 2, 23, 22, 28, tzinfo=datetime.timezone.utc)                                            |
@@ -1234,7 +1235,7 @@ default_set_deserializer
 +----------------+---------------------------------------+-------------------------------------------------------------------------------------------+
 | *Returns:*     | ``set``                               | A deserialized set instance.                                                              |
 +----------------+---------------------------------------+-------------------------------------------------------------------------------------------+
-| *Example:*     | ::                                                                                                                                |
+| *Example:*     | .. code:: python                                                                                                                  |
 |                |                                                                                                                                   |
 |                |     >>> jsons.default_set_deserializer(['2019-02-24T17:43:00Z'], Set[datetime])                                                   |
 |                |     {datetime.datetime(2019, 2, 24, 17, 43, tzinfo=datetime.timezone.utc)}                                                        |
@@ -1263,7 +1264,7 @@ default_dict_deserializer
 +----------------+-----------------------------------+---------------------------------------------------------+
 | *Returns:*     | ``dict``                          | A deserialized dict instance.                           |
 +----------------+-----------------------------------+---------------------------------------------------------+
-| *Example:*     | ::                                                                                          |
+| *Example:*     | .. code:: python                                                                            |
 |                |                                                                                             |
 |                |     >>> jsons.default_dict_deserializer({'a': '2019-02-24T17:43:00Z'}, Dict[str, datetime]) |
 |                |     {'a': datetime.datetime(2019, 2, 24, 17, 43, tzinfo=datetime.timezone.utc)}             |
@@ -1292,7 +1293,7 @@ default_enum_deserializer
 +----------------+---------------------+-------------------------------------------------------------------------------------+
 | *Returns:*     | ``dict``            | The corresponding enum element instance.                                            |
 +----------------+---------------------+-------------------------------------------------------------------------------------+
-| *Example:*     | ::                                                                                                        |
+| *Example:*     | .. code:: python                                                                                          |
 |                |                                                                                                           |
 |                |     >>> class Color(Enum):                                                                                |
 |                |     ...     RED = 1                                                                                       |
@@ -1320,7 +1321,7 @@ default_string_deserializer
 +----------------+-------------------------+---------------------------------------------------------------------+
 | *Returns:*     | ``object``              | The deserialized string.                                            |
 +----------------+-------------------------+---------------------------------------------------------------------+
-| *Example:*     | ::                                                                                            |
+| *Example:*     | .. code:: python                                                                              |
 |                |                                                                                               |
 |                |     >>> jsons.default_string_deserializer('2019-02-24T21:33:00Z')                             |
 |                |     2019-02-24 21:33:00+00:00                                                                 |
@@ -1344,7 +1345,7 @@ default_primitive_deserializer
 +----------------+----------------------------------------+------------------------------------------------+
 | *Returns:*     | ``object``                             | ``obj``.                                       |
 +----------------+----------------------------------------+------------------------------------------------+
-| *Example:*     | ::                                                                                      |
+| *Example:*     | .. code:: python                                                                        |
 |                |                                                                                         |
 |                |     >>> jsons.default_primitive_deserializer(42)                                        |
 |                |     42                                                                                  |
@@ -1374,7 +1375,7 @@ default_object_deserializer
 +----------------+----------------------------------+----------------------------------------------------------------------+
 | *Returns:*     | ``object``                       | An instance of type ``cls``.                                         |
 +----------------+----------------------------------+----------------------------------------------------------------------+
-| *Example:*     | ::                                                                                                      |
+| *Example:*     | .. code:: python                                                                                        |
 |                |                                                                                                         |
 |                |     >>> class Person:                                                                                   |
 |                |     ...    def __init__(self, name: str, friends: Optional[List['Person']] = None):                     |
