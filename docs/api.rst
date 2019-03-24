@@ -922,8 +922,8 @@ default_tuple_serializer
 +----------------+--------------------------------------------------------------------------------------------+
 | Function:*     | ``jsons.default_tuple_serializer``                                                         |
 +----------------+--------------------------------------------------------------------------------------------+
-| *Description:* | Serialize the given ``obj`` to a list of serialized objects.                               |
-|                |                                                                                            |
+| *Description:* | Serialize the given ``obj`` to a list of serialized objects. If ``obj`` happens to be a    |
+|                | namedtuple, then ``default_namedtuple_serializer`` is called.                              |
 +----------------+----------------+---------------------------------------------------------------------------+
 | *Arguments:*   | ``obj: tuple`` | The tuple that is to be serialized.                                       |
 +                +----------------+---------------------------------------------------------------------------+
@@ -933,8 +933,31 @@ default_tuple_serializer
 +----------------+----------------+---------------------------------------------------------------------------+
 | *Example:*     | ::                                                                                         |
 |                |                                                                                            |
-|                |     >>> default_iterable_serializer((1, 2, datetime.now(tz=timezone.utc)))                 |
+|                |     >>> default_tuple_serializer((1, 2, datetime.now(tz=timezone.utc)))                    |
 |                |     [1, 2, '2019-02-19T18:41:47Z']                                                         |
++----------------+--------------------------------------------------------------------------------------------+
+
+=============================
+default_namedtuple_serializer
+=============================
+
++----------------+--------------------------------------------------------------------------------------------+
+| Function:*     | ``jsons.default_namedtuple_serializer``                                                    |
++----------------+--------------------------------------------------------------------------------------------+
+| *Description:* | Serialize the given ``obj`` to a dict of serialized objects.                               |
+|                |                                                                                            |
++----------------+----------------+---------------------------------------------------------------------------+
+| *Arguments:*   | ``obj: tuple`` | The tuple that is to be serialized.                                       |
++                +----------------+---------------------------------------------------------------------------+
+|                | ``kwargs``     | Any keyword arguments that are passed through the serialization process.  |
++----------------+----------------+---------------------------------------------------------------------------+
+| *Returns:*     | ``dict``       | A dict of which all elements are serialized.                              |
++----------------+----------------+---------------------------------------------------------------------------+
+| *Example:*     | ::                                                                                         |
+|                |                                                                                            |
+|                |     >>> Point = namedtuple('Point', ['x', 'y'])                                            |
+|                |     >>> default_namedtuple_serializer(Point(10, 20))                                       |
+|                |     {'x': 10, 'y': 20}                                                                     |
 +----------------+--------------------------------------------------------------------------------------------+
 
 =======================
@@ -1143,26 +1166,27 @@ default_namedtuple_deserializer
 +----------------+--------------------------------------------------------------------------------------------+
 | *Function:*    | ``jsons.default_namedtuple_deserializer``                                                  |
 +----------------+--------------------------------------------------------------------------------------------+
-| *Description:* | Deserialize a (JSON) list into a named tuple by deserializing all items of that list.      |
+| *Description:* | Deserialize a (JSON) dict or list into a named tuple by deserializing all items of that    |
+|                | list/dict.                                                                                 |
 |                |                                                                                            |
 |                | This deserializer is called by the ``default_tuple_deserializer`` when it notices that     |
 |                | a named tuple (rather than a tuple) is involved.                                           |
-+----------------+--------------------------------------------------------------------------------------------+
-| *Arguments:*   | ``obj: list`` | The tuple that needs deserializing.                                        |
-+                +---------------+----------------------------------------------------------------------------+
-|                | ``cls: type`` | The NamedTuple class.                                                      |
-+                +---------------+----------------------------------------------------------------------------+
-|                | ``kwargs``    | Any keyword arguments that are passed through the deserialization process. |
-+----------------+---------------+----------------------------------------------------------------------------+
-| *Returns:*     | ``datetime``  | A deserialized named tuple (i.e. an instance of a class).                  |
-+----------------+---------------+----------------------------------------------------------------------------+
++----------------+----------------------------+---------------------------------------------------------------+
+| *Arguments:*   | ``obj: Union[list, dict]`` | The tuple that needs deserializing.                           |
++                +----------------------------+---------------------------------------------------------------+
+|                | ``cls: type``              | The NamedTuple class.                                         |
++                +----------------------------+---------------------------------------------------------------+
+|                | ``kwargs``                 | Any keyword arguments that are passed through the             |                            | deserialization process. |
++----------------+----------------------------+---------------------------------------------------------------+
+| *Returns:*     | ``datetime``               | A deserialized named tuple (i.e. an instance of a class).     |
++----------------+----------------------------+---------------------------------------------------------------+
 | *Example:*     | ::                                                                                         |
 |                |                                                                                            |
 |                |     >>> class NT(NamedTuple):                                                              |
 |                |     ...     a: int                                                                         |
-|                |     ...     c: str = 'I am default'                                                        |
-|                |     >>> jsons.load([42], NT)                                                               |
-|                |     NT(a=42, c='I am default')                                                             |
+|                |     ...     b: str = 'I am default'                                                        |
+|                |     >>> jsons.load({'a': 42}, NT)                                                          |
+|                |     NT(a=42, b='I am default')                                                             |
 +----------------+--------------------------------------------------------------------------------------------+
 
 ==========================

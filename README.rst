@@ -94,6 +94,11 @@ Meta
 Recent updates
 ==============
 
+0.8.2
++++++
+- Bugfix: Dumping a namedtuple resulted in a list rather than a dict.
+- Feature: Loading into named tuples can be from lists and dicts.
+
 0.8.1
 +++++
 - Bugfix: Loading a verbose dump worked only shallow.
