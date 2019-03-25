@@ -1,3 +1,4 @@
+from typing import Union
 from jsons._compatibility_impl import tuple_with_ellipsis
 from jsons.exceptions import UnfulfilledArgumentError
 from jsons._main_impl import load
@@ -24,19 +25,24 @@ def default_tuple_deserializer(obj: list,
     return tuple(list_)
 
 
-def default_namedtuple_deserializer(obj: list, cls: type, **kwargs) -> object:
+def default_namedtuple_deserializer(
+        obj: Union[list, dict],
+        cls: type,
+        **kwargs) -> object:
     """
-    Deserialize a (JSON) list into a named tuple by deserializing all items of
-    that list.
+    Deserialize a (JSON) list or dict into a named tuple by deserializing all
+    items of that list/dict.
     :param obj: the tuple that needs deserializing.
     :param cls: the NamedTuple.
     :param kwargs: any keyword arguments.
     :return: a deserialized named tuple (i.e. an instance of a class).
     """
+    is_dict = isinstance(obj, dict)
     args = []
     for index, field_name in enumerate(cls._fields):
         if index < len(obj):
-            field = obj[index]
+            key = field_name if is_dict else index
+            field = obj[key]
         else:
             field = cls._field_defaults.get(field_name, None)
         if field is None:

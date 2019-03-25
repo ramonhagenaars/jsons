@@ -19,7 +19,7 @@
 +--------------------------------------------------------+----------------------------------------------------------------------+
 | * *Python 3.5+*                                        | **Example of a model to be serialized:**                             |
 |                                                        |                                                                      |
-| * *Minimal effort to use!*                             | ::                                                                   |
+| * *Minimal effort to use!*                             | .. code:: python                                                     |
 |                                                        |                                                                      |
 | * *No magic, just you, Python and jsons!*              |                                                                      |
 |                                                        |     @dataclass                                                       |
@@ -30,7 +30,7 @@
 | * *Type hints for the win!*                            | **Example of the serialization:**                                    |
 |                                                        |                                                                      |
 |                                                        |                                                                      |
-|                                                        | ::                                                                   |
+|                                                        | .. code:: python                                                     |
 |                                                        |                                                                      |
 |                                                        |                                                                      |
 |                                                        |     jsons.dump(Person('Guido van Rossum', birthday_guido))           |
@@ -39,7 +39,7 @@
 |                                                        | **Output after serialization:**                                      |
 |                                                        |                                                                      |
 |                                                        |                                                                      |
-|                                                        | ::                                                                   |
+|                                                        | .. code:: python                                                     |
 |                                                        |                                                                      |
 |                                                        |                                                                      |
 |                                                        |     {'birthday': '1956-01-31T12:00:00Z', 'name': 'Guido van Rossum'} |
@@ -93,6 +93,11 @@ Meta
 
 Recent updates
 ==============
+
+0.8.2
++++++
+- Bugfix: Dumping a namedtuple resulted in a list rather than a dict.
+- Feature: Loading into named tuples can be from lists and dicts.
 
 0.8.1
 +++++

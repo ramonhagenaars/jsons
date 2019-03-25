@@ -9,7 +9,6 @@ from jsons.serializers.default_datetime import default_datetime_serializer
 from jsons.serializers.default_dict import default_dict_serializer
 from jsons.serializers.default_enum import default_enum_serializer
 from jsons.serializers.default_iterable import default_iterable_serializer
-from jsons.serializers.default_list import default_list_serializer
 from jsons.serializers.default_object import default_object_serializer
 from jsons.serializers.default_primitive import default_primitive_serializer
 from jsons.serializers.default_tuple import default_tuple_serializer

@@ -96,6 +96,7 @@ from jsons.exceptions import (
     UnfulfilledArgumentError,
     InvalidDecorationError
 )
+from jsons.serializers import default_iterable_serializer
 
 dump = _main_impl.dump
 load = _main_impl.load
@@ -116,7 +117,6 @@ KEY_TRANSFORMER_LISPCASE = lispcase
 
 Verbosity = classes.verbosity.Verbosity
 
-default_list_serializer = serializers.default_list_serializer
 default_tuple_serializer = serializers.default_tuple_serializer
 default_dict_serializer = serializers.default_dict_serializer
 default_enum_serializer = serializers.default_enum_serializer
@@ -134,8 +134,6 @@ default_string_deserializer = deserializers.default_string_deserializer
 default_primitive_deserializer = deserializers.default_primitive_deserializer
 default_object_deserializer = deserializers.default_object_deserializer
 
-set_serializer(default_list_serializer, list)
-set_serializer(default_list_serializer, set)
 set_serializer(default_tuple_serializer, tuple)
 set_serializer(default_dict_serializer, dict)
 set_serializer(default_enum_serializer, Enum)
@@ -145,6 +143,8 @@ set_serializer(default_primitive_serializer, int)
 set_serializer(default_primitive_serializer, float)
 set_serializer(default_primitive_serializer, bool)
 set_serializer(default_primitive_serializer, None)
+set_serializer(default_iterable_serializer, list)
+set_serializer(default_iterable_serializer, set)
 set_serializer(default_object_serializer, object, False)
 set_deserializer(default_list_deserializer, list)
 set_deserializer(default_tuple_deserializer, tuple)
