@@ -17,6 +17,6 @@ def default_string_deserializer(obj: str,
     """
     try:
         result = load(obj, datetime, **kwargs)
-    except DeserializationError:
+    except (DeserializationError, ValueError):
         result = obj
     return result
