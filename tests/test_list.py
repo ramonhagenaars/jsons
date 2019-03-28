@@ -1,4 +1,5 @@
 import datetime
+from typing import List
 from unittest import TestCase
 import jsons
 
@@ -17,3 +18,11 @@ class TestList(TestCase):
         list_ = [1, 2, 3, [4, 5, [dat]]]
         expectation = [1, 2, 3, [4, 5, ['2018-07-08T21:34:00Z']]]
         self.assertEqual(list_, jsons.load(expectation))
+
+    def test_load_explicit_specified_list(self):
+        list_ = [1, 2, 3]
+        self.assertEqual(list_, jsons.load(list_, List[int]))
+
+    def test_load_explicit_unspecified_list(self):
+        list_ = [1, 2, 3]
+        self.assertEqual(list_, jsons.load(list_, List))

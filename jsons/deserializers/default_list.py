@@ -1,4 +1,5 @@
 from jsons._main_impl import load
+from typing import TypeVar
 
 
 def default_list_deserializer(obj: list, cls: type = None, **kwargs) -> list:
@@ -10,6 +11,6 @@ def default_list_deserializer(obj: list, cls: type = None, **kwargs) -> list:
     :return: a deserialized list instance.
     """
     cls_ = None
-    if cls and hasattr(cls, '__args__'):
+    if cls and hasattr(cls, '__args__') and not isinstance(cls.__args__[0], TypeVar):
         cls_ = cls.__args__[0]
     return [load(x, cls_, **kwargs) for x in obj]
