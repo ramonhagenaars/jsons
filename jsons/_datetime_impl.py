@@ -6,6 +6,7 @@ This module contains functionality for ``datetime`` related stuff.
 from datetime import datetime, timezone, timedelta, time, date
 from typing import Union
 from jsons._main_impl import RFC3339_DATETIME_PATTERN
+from jsons.exceptions import DeserializationError
 
 
 def to_str(
@@ -96,14 +97,17 @@ def _datetime_offset_inst(obj: str, pattern: str) -> datetime:
     :param pattern: the datetime pattern that is used.
     :return: a datetime instance with timezone info.
     """
-    dat_str, tim_str = obj.split('T')
-    splitter, factor = ('+', 1) if '+' in tim_str else ('-', -1)
-    naive_tim_str, offset = tim_str.split(splitter)
-    naive_dattim_str = '{}T{}'.format(dat_str, naive_tim_str)
-    dattim_obj = datetime.strptime(naive_dattim_str, pattern)
-    hrs_str, mins_str = offset.split(':')
-    hrs = int(hrs_str) * factor
-    mins = int(mins_str) * factor
+    try:
+        dat_str, tim_str = obj.split('T')
+        splitter, factor = ('+', 1) if '+' in tim_str else ('-', -1)
+        naive_tim_str, offset = tim_str.split(splitter)
+        naive_dattim_str = '{}T{}'.format(dat_str, naive_tim_str)
+        dattim_obj = datetime.strptime(naive_dattim_str, pattern)
+        hrs_str, mins_str = offset.split(':')
+        hrs = int(hrs_str) * factor
+        mins = int(mins_str) * factor
+    except ValueError as err:
+        raise DeserializationError(str(err), obj, datetime)
     tz = timezone(offset=timedelta(hours=hrs, minutes=mins))
     return _new_datetime(dattim_obj.date(), dattim_obj.time(), tz)
 
