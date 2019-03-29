@@ -10,5 +10,5 @@ script:
   - pip install coverage
   - pip install codecov
   - python setup.py test
-  - coverage run setup.py test
+  - coverage run -m unittest discover .
   - codecov
