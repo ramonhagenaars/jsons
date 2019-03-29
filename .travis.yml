@@ -9,6 +9,7 @@ script:
   - pip install .
   - pip install coverage
   - pip install codecov
+  - python setup.py test
   - python -m unittest discover tests
   - coverage run -m unittest discover tests
   - codecov
