@@ -11,5 +11,5 @@ script:
   - pip install codecov
   - pip install pytest
   - python setup.py test
-  - coverage run -m pytest tests
+  - coverage run -m pytest --ignore=tests/python37 tests
   - codecov
