@@ -22,7 +22,7 @@ setup(
     ],
     test_suite='tests',
     install_requires=[
-        'dataclasses;python_version<"3.7"'
+        'dataclasses;python_version=="3.6"'
     ],
     zip_safe=False,
     classifiers=[
