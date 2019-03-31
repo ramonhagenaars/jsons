@@ -15,5 +15,5 @@ def default_list_deserializer(obj: list, cls: type = None, **kwargs) -> list:
         cls_ = cls.__args__[0]
         # Mark the cls as 'inferred' so that later it is known where cls came
         # from and the precedence of classes can be determined.
-        kwargs_['inferred_cls'] = True
+        kwargs_['_inferred_cls'] = True
     return [load(x, cls_, **kwargs_) for x in obj]

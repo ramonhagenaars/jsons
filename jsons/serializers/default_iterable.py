@@ -11,5 +11,5 @@ def default_iterable_serializer(obj: object, **kwargs) -> list:
     """
     # The meta kwarg store_cls is filtered out, because an iterable should have
     # its own -meta attribute.
-    kwargs_ = {key: kwargs[key] for key in kwargs if key != 'store_cls'}
+    kwargs_ = {key: kwargs[key] for key in kwargs if key != '_store_cls'}
     return [dump(elem, **kwargs_) for elem in obj]

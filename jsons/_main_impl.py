@@ -115,7 +115,7 @@ def load(json_obj: object,
     if not strict and (json_obj is None or type(json_obj) == cls):
         return json_obj
     cls, meta_hints = _check_and_get_cls_and_meta_hints(
-        json_obj, cls, fork_inst, kwargs.get('inferred_cls', False))
+        json_obj, cls, fork_inst, kwargs.get('_inferred_cls', False))
     deserializer = _get_deserializer(cls, fork_inst)
     kwargs_ = {
         'strict': strict,
