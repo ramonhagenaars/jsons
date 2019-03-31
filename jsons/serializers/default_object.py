@@ -41,7 +41,7 @@ def default_object_serializer(
     cls = kwargs['cls'] or obj.__class__
     obj_dict = _get_dict_from_obj(obj, strip_privates, strip_properties,
                                   strip_class_variables, **kwargs)
-    kwargs_ = {**kwargs}
+    kwargs_ = {**kwargs, 'verbose': verbose}
     verbose = Verbosity.from_value(verbose)
     if Verbosity.WITH_CLASS_INFO in verbose:
         kwargs_['store_cls'] = True

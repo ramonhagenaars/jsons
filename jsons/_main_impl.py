@@ -114,8 +114,8 @@ def load(json_obj: object,
     """
     if not strict and (json_obj is None or type(json_obj) == cls):
         return json_obj
-    cls, meta_hints = _check_and_get_cls_and_meta_hints(json_obj, cls,
-                                                        fork_inst)
+    cls, meta_hints = _check_and_get_cls_and_meta_hints(
+        json_obj, cls, fork_inst, kwargs.get('inferred_cls', False))
     deserializer = _get_deserializer(cls, fork_inst)
     kwargs_ = {
         'strict': strict,
@@ -361,7 +361,8 @@ def announce_class(
 def _check_and_get_cls_and_meta_hints(
         json_obj: object,
         cls: type,
-        fork_inst: type) -> Tuple[type, Optional[dict]]:
+        fork_inst: type,
+        inferred_cls: bool) -> Tuple[type, Optional[dict]]:
     # Check if json_obj is of a valid type and return the cls.
     if type(json_obj) not in VALID_TYPES:
         invalid_type = get_class_name(type(json_obj), fork_inst=fork_inst)
@@ -376,8 +377,24 @@ def _check_and_get_cls_and_meta_hints(
 
     cls_from_meta, meta = _get_cls_and_meta(json_obj, fork_inst)
     meta_hints = meta.get('classes', {}) if meta else {}
-    # Providing cls takes precedence over cls_from_meta.
-    return (cls or cls_from_meta or type(json_obj)), meta_hints
+    return _determine_precedence(
+        cls, cls_from_meta, type(json_obj), inferred_cls), meta_hints
+
+
+def _determine_precedence(
+        cls: type,
+        cls_from_meta: type,
+        cls_from_type: type,
+        inferred_cls: bool):
+    order = [cls, cls_from_meta, cls_from_type]
+    if inferred_cls:
+        # The type from a verbose dumped object takes precedence over an
+        # inferred type (e.g. T in List[T]).
+        order = [cls_from_meta, cls, cls_from_type]
+    # Now to return the first element in the order that holds a value.
+    for elem in order:
+        if elem:
+            return elem
 
 
 def _get_cls_and_meta(

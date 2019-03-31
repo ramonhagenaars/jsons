@@ -9,4 +9,7 @@ def default_iterable_serializer(obj: object, **kwargs) -> list:
     process.
     :return: a list of which all elements are serialized.
     """
-    return [dump(elem, **kwargs) for elem in obj]
+    # The meta kwarg store_cls is filtered out, because an iterable should have
+    # its own -meta attribute.
+    kwargs_ = {key: kwargs[key] for key in kwargs if key != 'store_cls'}
+    return [dump(elem, **kwargs_) for elem in obj]
