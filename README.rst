@@ -94,6 +94,10 @@ Meta
 Recent updates
 ==============
 
+0.8.3
++++++
+- Bugfix: Loading verbose dumped objects could fail if lists where involved.
+
 0.8.2
 +++++
 - Bugfix: Dumping a namedtuple resulted in a list rather than a dict.
@@ -117,19 +121,6 @@ Recent updates
 +++++
 - Bugfix: Deserializing named tuples raised an exception
 - Impl: Restructure of the code (splitted functions, moved to packages, ...)
-
-0.7.0
-+++++
-- Doc: Improved API documentation
-- Feature: Support for loading Union or Optional
-- Feature: Extended strict-mode
-- Feature: Added custom Exceptions
-- Feature: Support for attr-getters
-- Bugfix: Local timezone for datetime serialization improved
-
-0.6.1
-+++++
-- Feature: Support for loading tuples of variable length
 
 
 Contributors
