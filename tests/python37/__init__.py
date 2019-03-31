@@ -1,6 +1,9 @@
-from dataclasses import dataclass
+try:
+    from dataclasses import dataclass
 
 
-@dataclass
-class Person:
-    name: str
+    @dataclass
+    class Person:
+        name: str
+except:
+    pass
