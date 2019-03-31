@@ -12,6 +12,26 @@ class TestList(TestCase):
         self.assertEqual([1, 2, 3, [4, 5, ['2018-07-08T21:34:00Z']]],
                          jsons.dump(l))
 
+    def test_dump_load_list_verbose(self):
+        class Parent:
+            pass
+
+        class Child(Parent):
+            pass
+
+        class Store:
+            def __init__(self, c2s: List[Parent]):
+                self.c2s = c2s
+
+        jsons.announce_class(Parent)
+        jsons.announce_class(Child)
+        jsons.announce_class(Store)
+
+        s = Store([Child()])
+        dumped = jsons.dump(s, verbose=True)
+        loaded = jsons.load(dumped)
+        self.assertEqual(Child, type(loaded.c2s[0]))
+
     def test_load_list(self):
         dat = datetime.datetime(year=2018, month=7, day=8, hour=21, minute=34,
                                 tzinfo=datetime.timezone.utc)
