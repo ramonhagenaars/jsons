@@ -2,6 +2,7 @@ import sys
 from pathlib import Path
 from unittest import TestCase, skipUnless
 import jsons
+from jsons.exceptions import SignatureMismatchError
 
 try:
     from dataclasses import dataclass
@@ -25,3 +26,6 @@ class TestSpecificVersions(TestCase):
         dumped = jsons.dump(p)
         loaded = jsons.load(dumped, Person)
         self.assertEqual(p.name, loaded.name)
+
+        with self.assertRaises(SignatureMismatchError):
+            jsons.load({'name': 'John', 'age': 88}, Person, strict=True)

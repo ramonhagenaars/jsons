@@ -4,21 +4,22 @@ PRIVATE MODULE: do not import (from) it directly.
 This module contains the implementation of the main functions of jsons, such
 as `load` and `dump`.
 """
+from __future__ import annotations
 import json
 from json import JSONDecodeError
 from typing import Dict, Callable, Optional, Union, Tuple
+
 from jsons._common_impl import (
     get_class_name,
     get_parents,
-    META_ATTR,
     StateHolder,
-    get_cls_from_str)
+    get_cls_from_str, get_cls_and_meta, determine_precedence
+)
 from jsons.exceptions import (
     DecodeError,
     DeserializationError,
     JsonsError,
-    SerializationError,
-    UnknownClassError
+    SerializationError
 )
 
 VALID_TYPES = (str, int, float, bool, list, tuple, set, dict, type(None))
@@ -112,10 +113,13 @@ def load(json_obj: object,
     :param kwargs: the keyword args are passed on to the deserializer function.
     :return: an instance of ``cls`` if given, a dict otherwise.
     """
-    if not strict and (json_obj is None or type(json_obj) == cls):
+    if _should_skip(json_obj, cls, strict):
         return json_obj
+    if isinstance(cls, str):
+        cls = get_cls_from_str(cls, json_obj, fork_inst)
     cls, meta_hints = _check_and_get_cls_and_meta_hints(
         json_obj, cls, fork_inst, kwargs.get('_inferred_cls', False))
+
     deserializer = _get_deserializer(cls, fork_inst)
     kwargs_ = {
         'strict': strict,
@@ -130,6 +134,11 @@ def load(json_obj: object,
         if isinstance(err, JsonsError):
             raise
         raise DeserializationError(str(err), json_obj, cls)
+
+
+def _should_skip(json_obj: object, cls: type, strict: bool):
+    if not strict and (json_obj is None or type(json_obj) == cls):
+        return True
 
 
 def _get_serializer(cls: type,
@@ -375,45 +384,7 @@ def _check_and_get_cls_and_meta_hints(
         raise DeserializationError('Cannot load None with strict=True',
                                    json_obj, cls)
 
-    cls_from_meta, meta = _get_cls_and_meta(json_obj, fork_inst)
+    cls_from_meta, meta = get_cls_and_meta(json_obj, fork_inst)
     meta_hints = meta.get('classes', {}) if meta else {}
-    return _determine_precedence(
+    return determine_precedence(
         cls, cls_from_meta, type(json_obj), inferred_cls), meta_hints
-
-
-def _determine_precedence(
-        cls: type,
-        cls_from_meta: type,
-        cls_from_type: type,
-        inferred_cls: bool):
-    order = [cls, cls_from_meta, cls_from_type]
-    if inferred_cls:
-        # The type from a verbose dumped object takes precedence over an
-        # inferred type (e.g. T in List[T]).
-        order = [cls_from_meta, cls, cls_from_type]
-    # Now to return the first element in the order that holds a value.
-    for elem in order:
-        if elem:
-            return elem
-
-
-def _get_cls_and_meta(
-        json_obj: object,
-        fork_inst: type) -> Tuple[Optional[type], Optional[dict]]:
-    if isinstance(json_obj, dict) and META_ATTR in json_obj:
-        cls_str = json_obj[META_ATTR]['classes']['/']
-        cls = get_cls_from_str(cls_str, json_obj, fork_inst)
-        return cls, json_obj[META_ATTR]
-    return None, None
-
-
-def _lookup_announced_class(
-        cls_str: str,
-        source: object,
-        fork_inst: type) -> type:
-    cls = fork_inst._announced_classes.get(cls_str)
-    if not cls:
-        msg = ('Could not find a suitable type for "{}". Make sure it can be '
-               'imported or that is has been announced.'.format(cls_str))
-        raise UnknownClassError(msg, source, cls_str)
-    return cls
