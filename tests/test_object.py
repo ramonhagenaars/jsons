@@ -248,6 +248,26 @@ class TestObject(TestCase):
         loaded2 = jsons.load(dumped2)
         self.assertEqual(100, loaded2.x)
 
+    def test_dump_load_object_verbose_without_announcing(self):
+        class A:
+            def __init__(self, x):
+                self.x = x
+
+        class B:
+            def __init__(self, a: A):
+                self.a = a
+
+        class C:
+            def __init__(self, b: B):
+                self.b = b
+
+        c = C(B(A(42)))
+
+        dumped = jsons.dump(c, verbose=True)
+        loaded = jsons.load(dumped)
+
+        self.assertEqual(42, loaded.b.a.x)
+
     def test_load_object_with_attr_getters(self):
         class A:
             def __init__(self, x, y):

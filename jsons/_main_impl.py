@@ -52,13 +52,15 @@ def dump(obj: object,
         raise SerializationError('Invalid type: "{}". Only types that have a '
                                  '__slots__ defined are allowed when '
                                  'providing "cls".'
-                         .format(get_class_name(cls, fork_inst=fork_inst)))
+                         .format(get_class_name(cls, fork_inst=fork_inst,
+                                                fully_qualified=True)))
     cls_ = cls or obj.__class__
     serializer = _get_serializer(cls_, fork_inst)
     kwargs_ = {
         'fork_inst': fork_inst,
         **kwargs
     }
+    announce_class(cls_, fork_inst=fork_inst)
     try:
         return serializer(obj, cls=cls, **kwargs_)
     except Exception as err:
@@ -159,12 +161,14 @@ def _get_lizer(cls: type,
                lizers: Dict[str, callable],
                classes_lizers: list,
                fork_inst: type) -> callable:
-    cls_name = get_class_name(cls, str.lower, fork_inst=fork_inst)
+    cls_name = get_class_name(cls, str.lower, fork_inst=fork_inst,
+                              fully_qualified=True)
     lizer = lizers.get(cls_name, None)
     if not lizer:
         parents = get_parents(cls, classes_lizers)
         if parents:
-            pname = get_class_name(parents[0], str.lower, fork_inst=fork_inst)
+            pname = get_class_name(parents[0], str.lower, fork_inst=fork_inst,
+                                   fully_qualified=True)
             lizer = lizers[pname]
     return lizer
 
@@ -299,7 +303,8 @@ def set_serializer(func: callable,
     if cls:
         index = 0 if high_prio else len(fork_inst._classes_serializers)
         fork_inst._classes_serializers.insert(index, cls)
-        cls_name = get_class_name(cls, fork_inst=fork_inst)
+        cls_name = get_class_name(cls, fork_inst=fork_inst,
+                                  fully_qualified=True)
         fork_inst._serializers[cls_name.lower()] = func
     else:
         fork_inst._serializers['nonetype'] = func
@@ -331,7 +336,8 @@ def set_deserializer(func: callable,
     if cls:
         index = 0 if high_prio else len(fork_inst._classes_deserializers)
         fork_inst._classes_deserializers.insert(index, cls)
-        cls_name = get_class_name(cls, fork_inst=fork_inst)
+        cls_name = get_class_name(cls, fork_inst=fork_inst,
+                                  fully_qualified=True)
         fork_inst._deserializers[cls_name.lower()] = func
     else:
         fork_inst._deserializers['nonetype'] = func
@@ -374,8 +380,10 @@ def _check_and_get_cls_and_meta_hints(
         inferred_cls: bool) -> Tuple[type, Optional[dict]]:
     # Check if json_obj is of a valid type and return the cls.
     if type(json_obj) not in VALID_TYPES:
-        invalid_type = get_class_name(type(json_obj), fork_inst=fork_inst)
-        valid_types = [get_class_name(typ, fork_inst=fork_inst)
+        invalid_type = get_class_name(type(json_obj), fork_inst=fork_inst,
+                                      fully_qualified=True)
+        valid_types = [get_class_name(typ, fork_inst=fork_inst,
+                                      fully_qualified=True)
                        for typ in VALID_TYPES]
         msg = ('Invalid type: "{}", only arguments of the following types are '
                'allowed: {}'.format(invalid_type, ", ".join(valid_types)))

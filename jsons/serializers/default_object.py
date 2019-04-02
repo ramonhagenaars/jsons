@@ -4,7 +4,6 @@ from jsons._common_impl import get_class_name, META_ATTR
 from jsons._datetime_impl import to_str
 from jsons.classes import JsonSerializable
 from jsons.classes.verbosity import Verbosity
-from jsons.serializers import default_datetime_serializer
 from jsons.serializers.default_dict import default_dict_serializer
 
 
@@ -38,6 +37,8 @@ def default_object_serializer(
     serializer functions.
     :return: a Python dict holding the values of ``obj``.
     """
+    if obj is None:
+        return obj
     cls = kwargs['cls'] or obj.__class__
     obj_dict = _get_dict_from_obj(obj, strip_privates, strip_properties,
                                   strip_class_variables, **kwargs)

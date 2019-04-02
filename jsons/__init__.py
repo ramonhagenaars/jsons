@@ -87,7 +87,7 @@ Alternatively, you can make use of the `JsonSerializable` class.
 """
 from datetime import datetime
 from enum import Enum
-from typing import Union
+from typing import Union, Set, List, Tuple, Dict
 from jsons import _main_impl, deserializers, serializers, classes
 from jsons._key_transformers import snakecase, camelcase, pascalcase, lispcase
 from jsons.exceptions import (
@@ -135,7 +135,9 @@ default_primitive_deserializer = deserializers.default_primitive_deserializer
 default_object_deserializer = deserializers.default_object_deserializer
 
 set_serializer(default_tuple_serializer, tuple)
+set_serializer(default_tuple_serializer, Tuple)
 set_serializer(default_dict_serializer, dict)
+set_serializer(default_dict_serializer, Dict)
 set_serializer(default_enum_serializer, Enum)
 set_serializer(default_datetime_serializer, datetime)
 set_serializer(default_primitive_serializer, str)
@@ -144,13 +146,20 @@ set_serializer(default_primitive_serializer, float)
 set_serializer(default_primitive_serializer, bool)
 set_serializer(default_primitive_serializer, None)
 set_serializer(default_iterable_serializer, list)
+set_serializer(default_iterable_serializer, List)
 set_serializer(default_iterable_serializer, set)
+set_serializer(default_iterable_serializer, Set)
 set_serializer(default_object_serializer, object, False)
+
 set_deserializer(default_list_deserializer, list)
+set_deserializer(default_list_deserializer, List)
 set_deserializer(default_tuple_deserializer, tuple)
+set_deserializer(default_tuple_deserializer, Tuple)
 set_deserializer(default_union_deserializer, Union)
 set_deserializer(default_set_deserializer, set)
+set_deserializer(default_set_deserializer, Set)
 set_deserializer(default_dict_deserializer, dict)
+set_deserializer(default_dict_deserializer, Dict)
 set_deserializer(default_enum_deserializer, Enum)
 set_deserializer(default_datetime_deserializer, datetime)
 set_deserializer(default_string_deserializer, str)
