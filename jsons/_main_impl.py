@@ -4,11 +4,9 @@ PRIVATE MODULE: do not import (from) it directly.
 This module contains the implementation of the main functions of jsons, such
 as `load` and `dump`.
 """
-from __future__ import annotations
 import json
 from json import JSONDecodeError
 from typing import Dict, Callable, Optional, Union, Tuple, Sequence
-
 from jsons._common_impl import (
     get_class_name,
     get_parents,
