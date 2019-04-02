@@ -7,7 +7,7 @@ as `load` and `dump`.
 from __future__ import annotations
 import json
 from json import JSONDecodeError
-from typing import Dict, Callable, Optional, Union, Tuple
+from typing import Dict, Callable, Optional, Union, Tuple, Sequence
 
 from jsons._common_impl import (
     get_class_name,
@@ -279,7 +279,7 @@ def loadb(bytes_: bytes,
 
 
 def set_serializer(func: callable,
-                   cls: type,
+                   cls: Union[type, Sequence[type]],
                    high_prio: bool = True,
                    fork_inst: type = StateHolder) -> None:
     """
@@ -295,12 +295,15 @@ def set_serializer(func: callable,
     You may ask additional arguments between ``cls`` and ``kwargs``.
 
     :param func: the serializer function.
-    :param cls: the type this serializer can handle.
+    :param cls: the type or sequence of types this serializer can handle.
     :param high_prio: determines the order in which is looked for the callable.
     :param fork_inst: if given, it uses this fork of ``JsonSerializable``.
     :return: None.
     """
-    if cls:
+    if isinstance(cls, Sequence):
+        for cls_ in cls:
+            set_serializer(func, cls_, high_prio, fork_inst)
+    elif cls:
         index = 0 if high_prio else len(fork_inst._classes_serializers)
         fork_inst._classes_serializers.insert(index, cls)
         cls_name = get_class_name(cls, fork_inst=fork_inst,
@@ -311,7 +314,7 @@ def set_serializer(func: callable,
 
 
 def set_deserializer(func: callable,
-                     cls: Union[type, str],
+                     cls: Union[type, Sequence[type]],
                      high_prio: bool = True,
                      fork_inst: type = StateHolder) -> None:
     """
@@ -328,12 +331,15 @@ def set_deserializer(func: callable,
     You may ask additional arguments between ``cls`` and ``kwargs``.
 
     :param func: the deserializer function.
-    :param cls: the type or the name of the type this serializer can handle.
+    :param cls: the type or sequence of types this serializer can handle.
     :param high_prio: determines the order in which is looked for the callable.
     :param fork_inst: if given, it uses this fork of ``JsonSerializable``.
     :return: None.
     """
-    if cls:
+    if isinstance(cls, Sequence):
+        for cls_ in cls:
+            set_deserializer(func, cls_, high_prio, fork_inst)
+    elif cls:
         index = 0 if high_prio else len(fork_inst._classes_deserializers)
         fork_inst._classes_deserializers.insert(index, cls)
         cls_name = get_class_name(cls, fork_inst=fork_inst,
