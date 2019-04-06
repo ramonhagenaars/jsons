@@ -128,14 +128,13 @@ default_object_serializer = serializers.default_object_serializer
 default_list_deserializer = deserializers.default_list_deserializer
 default_tuple_deserializer = deserializers.default_tuple_deserializer
 default_union_deserializer = deserializers.default_union_deserializer
-default_set_deserializer = deserializers.default_set_deserializer
-default_deque_deserializer = deserializers.default_deque_deserializer
 default_dict_deserializer = deserializers.default_dict_deserializer
 default_enum_deserializer = deserializers.default_enum_deserializer
 default_datetime_deserializer = deserializers.default_datetime_deserializer
 default_string_deserializer = deserializers.default_string_deserializer
 default_primitive_deserializer = deserializers.default_primitive_deserializer
 default_mapping_deserializer = deserializers.default_mapping_deserializer
+default_iterable_deserializer = deserializers.default_iterable_deserializer
 default_object_deserializer = deserializers.default_object_deserializer
 
 # Set the serializers:
@@ -151,11 +150,10 @@ set_serializer(default_object_serializer, object, False)
 set_deserializer(default_list_deserializer, (list, List))
 set_deserializer(default_tuple_deserializer, (tuple, Tuple))
 set_deserializer(default_union_deserializer, Union)
-set_deserializer(default_set_deserializer, (set, Set))
-set_deserializer(default_deque_deserializer, (deque, Deque))
 set_deserializer(default_enum_deserializer, Enum)
 set_deserializer(default_datetime_deserializer, datetime)
 set_deserializer(default_string_deserializer, str)
 set_deserializer(default_primitive_deserializer, (int, float, bool, None))
 set_deserializer(default_mapping_deserializer, Mapping, False)
+set_deserializer(default_iterable_deserializer, Iterable, False)
 set_deserializer(default_object_deserializer, object, False)
