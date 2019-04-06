@@ -2,7 +2,8 @@ import datetime
 from typing import List
 from unittest import TestCase
 from jsons._common_impl import StateHolder
-from jsons.exceptions import SignatureMismatchError, UnknownClassError
+from jsons.exceptions import SignatureMismatchError, UnknownClassError, \
+    SerializationError
 import jsons
 
 
@@ -134,6 +135,23 @@ class TestObject(TestCase):
                                        'parent_name': 'William'})
         self.assertDictEqual(dumped2, {'parent_name': 'William'})
 
+    def test_dump_as_parent_type_without_slots(self):
+        class Parent:
+            pass
+
+            def __init__(self, pname):
+                self.parent_name = pname
+
+        class Child(Parent):
+            def __init__(self, cname, pname):
+                Parent.__init__(self, pname)
+                self.child_name = cname
+
+        c = Child('John', 'William')
+
+        with self.assertRaises(SerializationError):
+            jsons.dump(c, Parent)
+
     def test_load_too_many_args(self):
         class C:
             def __init__(self, x: int):
@@ -242,6 +260,11 @@ class TestObject(TestCase):
 
         with self.assertRaises(UnknownClassError):
             jsons.load(dumped2)
+
+        try:
+            jsons.load(dumped2)
+        except UnknownClassError as err:
+            self.assertEqual('custom_class', err.target_name)
 
         # Now announce the class and try again; it should work now.
         jsons.announce_class(A, 'custom_class')

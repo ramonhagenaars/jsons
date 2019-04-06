@@ -19,6 +19,10 @@ class TestVarious(TestCase):
         loaded = jsons.load({'x': 'test'}, C)
         self.assertEqual('test', loaded.x)
 
+    def test_load_obj_with_str_cls(self):
+        loaded = jsons.load({'x': 'test'}, 'tests.test_various.C')
+        self.assertEqual('test', loaded.x)
+
     def test_dump_recursive_structure(self):
         linkedlist = Node(10, Node(20, Node(30)))
         dumped = jsons.dump(linkedlist)
