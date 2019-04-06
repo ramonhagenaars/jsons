@@ -11,6 +11,8 @@ from jsons.deserializers.default_enum import default_enum_deserializer
 from jsons.deserializers.default_list import default_list_deserializer
 from jsons.deserializers.default_object import default_object_deserializer
 from jsons.deserializers.default_set import default_set_deserializer
+from jsons.deserializers.default_deque import default_deque_deserializer
+from jsons.deserializers.default_mapping import default_mapping_deserializer
 from jsons.deserializers.default_string import default_string_deserializer
 from jsons.deserializers.default_union import default_union_deserializer
 from jsons.deserializers.default_primitive import (
