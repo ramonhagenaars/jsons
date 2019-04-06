@@ -94,6 +94,12 @@ Meta
 Recent updates
 ==============
 
+0.8.4
++++++
+- Feature: Support for textual type hints.
+- Feature: Automatically announce classes when dumped.
+- Bugfix: Support for ``from __future__ import annotations``
+
 0.8.3
 +++++
 - Bugfix: Loading verbose dumped objects could fail if lists where involved.
@@ -116,11 +122,6 @@ Recent updates
 0.7.2
 +++++
 - Bugfix: Package problem.
-
-0.7.1
-+++++
-- Bugfix: Deserializing named tuples raised an exception
-- Impl: Restructure of the code (splitted functions, moved to packages, ...)
 
 
 Contributors
