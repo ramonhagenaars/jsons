@@ -94,6 +94,14 @@ Meta
 Recent updates
 ==============
 
+0.8.5
++++++
+- Feature: Support for Deque.
+- Feature: Support for Counter.
+- Feature: Support for OrderedDict.
+- Feature: Support for Defaultdict.
+- Feature: Support for ChainMap.
+
 0.8.4
 +++++
 - Feature: Support for textual type hints.
@@ -112,16 +120,6 @@ Recent updates
 0.8.1
 +++++
 - Bugfix: Loading a verbose dump worked only shallow.
-
-0.8.0
-+++++
-- Feature: Dumping objects can be verbose.
-- Feature: Loading enums without `use_enum_name` can be with names or values.
-- Bugfix: Loading empty namedtuples caused a problem.
-
-0.7.2
-+++++
-- Bugfix: Package problem.
 
 
 Contributors
