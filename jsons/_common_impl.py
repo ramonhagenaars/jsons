@@ -50,12 +50,11 @@ def get_class_name(cls: type,
     if cls in fork_inst._announced_classes:
         return fork_inst._announced_classes[cls]
     cls_name = _get_simple_name(cls)
-    module = _get_module(cls)
     transformer = transformer or (lambda x: x)
-    if not cls_name:
-        cls_name = str(cls)
-    if fully_qualified and module:
-        cls_name = '{}.{}'.format(module, cls_name)
+    if fully_qualified:
+        module = _get_module(cls)
+        if module:
+            cls_name = '{}.{}'.format(module, cls_name)
     cls_name = transformer(cls_name)
     return cls_name
 
@@ -70,8 +69,6 @@ def get_cls_from_str(cls_str: str, source: object, fork_inst) -> type:
         cls_name = splitted[-1]
         cls_module = import_module(module_name)
         cls = getattr(cls_module, cls_name)
-        if not cls or not isinstance(cls, type):
-            cls = _lookup_announced_class(cls_str, source, fork_inst)
     except (ImportError, AttributeError, ValueError):
         cls = _lookup_announced_class(cls_str, source, fork_inst)
     return cls
@@ -134,6 +131,8 @@ def _lookup_announced_class(
 
 
 def _get_simple_name(cls: type) -> str:
+    if cls is None:
+        cls = type(cls)
     cls_name = getattr(cls, '__name__', None)
     if not cls_name:
         cls_name = getattr(cls, '_name', None)
