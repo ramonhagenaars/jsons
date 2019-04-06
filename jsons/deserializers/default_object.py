@@ -1,7 +1,13 @@
 import inspect
+import typing
 from functools import partial
 from typing import Optional, Callable, Tuple
-from jsons._common_impl import get_class_name, META_ATTR, get_cls_from_str
+from jsons._common_impl import (
+    get_class_name,
+    META_ATTR,
+    get_cls_from_str,
+    determine_precedence
+)
 from jsons._main_impl import load
 from jsons.exceptions import SignatureMismatchError, UnfulfilledArgumentError
 
@@ -46,14 +52,15 @@ def _get_constructor_args(
     # every required parameter, we try to get the corresponding value from
     # json_obj.
     signature_parameters = inspect.signature(cls.__init__).parameters
+    hints = typing.get_type_hints(cls.__init__)
     attr_getters = dict(**(attr_getters or {}))
     value_for_attr_part = partial(_get_value_for_attr,
                                   obj=obj,
-                                  cls=cls,
+                                  orig_cls=cls,
                                   meta_hints=meta_hints,
                                   attr_getters=attr_getters,
                                   **kwargs)
-    args_gen = (value_for_attr_part(sig_key=sig_key, sig=sig) for sig_key, sig
+    args_gen = (value_for_attr_part(sig_key=sig_key, cls=hints.get(sig_key, None), sig=sig) for sig_key, sig
                 in signature_parameters.items() if sig_key != 'self')
     constructor_args_in_obj = {key: value for key, value in args_gen if key}
     return constructor_args_in_obj
@@ -62,6 +69,7 @@ def _get_constructor_args(
 def _get_value_for_attr(
         obj,
         cls,
+        orig_cls,
         sig_key,
         sig,
         meta_hints,
@@ -71,7 +79,7 @@ def _get_value_for_attr(
     result = None, None
     if obj and sig_key in obj:
         # This argument is in obj.
-        result = sig_key, _get_value_from_obj(obj, sig, sig_key,
+        result = sig_key, _get_value_from_obj(obj, cls, sig, sig_key,
                                               meta_hints, **kwargs)
     elif sig_key in attr_getters:
         # There exists an attr_getter for this argument.
@@ -84,29 +92,30 @@ def _get_value_for_attr(
                           inspect.Parameter.VAR_KEYWORD):
         # This argument is no *args or **kwargs and has no value.
         raise UnfulfilledArgumentError(
-            'No value found for "{}"'.format(sig_key), sig_key, obj, cls)
+            'No value found for "{}"'.format(sig_key), sig_key, obj, orig_cls)
     return result
 
 
-def _get_value_from_obj(obj, sig, sig_key, meta_hints, **kwargs):
+def _get_value_from_obj(obj, cls, sig, sig_key, meta_hints, **kwargs):
     # Obtain the value for the attribute with the given signature from the
     # given obj. Try to obtain the class of this attribute from the meta info
     # or from type hints.
     cls_key = '/{}'.format(sig_key)
-    cls_from_meta = meta_hints.get(cls_key, None)
+    cls_str_from_meta = meta_hints.get(cls_key, None)
     new_hints = meta_hints
-    arg_cls = None
-    if cls_from_meta:
-        arg_cls = get_cls_from_str(cls_from_meta, obj, kwargs['fork_inst'])
+    cls_from_meta = None
+    if cls_str_from_meta:
+        cls_from_meta = get_cls_from_str(
+            cls_str_from_meta, obj, kwargs['fork_inst'])
         # Rebuild the class hints: cls_key becomes the new root.
         new_hints = {
             key.replace(cls_key, '/'): meta_hints[key]
             for key in meta_hints
             if key != '/'
         }
-    elif sig.annotation != inspect.Parameter.empty:
-        arg_cls = sig.annotation
-    value = load(obj[sig_key], arg_cls, meta_hints=new_hints, **kwargs)
+    cls_ = determine_precedence(cls=cls, cls_from_meta=cls_from_meta,
+                                cls_from_type=None, inferred_cls=True)
+    value = load(obj[sig_key], cls_, meta_hints=new_hints, **kwargs)
     return value
 
 

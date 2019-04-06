@@ -210,3 +210,15 @@ class TestDecorator(TestCase):
             self.assertEqual(res.x, 'c_res')
 
         asyncio.get_event_loop().run_until_complete(_test_body())
+
+    def test_loaded_wrong_dumper(self):
+        with self.assertRaises(InvalidDecorationError):
+            @dumped(dumper='anything')
+            def func():
+                pass
+
+    def test_loaded_wrong_loader(self):
+        with self.assertRaises(InvalidDecorationError):
+            @loaded(loader='anything')
+            def func():
+                pass

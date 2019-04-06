@@ -6,19 +6,18 @@ as `load` and `dump`.
 """
 import json
 from json import JSONDecodeError
-from typing import Dict, Callable, Optional, Union, Tuple
+from typing import Dict, Callable, Optional, Union, Tuple, Sequence
 from jsons._common_impl import (
     get_class_name,
     get_parents,
-    META_ATTR,
     StateHolder,
-    get_cls_from_str)
+    get_cls_from_str, get_cls_and_meta, determine_precedence
+)
 from jsons.exceptions import (
     DecodeError,
     DeserializationError,
     JsonsError,
-    SerializationError,
-    UnknownClassError
+    SerializationError
 )
 
 VALID_TYPES = (str, int, float, bool, list, tuple, set, dict, type(None))
@@ -51,13 +50,15 @@ def dump(obj: object,
         raise SerializationError('Invalid type: "{}". Only types that have a '
                                  '__slots__ defined are allowed when '
                                  'providing "cls".'
-                         .format(get_class_name(cls, fork_inst=fork_inst)))
+                         .format(get_class_name(cls, fork_inst=fork_inst,
+                                                fully_qualified=True)))
     cls_ = cls or obj.__class__
     serializer = _get_serializer(cls_, fork_inst)
     kwargs_ = {
         'fork_inst': fork_inst,
         **kwargs
     }
+    announce_class(cls_, fork_inst=fork_inst)
     try:
         return serializer(obj, cls=cls, **kwargs_)
     except Exception as err:
@@ -112,10 +113,13 @@ def load(json_obj: object,
     :param kwargs: the keyword args are passed on to the deserializer function.
     :return: an instance of ``cls`` if given, a dict otherwise.
     """
-    if not strict and (json_obj is None or type(json_obj) == cls):
+    if _should_skip(json_obj, cls, strict):
         return json_obj
+    if isinstance(cls, str):
+        cls = get_cls_from_str(cls, json_obj, fork_inst)
     cls, meta_hints = _check_and_get_cls_and_meta_hints(
         json_obj, cls, fork_inst, kwargs.get('_inferred_cls', False))
+
     deserializer = _get_deserializer(cls, fork_inst)
     kwargs_ = {
         'strict': strict,
@@ -130,6 +134,11 @@ def load(json_obj: object,
         if isinstance(err, JsonsError):
             raise
         raise DeserializationError(str(err), json_obj, cls)
+
+
+def _should_skip(json_obj: object, cls: type, strict: bool):
+    if not strict and (json_obj is None or type(json_obj) == cls):
+        return True
 
 
 def _get_serializer(cls: type,
@@ -150,12 +159,14 @@ def _get_lizer(cls: type,
                lizers: Dict[str, callable],
                classes_lizers: list,
                fork_inst: type) -> callable:
-    cls_name = get_class_name(cls, str.lower, fork_inst=fork_inst)
+    cls_name = get_class_name(cls, str.lower, fork_inst=fork_inst,
+                              fully_qualified=True)
     lizer = lizers.get(cls_name, None)
     if not lizer:
         parents = get_parents(cls, classes_lizers)
         if parents:
-            pname = get_class_name(parents[0], str.lower, fork_inst=fork_inst)
+            pname = get_class_name(parents[0], str.lower, fork_inst=fork_inst,
+                                   fully_qualified=True)
             lizer = lizers[pname]
     return lizer
 
@@ -266,7 +277,7 @@ def loadb(bytes_: bytes,
 
 
 def set_serializer(func: callable,
-                   cls: type,
+                   cls: Union[type, Sequence[type]],
                    high_prio: bool = True,
                    fork_inst: type = StateHolder) -> None:
     """
@@ -282,22 +293,26 @@ def set_serializer(func: callable,
     You may ask additional arguments between ``cls`` and ``kwargs``.
 
     :param func: the serializer function.
-    :param cls: the type this serializer can handle.
+    :param cls: the type or sequence of types this serializer can handle.
     :param high_prio: determines the order in which is looked for the callable.
     :param fork_inst: if given, it uses this fork of ``JsonSerializable``.
     :return: None.
     """
-    if cls:
+    if isinstance(cls, Sequence):
+        for cls_ in cls:
+            set_serializer(func, cls_, high_prio, fork_inst)
+    elif cls:
         index = 0 if high_prio else len(fork_inst._classes_serializers)
         fork_inst._classes_serializers.insert(index, cls)
-        cls_name = get_class_name(cls, fork_inst=fork_inst)
+        cls_name = get_class_name(cls, fork_inst=fork_inst,
+                                  fully_qualified=True)
         fork_inst._serializers[cls_name.lower()] = func
     else:
         fork_inst._serializers['nonetype'] = func
 
 
 def set_deserializer(func: callable,
-                     cls: Union[type, str],
+                     cls: Union[type, Sequence[type]],
                      high_prio: bool = True,
                      fork_inst: type = StateHolder) -> None:
     """
@@ -314,15 +329,19 @@ def set_deserializer(func: callable,
     You may ask additional arguments between ``cls`` and ``kwargs``.
 
     :param func: the deserializer function.
-    :param cls: the type or the name of the type this serializer can handle.
+    :param cls: the type or sequence of types this serializer can handle.
     :param high_prio: determines the order in which is looked for the callable.
     :param fork_inst: if given, it uses this fork of ``JsonSerializable``.
     :return: None.
     """
-    if cls:
+    if isinstance(cls, Sequence):
+        for cls_ in cls:
+            set_deserializer(func, cls_, high_prio, fork_inst)
+    elif cls:
         index = 0 if high_prio else len(fork_inst._classes_deserializers)
         fork_inst._classes_deserializers.insert(index, cls)
-        cls_name = get_class_name(cls, fork_inst=fork_inst)
+        cls_name = get_class_name(cls, fork_inst=fork_inst,
+                                  fully_qualified=True)
         fork_inst._deserializers[cls_name.lower()] = func
     else:
         fork_inst._deserializers['nonetype'] = func
@@ -365,8 +384,10 @@ def _check_and_get_cls_and_meta_hints(
         inferred_cls: bool) -> Tuple[type, Optional[dict]]:
     # Check if json_obj is of a valid type and return the cls.
     if type(json_obj) not in VALID_TYPES:
-        invalid_type = get_class_name(type(json_obj), fork_inst=fork_inst)
-        valid_types = [get_class_name(typ, fork_inst=fork_inst)
+        invalid_type = get_class_name(type(json_obj), fork_inst=fork_inst,
+                                      fully_qualified=True)
+        valid_types = [get_class_name(typ, fork_inst=fork_inst,
+                                      fully_qualified=True)
                        for typ in VALID_TYPES]
         msg = ('Invalid type: "{}", only arguments of the following types are '
                'allowed: {}'.format(invalid_type, ", ".join(valid_types)))
@@ -375,45 +396,7 @@ def _check_and_get_cls_and_meta_hints(
         raise DeserializationError('Cannot load None with strict=True',
                                    json_obj, cls)
 
-    cls_from_meta, meta = _get_cls_and_meta(json_obj, fork_inst)
+    cls_from_meta, meta = get_cls_and_meta(json_obj, fork_inst)
     meta_hints = meta.get('classes', {}) if meta else {}
-    return _determine_precedence(
+    return determine_precedence(
         cls, cls_from_meta, type(json_obj), inferred_cls), meta_hints
-
-
-def _determine_precedence(
-        cls: type,
-        cls_from_meta: type,
-        cls_from_type: type,
-        inferred_cls: bool):
-    order = [cls, cls_from_meta, cls_from_type]
-    if inferred_cls:
-        # The type from a verbose dumped object takes precedence over an
-        # inferred type (e.g. T in List[T]).
-        order = [cls_from_meta, cls, cls_from_type]
-    # Now to return the first element in the order that holds a value.
-    for elem in order:
-        if elem:
-            return elem
-
-
-def _get_cls_and_meta(
-        json_obj: object,
-        fork_inst: type) -> Tuple[Optional[type], Optional[dict]]:
-    if isinstance(json_obj, dict) and META_ATTR in json_obj:
-        cls_str = json_obj[META_ATTR]['classes']['/']
-        cls = get_cls_from_str(cls_str, json_obj, fork_inst)
-        return cls, json_obj[META_ATTR]
-    return None, None
-
-
-def _lookup_announced_class(
-        cls_str: str,
-        source: object,
-        fork_inst: type) -> type:
-    cls = fork_inst._announced_classes.get(cls_str)
-    if not cls:
-        msg = ('Could not find a suitable type for "{}". Make sure it can be '
-               'imported or that is has been announced.'.format(cls_str))
-        raise UnknownClassError(msg, source, cls_str)
-    return cls
