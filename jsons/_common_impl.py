@@ -52,10 +52,6 @@ def get_class_name(cls: type,
     cls_name = _get_simple_name(cls)
     module = _get_module(cls)
     transformer = transformer or (lambda x: x)
-    if not cls_name and hasattr(cls, '__origin__'):
-        origin = cls.__origin__
-        cls_name = get_class_name(origin, transformer,
-                                  fully_qualified, fork_inst)
     if not cls_name:
         cls_name = str(cls)
     if fully_qualified and module:
@@ -138,21 +134,15 @@ def _lookup_announced_class(
 
 
 def _get_simple_name(cls: type) -> str:
-    cls_name = getattr(cls, '__name__', None) #or _get_special_cases(cls)
+    cls_name = getattr(cls, '__name__', None)
     if not cls_name:
         cls_name = getattr(cls, '_name', None)
     if not cls_name:
         cls_name = repr(cls)
         cls_name = cls_name.split('[')[0]  # Remove generic types.
         cls_name = cls_name.split('.')[-1]  # Remove any . caused by repr.
+        cls_name = cls_name.split(r"'>")[0]  # Remove any '>.
     return cls_name
-
-
-# def _get_special_cases(cls: type) -> str:
-#     # This method contains all special cases that cannot (easily) be captured
-#     # with a generic method.
-#     if isinstance(cls, ForwardRef):
-#         return 'ForwardRef'
 
 
 def _get_module(cls: type) -> Optional[str]:
