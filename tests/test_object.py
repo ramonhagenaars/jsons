@@ -152,6 +152,15 @@ class TestObject(TestCase):
         with self.assertRaises(SerializationError):
             jsons.dump(c, Parent)
 
+    def test_dump_with_error(self):
+        class C:
+            @property
+            def x(self):
+                raise KeyError('Some bug this is!')
+
+        with self.assertRaises(SerializationError):
+            jsons.dump(C())
+
     def test_load_too_many_args(self):
         class C:
             def __init__(self, x: int):
