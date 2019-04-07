@@ -19,4 +19,4 @@ class TestOrderedDict(TestCase):
             'b': 'B'
         }
         loaded = jsons.load(d, OrderedDict)
-        self.assertEqual(OrderedDict(d), loaded)
+        self.assertDictEqual(OrderedDict(d), loaded)

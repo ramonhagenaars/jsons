@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, NewType
 from unittest import TestCase
 import jsons
 
@@ -51,3 +51,17 @@ class TestVarious(TestCase):
         }
         loaded = jsons.load(source, Node)
         self.assertEqual(30, loaded.next.next.value)
+
+    def test_dump_load_newtype(self):
+        Uid = NewType('uid', str)
+
+        class User:
+            def __init__(self, uid: Uid, name: str):
+                self.uid = uid
+                self.name = name
+
+        dumped = jsons.dump(User('uid', 'name'))
+        loaded = jsons.load(dumped, User)
+
+        self.assertEqual('uid', loaded.uid)
+        self.assertEqual('name', loaded.name)

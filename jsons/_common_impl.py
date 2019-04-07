@@ -8,6 +8,7 @@ import builtins
 import warnings
 from importlib import import_module
 from typing import Callable, Optional, Tuple
+from jsons._compatibility_impl import get_naked_class
 from jsons.exceptions import UnknownClassError
 
 
@@ -47,6 +48,9 @@ def get_class_name(cls: type,
     finding the class name.
     :return: the name of ``cls``, transformed if a transformer is given.
     """
+    cls_name = _get_special_cases(cls)
+    if cls_name:
+        return cls_name
     if cls in fork_inst._announced_classes:
         return fork_inst._announced_classes[cls]
     cls_name = _get_simple_name(cls)
@@ -57,6 +61,12 @@ def get_class_name(cls: type,
             cls_name = '{}.{}'.format(module, cls_name)
     cls_name = transformer(cls_name)
     return cls_name
+
+
+def _get_special_cases(cls: type):
+    if (hasattr(cls, '__qualname__')
+            and cls.__qualname__ == 'NewType.<locals>.new_type'):
+        return cls.__name__
 
 
 def get_cls_from_str(cls_str: str, source: object, fork_inst) -> type:
@@ -109,11 +119,12 @@ def get_parents(cls: type, lizers: list) -> list:
     :return: a list of serializers or deserializers.
     """
     parents = []
+    naked_cls = get_naked_class(cls)
     for cls_ in lizers:
         try:
-            if issubclass(cls, cls_):
+            if issubclass(naked_cls, cls_):
                 parents.append(cls_)
-        except TypeError:
+        except (TypeError, AttributeError):
             pass  # Some types do not support `issubclass` (e.g. Union).
     return parents
 

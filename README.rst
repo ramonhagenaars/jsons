@@ -94,6 +94,11 @@ Meta
 Recent updates
 ==============
 
+0.8.6
++++++
+- Feature: Support for typing.NewType.
+- Bugfix: Deserializing a ``Dict[K, V]`` failed in ``3.7``.
+
 0.8.5
 +++++
 - Feature: Support for Deque.
@@ -116,10 +121,6 @@ Recent updates
 +++++
 - Bugfix: Dumping a namedtuple resulted in a list rather than a dict.
 - Feature: Loading into named tuples can be from lists and dicts.
-
-0.8.1
-+++++
-- Bugfix: Loading a verbose dump worked only shallow.
 
 
 Contributors
