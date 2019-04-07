@@ -9,8 +9,6 @@ script:
   - pip install .
   - pip install coverage
   - pip install codecov
-  - pip install tox
-  - tox
   - python setup.py test
   - coverage run -m unittest discover .
   - codecov
