@@ -158,17 +158,29 @@ def _get_deserializer(cls: type,
 def _get_lizer(cls: type,
                lizers: Dict[str, callable],
                classes_lizers: list,
-               fork_inst: type) -> callable:
+               fork_inst: type,
+               recursive: bool = False) -> callable:
     cls_name = get_class_name(cls, str.lower, fork_inst=fork_inst,
                               fully_qualified=True)
-    lizer = lizers.get(cls_name, None)
-    if not lizer:
-        parents = get_parents(cls, classes_lizers)
-        if parents:
-            pname = get_class_name(parents[0], str.lower, fork_inst=fork_inst,
-                                   fully_qualified=True)
-            lizer = lizers[pname]
+    lizer = (lizers.get(cls_name, None)
+             or _get_lizer_by_parents(cls, lizers, classes_lizers, fork_inst))
+    if not lizer and not recursive:
+        return _get_lizer(cls.__supertype__, lizers,
+                          classes_lizers, fork_inst, True)
     return lizer
+
+
+def _get_lizer_by_parents(cls: type,
+                          lizers: Dict[str, callable],
+                          classes_lizers: list,
+                          fork_inst: type) -> callable:
+    result = None
+    parents = get_parents(cls, classes_lizers)
+    if parents:
+        pname = get_class_name(parents[0], str.lower, fork_inst=fork_inst,
+                               fully_qualified=True)
+        result = lizers[pname]
+    return result
 
 
 def dumps(obj: object,

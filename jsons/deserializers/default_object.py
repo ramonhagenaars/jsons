@@ -1,5 +1,4 @@
 import inspect
-import typing
 from functools import partial
 from typing import Optional, Callable, Tuple
 from jsons._common_impl import (
@@ -61,8 +60,11 @@ def _get_constructor_args(
                                   meta_hints=meta_hints,
                                   attr_getters=attr_getters,
                                   **kwargs)
-    args_gen = (value_for_attr_part(sig_key=sig_key, cls=hints.get(sig_key, None), sig=sig) for sig_key, sig
-                in signature_parameters.items() if sig_key != 'self')
+    args_gen = (value_for_attr_part(sig_key=sig_key,
+                                    cls=hints.get(sig_key, None),
+                                    sig=sig)
+                for sig_key, sig in signature_parameters.items()
+                if sig_key != 'self')
     constructor_args_in_obj = {key: value for key, value in args_gen if key}
     return constructor_args_in_obj
 
