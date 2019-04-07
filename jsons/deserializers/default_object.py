@@ -8,6 +8,7 @@ from jsons._common_impl import (
     get_cls_from_str,
     determine_precedence
 )
+from jsons._compatibility_impl import get_type_hints
 from jsons._main_impl import load
 from jsons.exceptions import SignatureMismatchError, UnfulfilledArgumentError
 
@@ -52,7 +53,7 @@ def _get_constructor_args(
     # every required parameter, we try to get the corresponding value from
     # json_obj.
     signature_parameters = inspect.signature(cls.__init__).parameters
-    hints = typing.get_type_hints(cls.__init__)
+    hints = get_type_hints(cls.__init__)
     attr_getters = dict(**(attr_getters or {}))
     value_for_attr_part = partial(_get_value_for_attr,
                                   obj=obj,
