@@ -85,7 +85,7 @@ Alternatively, you can make use of the `JsonSerializable` class.
     'Red'
 
 """
-from collections import Mapping
+from collections.abc import Mapping
 from datetime import datetime
 from enum import Enum
 from typing import Union, List, Tuple, Iterable
