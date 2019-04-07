@@ -85,9 +85,10 @@ Alternatively, you can make use of the `JsonSerializable` class.
     'Red'
 
 """
+from collections import deque, Mapping
 from datetime import datetime
 from enum import Enum
-from typing import Union, Set, List, Tuple, Dict
+from typing import Union, Set, List, Tuple, Iterable, Deque
 from jsons import _main_impl, deserializers, serializers, classes
 from jsons._key_transformers import snakecase, camelcase, pascalcase, lispcase
 from jsons.exceptions import (
@@ -117,6 +118,7 @@ KEY_TRANSFORMER_LISPCASE = lispcase
 
 Verbosity = classes.verbosity.Verbosity
 
+# Redeclare the serializers and deserializers:
 default_tuple_serializer = serializers.default_tuple_serializer
 default_dict_serializer = serializers.default_dict_serializer
 default_enum_serializer = serializers.default_enum_serializer
@@ -126,28 +128,32 @@ default_object_serializer = serializers.default_object_serializer
 default_list_deserializer = deserializers.default_list_deserializer
 default_tuple_deserializer = deserializers.default_tuple_deserializer
 default_union_deserializer = deserializers.default_union_deserializer
-default_set_deserializer = deserializers.default_set_deserializer
 default_dict_deserializer = deserializers.default_dict_deserializer
 default_enum_deserializer = deserializers.default_enum_deserializer
 default_datetime_deserializer = deserializers.default_datetime_deserializer
 default_string_deserializer = deserializers.default_string_deserializer
 default_primitive_deserializer = deserializers.default_primitive_deserializer
+default_mapping_deserializer = deserializers.default_mapping_deserializer
+default_iterable_deserializer = deserializers.default_iterable_deserializer
 default_object_deserializer = deserializers.default_object_deserializer
 
+# Set the serializers:
 set_serializer(default_tuple_serializer, (tuple, Tuple))
-set_serializer(default_dict_serializer, (dict, Dict))
 set_serializer(default_enum_serializer, Enum)
 set_serializer(default_datetime_serializer, datetime)
 set_serializer(default_primitive_serializer, (str, int, float, bool, None))
-set_serializer(default_iterable_serializer, (list, List, set, Set))
+set_serializer(default_dict_serializer, Mapping, False)
+set_serializer(default_iterable_serializer, Iterable, False)
 set_serializer(default_object_serializer, object, False)
+
+# Set the deserializers:
 set_deserializer(default_list_deserializer, (list, List))
 set_deserializer(default_tuple_deserializer, (tuple, Tuple))
 set_deserializer(default_union_deserializer, Union)
-set_deserializer(default_set_deserializer, (set, Set))
-set_deserializer(default_dict_deserializer, (dict, Dict))
 set_deserializer(default_enum_deserializer, Enum)
 set_deserializer(default_datetime_deserializer, datetime)
 set_deserializer(default_string_deserializer, str)
 set_deserializer(default_primitive_deserializer, (int, float, bool, None))
+set_deserializer(default_mapping_deserializer, Mapping, False)
+set_deserializer(default_iterable_deserializer, Iterable, False)
 set_deserializer(default_object_deserializer, object, False)

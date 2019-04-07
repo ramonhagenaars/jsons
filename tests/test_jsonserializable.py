@@ -12,6 +12,7 @@ class TestJsonSerializable(TestCase):
         person = Person('John', 65)
         person_json = person.json
         person_json_str = person.dumps()
+        person_json_str2 = str(person)
         person_json_bytes = person.dumpb()
         person_loaded = Person.from_json(person_json)
         person_loaded_str = str(person_json)
@@ -20,6 +21,8 @@ class TestJsonSerializable(TestCase):
         self.assertDictEqual(person_json, {'name': 'John', 'age': 65})
         self.assertDictEqual(person.dump(), {'name': 'John', 'age': 65})
         self.assertDictEqual(eval(person_json_str),
+                             eval("{'name': 'John', 'age': 65}"))
+        self.assertDictEqual(eval(person_json_str2),
                              eval("{'name': 'John', 'age': 65}"))
         self.assertDictEqual(eval(person_json_bytes.decode()),
                              eval("{'name': 'John', 'age': 65}"))
@@ -30,6 +33,7 @@ class TestJsonSerializable(TestCase):
         self.assertEqual(person_loaded_bytes.name, 'John')
         self.assertEqual(Person.load(person_json).name, 'John')
         self.assertEqual(Person.load(person_json).age, 65)
+        self.assertEqual(Person.loads(person_json_str).age, 65)
 
     def test_jsonserializable_with_kwargs(self):
         forked = jsons.JsonSerializable \
@@ -82,16 +86,21 @@ class TestJsonSerializable(TestCase):
         f2 = f1.fork()
         f2.set_serializer(lambda *_, **__: 'f2', str)
         f2.set_serializer(lambda *_, **__: 999, int)
+        f2.set_deserializer(lambda *_, **__: 42, int)
 
         f3 = f2.fork('custom_fork_name')
         f3.set_serializer(lambda *_, **__: 'f3', str)
+        f3.set_deserializer(lambda *_, **__: 84, int)
 
         self.assertEqual(jsons.dump('some string', fork_inst=f1), 'f1')
         self.assertEqual(jsons.dump(123, fork_inst=f1), 123)
+        self.assertEqual(jsons.load(123, fork_inst=f1), 123)
 
         self.assertEqual(jsons.dump('some string', fork_inst=f2), 'f2')
         self.assertEqual(jsons.dump(123, fork_inst=f2), 999)
+        self.assertEqual(jsons.load(123, fork_inst=f2), 42)
 
         self.assertEqual(jsons.dump('some string', fork_inst=f3), 'f3')
         self.assertEqual(jsons.dump(123, fork_inst=f3), 999)
+        self.assertEqual(jsons.load(123, fork_inst=f3), 84)
         self.assertEqual(f3.__name__, 'custom_fork_name')
