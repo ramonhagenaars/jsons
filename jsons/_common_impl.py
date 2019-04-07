@@ -8,6 +8,7 @@ import builtins
 import warnings
 from importlib import import_module
 from typing import Callable, Optional, Tuple
+from jsons._compatibility_impl import get_naked_class
 from jsons.exceptions import UnknownClassError
 
 
@@ -109,9 +110,10 @@ def get_parents(cls: type, lizers: list) -> list:
     :return: a list of serializers or deserializers.
     """
     parents = []
+    naked_cls = get_naked_class(cls)
     for cls_ in lizers:
         try:
-            if issubclass(cls, cls_):
+            if issubclass(naked_cls, cls_):
                 parents.append(cls_)
         except TypeError:
             pass  # Some types do not support `issubclass` (e.g. Union).

@@ -85,10 +85,10 @@ Alternatively, you can make use of the `JsonSerializable` class.
     'Red'
 
 """
-from collections import deque, Mapping
+from collections import Mapping
 from datetime import datetime
 from enum import Enum
-from typing import Union, Set, List, Tuple, Iterable, Deque
+from typing import Union, List, Tuple, Iterable
 from jsons import _main_impl, deserializers, serializers, classes
 from jsons._key_transformers import snakecase, camelcase, pascalcase, lispcase
 from jsons.exceptions import (

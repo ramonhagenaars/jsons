@@ -4,6 +4,7 @@ PRIVATE MODULE: do not import (from) it directly.
 This module contains functionality for supporting the compatibility of jsons
 with multiple Python versions.
 """
+import sys
 from enum import Enum
 
 
@@ -48,3 +49,11 @@ def get_union_params(un: type) -> list:
     # Python3.5: Unions have __union_params__
     # Python3.7: Unions have __args__
     return getattr(un, '__union_params__', getattr(un, '__args__', None))
+
+
+def get_naked_class(cls: type) -> type:
+    # Return the non-generic class (e.g. dict) of a generic type (e.g. Dict).
+    attr = '__origin__'
+    if sys.version_info[1] in (5, 6):
+        attr = '__extra__'
+    return getattr(cls, attr, cls)

@@ -1,5 +1,6 @@
 from collections import Mapping, Iterable
 from typing import Iterable as IterableType
+from jsons._compatibility_impl import get_naked_class
 from jsons.deserializers import default_list_deserializer
 
 
@@ -22,8 +23,7 @@ def default_iterable_deserializer(
         cls_ = IterableType[cls.__args__]
     list_ = default_list_deserializer(obj, cls_, **kwargs)
     result = list_
-    # Strip any generics from cls to allow for an instance check.
-    stripped_cls = getattr(cls, '__extra__', cls)
-    if not isinstance(result, stripped_cls):
-        result = stripped_cls(list_)
+    naked_cls = get_naked_class(cls)
+    if not isinstance(result, naked_cls):
+        result = naked_cls(list_)
     return result
