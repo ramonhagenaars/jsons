@@ -1,7 +1,8 @@
+from collections import Iterable
 from jsons._main_impl import dump
 
 
-def default_iterable_serializer(obj: object, **kwargs) -> list:
+def default_iterable_serializer(obj: Iterable, **kwargs) -> list:
     """
     Serialize the given ``obj`` to a list of serialized objects.
     :param obj: the iterable that is to be serialized.

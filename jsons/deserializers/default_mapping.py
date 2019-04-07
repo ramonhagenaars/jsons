@@ -3,12 +3,11 @@ from typing import Mapping as MappingType
 from jsons.deserializers import default_dict_deserializer
 
 
-def default_mapping_deserializer(obj: Mapping, cls: type, **kwargs) -> Mapping:
+def default_mapping_deserializer(obj: dict, cls: type, **kwargs) -> Mapping:
     """
-    Deserialize a (JSON) list into a set by deserializing all items of that
-    list. If the list as a generic type (e.g. Set[datetime]) then it is
-    assumed that all elements can be deserialized to that type.
-    :param obj: the list that needs deserializing.
+    Deserialize a (JSON) dict into a mapping by deserializing all items of that
+    dict.
+    :param obj: the dict that needs deserializing.
     :param cls: the type, optionally with a generic (e.g. Set[str]).
     :param kwargs: any keyword arguments.
     :return: a deserialized set instance.
