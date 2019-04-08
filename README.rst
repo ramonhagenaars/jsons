@@ -1,18 +1,18 @@
 |PyPI version| |Docs| |Build Status| |Code Coverage| |Scrutinizer Code Quality|
-|Maintainability|
+|Downloads| |Maintainability|
 
 ::
 
-       _                     
-      (_)                    
-       _ ___  ___  _ __  ___ 
+       _
+      (_)
+       _ ___  ___  _ __  ___
       | / __|/ _ \| '_ \/ __|
       | \__ | (_) | | | \__ \
       | |___/\___/|_| |_|___/
-     _/ | JSON SERIALIZATION                   
-    |__/      MADE EASY!               
+     _/ | JSON SERIALIZATION
+    |__/      MADE EASY!
 
-    
+
 *~ Any Python objects to/from JSON, easily! ~*
 
 
@@ -125,11 +125,15 @@ Recent updates
 
 Contributors
 ============
-Special thanks to the following contributors:
+Special thanks to the following contributors of code, discussions or suggestions:
 
 
 - `finetuned89 <https://github.com/finetuned89>`_
 - `haluzpav <https://github.com/haluzpav>`_
+- `jmolinski <https://github.com/jmolinski>`_
+- `gastlich <https://github.com/gastlich>`_
+- `cypreess <https://github.com/cypreess>`_
+- `casparjespersen <https://github.com/casparjespersen>`_
 
 .. |PyPI version| image:: https://badge.fury.io/py/jsons.svg
    :target: https://badge.fury.io/py/jsons
@@ -140,12 +144,15 @@ Special thanks to the following contributors:
 
 .. |Build Status| image:: https://api.travis-ci.org/ramonhagenaars/jsons.svg?branch=master
    :target: https://travis-ci.org/ramonhagenaars/jsons
-   
+
 .. |Code Coverage| image:: https://codecov.io/gh/ramonhagenaars/jsons/branch/master/graph/badge.svg
   :target: https://codecov.io/gh/ramonhagenaars/jsons
-   
+
 .. |Scrutinizer Code Quality| image:: https://scrutinizer-ci.com/g/ramonhagenaars/jsons/badges/quality-score.png?b=master
    :target: https://scrutinizer-ci.com/g/ramonhagenaars/jsons/?branch=master
-   
+
 .. |Maintainability| image:: https://api.codeclimate.com/v1/badges/17d997068b3387c2f2c3/maintainability
    :target: https://codeclimate.com/github/ramonhagenaars/jsons/maintainability
+
+.. |Downloads| image:: https://img.shields.io/pypi/dm/jsons.svg
+   :target: https://pypistats.org/packages/jsons
