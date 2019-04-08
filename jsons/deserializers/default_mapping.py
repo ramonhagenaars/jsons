@@ -1,4 +1,4 @@
-from collections import Mapping
+from collections.abc import Mapping
 from typing import Mapping as MappingType
 from jsons._common_impl import get_naked_class
 from jsons.deserializers import default_dict_deserializer
