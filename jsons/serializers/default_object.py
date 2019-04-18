@@ -1,5 +1,5 @@
 from datetime import datetime, timezone
-from typing import Optional, Callable, Union
+from typing import Optional, Callable, Union, MutableSequence, Tuple
 from jsons._common_impl import get_class_name, META_ATTR
 from jsons._datetime_impl import to_str
 from jsons.classes import JsonSerializable
@@ -14,6 +14,7 @@ def default_object_serializer(
         strip_privates: bool = False,
         strip_properties: bool = False,
         strip_class_variables: bool = False,
+        strip_attr: Union[str, MutableSequence[str], Tuple[str]] = None,
         verbose: Union[Verbosity, bool] = False,
         **kwargs) -> dict:
     """
@@ -31,6 +32,9 @@ def default_object_serializer(
     values from @properties.
     :param strip_class_variables: if ``True`` the resulting dict will not
     contain values from class variables.
+    :param strip_attr: can be a name or a collection of names of attributes
+    that are not to be included in the dump.
+    dict will not contain attributes with
     :param verbose: if ``True`` the resulting dict will contain meta
     information (e.g. on how to deserialize).
     :param kwargs: any keyword arguments that are to be passed to the
@@ -39,9 +43,13 @@ def default_object_serializer(
     """
     if obj is None:
         return obj
+    strip_attr = strip_attr or []
+    if (not isinstance(strip_attr, MutableSequence)
+            and not isinstance(strip_attr, tuple)):
+        strip_attr = (strip_attr,)
     cls = kwargs['cls'] or obj.__class__
     obj_dict = _get_dict_from_obj(obj, strip_privates, strip_properties,
-                                  strip_class_variables, **kwargs)
+                                  strip_class_variables, strip_attr, **kwargs)
     kwargs_ = {**kwargs, 'verbose': verbose}
     verbose = Verbosity.from_value(verbose)
     if Verbosity.WITH_CLASS_INFO in verbose:
@@ -53,6 +61,7 @@ def default_object_serializer(
         strip_privates=strip_privates,
         strip_properties=strip_properties,
         strip_class_variables=strip_class_variables,
+        strip_attr=strip_attr,
         **kwargs_)
     cls_name = get_class_name(cls, fully_qualified=True,
                               fork_inst=kwargs['fork_inst'])
@@ -64,11 +73,13 @@ def default_object_serializer(
     return result
 
 
-def _get_dict_from_obj(obj,
-                       strip_privates,
-                       strip_properties,
-                       strip_class_variables,
-                       cls=None, *_, **__) -> dict:
+def _get_dict_from_obj(
+        obj,
+        strip_privates,
+        strip_properties,
+        strip_class_variables,
+        strip_attr,
+        cls=None, *_, **__) -> dict:
     excluded_elems = dir(JsonSerializable)
     props, other_cls_vars = _get_class_props(obj.__class__)
     return {attr: obj.__getattribute__(attr) for attr in dir(obj)
@@ -76,6 +87,7 @@ def _get_dict_from_obj(obj,
             and not (strip_privates and attr.startswith('_'))
             and not (strip_properties and attr in props)
             and not (strip_class_variables and attr in other_cls_vars)
+            and attr not in strip_attr
             and attr != 'json'
             and not isinstance(obj.__getattribute__(attr), Callable)
             and (not cls or attr in cls.__slots__)
@@ -120,10 +132,11 @@ def _get_dict_with_meta(
     return obj
 
 
-def _fill_collection_of_types(obj_: dict,
-                              cls_name_: Optional[str],
-                              prefix: str,
-                              collection_of_types_: dict) -> str:
+def _fill_collection_of_types(
+        obj_: dict,
+        cls_name_: Optional[str],
+        prefix: str,
+        collection_of_types_: dict) -> str:
     # This function loops through obj to fill collection_of_types_ with the
     # class names.
     cls_name_ = cls_name_ or obj_.pop('-cls')

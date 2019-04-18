@@ -103,6 +103,23 @@ class TestObject(TestCase):
         dump = jsons.dump(obj, strip_class_variables=True)
         self.assertDictEqual(exp, dump)
 
+    def test_dump_object_strip_attr(self):
+        obj = AllDumpable(AllDumpable())
+        dump1 = jsons.dump(obj, strip_attr=('v',))
+        dump2 = jsons.dump(obj, strip_attr=('v', '_v'))
+        exp1 = {'_par_c': 10, 'par_v': None, 'par_p': 12,
+                'c': 1, '_c': 2, 'c_n': None, '_c_n': None,
+                'child': None, '_v': 4, 'v_n': None, '_v_n': None, 'p': 5,
+                '_p': 5, 'p_n': None, '_p_n': None}
+        exp1['child'] = exp1.copy()
+        exp2 = {'_par_c': 10, 'par_v': None, 'par_p': 12,
+                'c': 1, '_c': 2, 'c_n': None, '_c_n': None,
+                'child': None, 'v_n': None, '_v_n': None,
+                'p': 5, '_p': 5, 'p_n': None, '_p_n': None}
+        exp2['child'] = exp2.copy()
+        self.assertDictEqual(exp1, dump1)
+        self.assertDictEqual(exp2, dump2)
+
     def test_dump_with_slots(self):
         class C:
             __slots__ = 'x', 'y'
