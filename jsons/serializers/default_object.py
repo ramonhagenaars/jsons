@@ -80,6 +80,7 @@ def _get_dict_from_obj(
         strip_class_variables,
         strip_attr,
         cls=None, *_, **__) -> dict:
+    strip_attr = tuple(strip_attr) + _ABC_ATTRS
     excluded_elems = dir(JsonSerializable)
     props, other_cls_vars = _get_class_props(obj.__class__)
     return {attr: obj.__getattribute__(attr) for attr in dir(obj)
@@ -148,3 +149,7 @@ def _fill_collection_of_types(
                                                    collection_of_types_)
             collection_of_types_[prefix + attr] = attr_class
     return cls_name_
+
+
+_ABC_ATTRS = ('_abc_registry', '_abc_cache', '_abc_negative_cache',
+              '_abc_negative_cache_version', '_abc_impl')

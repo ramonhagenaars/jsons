@@ -1,4 +1,5 @@
 import datetime
+from abc import ABC
 from typing import List
 from unittest import TestCase
 from jsons._common_impl import StateHolder
@@ -119,6 +120,17 @@ class TestObject(TestCase):
         exp2['child'] = exp2.copy()
         self.assertDictEqual(exp1, dump1)
         self.assertDictEqual(exp2, dump2)
+
+    def test_dump_abc_class(self):
+        class A(ABC):
+            pass
+
+        class B(A):
+            def __init__(self, x: int):
+                self.x = x
+
+        dumped = jsons.dump(B(42))
+        self.assertDictEqual({'x': 42}, dumped)
 
     def test_dump_with_slots(self):
         class C:
