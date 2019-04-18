@@ -21,7 +21,7 @@ setup(
         'jsons.serializers'
     ],
     test_suite='tests',
-    install_requires=[
+    tests_require=[
         'dataclasses;python_version=="3.6"'
     ],
     zip_safe=False,
