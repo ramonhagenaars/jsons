@@ -106,7 +106,7 @@ class TestObject(TestCase):
 
     def test_dump_object_strip_attr(self):
         obj = AllDumpable(AllDumpable())
-        dump1 = jsons.dump(obj, strip_attr=('v',))
+        dump1 = jsons.dump(obj, strip_attr='v')
         dump2 = jsons.dump(obj, strip_attr=('v', '_v'))
         exp1 = {'_par_c': 10, 'par_v': None, 'par_p': 12,
                 'c': 1, '_c': 2, 'c_n': None, '_c_n': None,
