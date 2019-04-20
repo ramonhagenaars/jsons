@@ -8,10 +8,10 @@ import builtins
 import warnings
 from importlib import import_module
 from typing import Callable, Optional, Tuple
-from jsons._compatibility_impl import get_naked_class
 from jsons.exceptions import UnknownClassError
 
 
+VALID_TYPES = (str, int, float, bool, list, tuple, set, dict, type(None))
 META_ATTR = '-meta'  # The name of the attribute holding meta info.
 
 
@@ -108,25 +108,6 @@ def get_cls_and_meta(
         cls = get_cls_from_str(cls_str, json_obj, fork_inst)
         return cls, json_obj[META_ATTR]
     return None, None
-
-
-def get_parents(cls: type, lizers: list) -> list:
-    """
-    Return a list of serializers or deserializers that can handle a parent
-    of ``cls``.
-    :param cls: the type that
-    :param lizers: a list of serializers or deserializers.
-    :return: a list of serializers or deserializers.
-    """
-    parents = []
-    naked_cls = get_naked_class(cls)
-    for cls_ in lizers:
-        try:
-            if issubclass(naked_cls, cls_):
-                parents.append(cls_)
-        except (TypeError, AttributeError):
-            pass  # Some types do not support `issubclass` (e.g. Union).
-    return parents
 
 
 def _lookup_announced_class(

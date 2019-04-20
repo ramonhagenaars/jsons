@@ -1,7 +1,6 @@
 from datetime import datetime
 from typing import Optional
-from jsons._datetime_impl import to_str
-from jsons._main_impl import RFC3339_DATETIME_PATTERN
+from jsons._datetime_impl import to_str, RFC3339_DATETIME_PATTERN
 
 
 def default_datetime_serializer(obj: datetime,

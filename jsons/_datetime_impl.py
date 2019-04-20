@@ -5,7 +5,9 @@ This module contains functionality for ``datetime`` related stuff.
 """
 from datetime import datetime, timezone, timedelta, time, date
 from typing import Union
-from jsons._main_impl import RFC3339_DATETIME_PATTERN
+
+
+RFC3339_DATETIME_PATTERN = '%Y-%m-%dT%H:%M:%S'
 
 
 def to_str(

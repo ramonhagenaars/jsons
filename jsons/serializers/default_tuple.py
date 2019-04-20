@@ -1,5 +1,5 @@
 from typing import Union
-from jsons._main_impl import dump
+from jsons._dump_impl import dump
 from jsons.serializers.default_iterable import default_iterable_serializer
 
 

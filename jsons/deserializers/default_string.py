@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Optional
+from jsons._load_impl import load
 from jsons.exceptions import DeserializationError
-from jsons._main_impl import load
 
 
 def default_string_deserializer(obj: str,

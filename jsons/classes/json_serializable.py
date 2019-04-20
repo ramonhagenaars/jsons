@@ -1,15 +1,8 @@
 from typing import Optional
 from jsons._common_impl import get_class_name, StateHolder
-from jsons._main_impl import (
-    dump,
-    dumps,
-    dumpb,
-    load,
-    loads,
-    loadb,
-    set_serializer,
-    set_deserializer
-)
+from jsons._dump_impl import dump, dumps, dumpb
+from jsons._lizers_impl import set_serializer, set_deserializer
+from jsons._load_impl import load, loads, loadb
 
 
 class JsonSerializable(StateHolder):

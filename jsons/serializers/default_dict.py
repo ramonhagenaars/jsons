@@ -1,5 +1,5 @@
 from typing import Optional, Callable
-from jsons._main_impl import dump
+from jsons._dump_impl import dump
 
 
 def default_dict_serializer(
