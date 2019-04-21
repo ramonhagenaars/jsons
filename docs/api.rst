@@ -858,6 +858,8 @@ default_datetime_serializer
 | *Arguments:*   | ``obj: datetime``                      | The datetime instance that is to be                  |
 |                |                                        | serialized.                                          |
 +                +----------------------------------------+------------------------------------------------------+
+|                | ``*``                                  |                                                      |
++                +----------------------------------------+------------------------------------------------------+
 |                | ``strip_microseconds: Optional[bool]`` | Determines whether microseconds should be discarded. |
 +                +----------------------------------------+------------------------------------------------------+
 |                | ``kwargs``                             | Not used.                                            |
@@ -972,6 +974,8 @@ default_dict_serializer
 +----------------+-----------------------------------------------------+-----------------------------------------------------------------+
 | *Arguments:*   | ``obj: dict``                                       | The object that is to be serialized.                            |
 +                +-----------------------------------------------------+-----------------------------------------------------------------+
+|                | ``*``                                               |                                                                 |
++                +-----------------------------------------------------+-----------------------------------------------------------------+
 |                | ``strip_nulls: bool``                               | When ``True``, the resulting dict won't contain 'null values'.  |
 +                +-----------------------------------------------------+-----------------------------------------------------------------+
 |                | ``key_transformer: Optional[Callable[[str], str]]`` | A function that will be applied to all keys in the              |
@@ -1000,6 +1004,8 @@ default_enum_serializer
 |                |                                                                                                           |
 +----------------+-----------------------------------------------------+-----------------------------------------------------+
 | *Arguments:*   | ``obj: EnumMeta``                                   | The object that is to be serialized.                |
++                +-----------------------------------------------------+-----------------------------------------------------+
+|                | ``*``                                               |                                                     |
 +                +-----------------------------------------------------+-----------------------------------------------------+
 |                | ``use_enum_name: bool``                             | When ``True``, the name of the enum type is used,   |
 |                |                                                     | otherwise the value is used.                        |
@@ -1051,6 +1057,8 @@ default_object_serializer
 +----------------+-----------------------------------------------------+--------------------------------------------------+
 | *Arguments:*   | ``obj: object``                                     | The object that is to be serialized.             |
 +                +-----------------------------------------------------+--------------------------------------------------+
+|                | ``*``                                               |                                                  |
++                +-----------------------------------------------------+--------------------------------------------------+
 |                | ``key_transformer: Optional[Callable[[str], str]]`` | A function that will be applied to all keys in   |
 |                |                                                     | the resulting dict.                              |
 +                +-----------------------------------------------------+--------------------------------------------------+
@@ -1063,6 +1071,14 @@ default_object_serializer
 +                +-----------------------------------------------------+--------------------------------------------------+
 |                | ``strip_properties: bool``                          | If ``True`` the resulting dict will not          |
 |                |                                                     | contain values from @properties.                 |
++                +-----------------------------------------------------+--------------------------------------------------+
+|                | ``strip_class_variables: bool``                     | If ``True`` the resulting dict will not contain  |
+|                |                                                     | attributes that belong to the `class` of         |
+|                |                                                     | ``obj``.                                         |
++                +-----------------------------------------------------+--------------------------------------------------+
+|                | ``strip_attr: Union[str,                            | If given, the attribute(s) with the given        |
+|                |                     MutableSequence[str],           | name(s) will be omitted from the resulting       |
+|                |                     Tuple[str]]``                   | dict.                                            |
 +                +-----------------------------------------------------+--------------------------------------------------+
 |                | ``verbose: Union[Verbosity, bool]``                 | When set, the output will contain meta data      |
 |                |                                                     | (e.g. data on the types).                        |
@@ -1257,6 +1273,8 @@ default_dict_deserializer
 |                | ``cls: type``                     | The type of the dict, optionally with a generic type    |
 |                |                                   | (e.g. Dict[str, datetime]).                             |
 +                +-----------------------------------+---------------------------------------------------------+
+|                | ``*``                             |                                                         |
++                +-----------------------------------+---------------------------------------------------------+
 |                | key_transformer:                  | A function that transforms the keys to a                |
 |                | Optional[Callable[[str], str]]    | different style (e.g. PascalCase).                      |
 +                +-----------------------------------+---------------------------------------------------------+
@@ -1311,6 +1329,8 @@ default_enum_deserializer
 | *Arguments:*   | ``obj: str``        | The serialized enum.                                                                |
 +                +---------------------+-------------------------------------------------------------------------------------+
 |                | ``cls: EnumMeta``   | The enum class.                                                                     |
++                +---------------------+-------------------------------------------------------------------------------------+
+|                | ``*``               |                                                                                     |
 +                +---------------------+-------------------------------------------------------------------------------------+
 |                | use_enum_name: bool | Determines whether the name (``True``) or the value (``False``) of an enum element  |
 |                |                     | should be used.                                                                     |
@@ -1391,6 +1411,8 @@ default_object_deserializer
 | *Arguments:*   | ``obj: dict``                    | The object that is be deserialized.                                  |
 +                +----------------------------------+----------------------------------------------------------------------+
 |                | ``cls: type``                    | The type to which ``obj`` should be deserialized.                    |
++                +----------------------------------+----------------------------------------------------------------------+
+|                | ``*``                            |                                                                      |
 +                +----------------------------------+----------------------------------------------------------------------+
 |                | ``key_transformer:               | A function that transforms the keys in order to match the attribute  |
 |                | Optional[Callable[[str], str]]`` | names of ``cls``.                                                    |
