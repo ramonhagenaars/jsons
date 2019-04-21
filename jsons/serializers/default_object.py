@@ -9,6 +9,7 @@ from jsons.serializers.default_dict import default_dict_serializer
 
 def default_object_serializer(
         obj: object,
+        *,
         key_transformer: Optional[Callable[[str], str]] = None,
         strip_nulls: bool = False,
         strip_privates: bool = False,

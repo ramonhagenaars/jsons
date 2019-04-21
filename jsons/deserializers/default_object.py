@@ -15,6 +15,7 @@ from jsons._common_impl import (
 def default_object_deserializer(
         obj: dict,
         cls: type,
+        *,
         key_transformer: Optional[Callable[[str], str]] = None,
         strict: bool = False,
         **kwargs) -> object:

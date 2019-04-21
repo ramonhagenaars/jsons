@@ -4,6 +4,7 @@ from jsons._datetime_impl import to_str, RFC3339_DATETIME_PATTERN
 
 
 def default_datetime_serializer(obj: datetime,
+                                *,
                                 strip_microseconds: Optional[bool] = True,
                                 **kwargs) -> str:
     """

@@ -2,6 +2,7 @@ from enum import EnumMeta
 
 
 def default_enum_serializer(obj: EnumMeta,
+                            *,
                             use_enum_name: bool = True,
                             **_) -> str:
     """

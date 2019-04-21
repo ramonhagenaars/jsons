@@ -5,6 +5,7 @@ from jsons._load_impl import load
 def default_dict_deserializer(
         obj: dict,
         cls: type,
+        *,
         key_transformer: Optional[Callable[[str], str]] = None,
         **kwargs) -> dict:
     """
