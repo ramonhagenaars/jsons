@@ -100,7 +100,8 @@ def _get_class_props(cls):
     props = []
     other_cls_vars = []
     for n, v in _get_complete_class_dict(cls).items():
-        props.append(n) if type(v) is property else other_cls_vars.append(n)
+        list_to_append = props if isinstance(v, property) else other_cls_vars
+        list_to_append.append(n)
     return props, other_cls_vars
 
 
