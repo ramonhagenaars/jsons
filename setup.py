@@ -7,7 +7,7 @@ with open('README.rst', 'r') as fh:
 
 setup(
     name='jsons',
-    version='0.8.6',
+    version='0.8.7',
     author='Ramon Hagenaars',
     author_email='ramon.hagenaars@gmail.com',
     description='For serializing Python objects to JSON (dicts) and back',
@@ -21,7 +21,7 @@ setup(
         'jsons.serializers'
     ],
     test_suite='tests',
-    install_requires=[
+    tests_require=[
         'dataclasses;python_version=="3.6"'
     ],
     zip_safe=False,

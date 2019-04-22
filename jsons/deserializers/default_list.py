@@ -1,4 +1,4 @@
-from jsons._main_impl import load
+from jsons._load_impl import load
 
 
 def default_list_deserializer(obj: list, cls: type = None, **kwargs) -> list:

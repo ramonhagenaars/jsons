@@ -89,27 +89,35 @@ from collections.abc import Mapping
 from datetime import datetime
 from enum import Enum
 from typing import Union, List, Tuple, Iterable
-from jsons import _main_impl, deserializers, serializers, classes
 from jsons._key_transformers import snakecase, camelcase, pascalcase, lispcase
+from jsons import (
+    _dump_impl,
+    _load_impl,
+    _lizers_impl,
+    _extra_impl,
+    deserializers,
+    serializers,
+    classes
+)
 from jsons.exceptions import (
     DeserializationError,
     DecodeError,
     UnfulfilledArgumentError,
     InvalidDecorationError
 )
-from jsons.serializers import default_iterable_serializer
 
-dump = _main_impl.dump
-load = _main_impl.load
-dumps = _main_impl.dumps
-loads = _main_impl.loads
-dumpb = _main_impl.dumpb
-loadb = _main_impl.loadb
+
+dump = _dump_impl.dump
+dumps = _dump_impl.dumps
+dumpb = _dump_impl.dumpb
+load = _load_impl.load
+loads = _load_impl.loads
+loadb = _load_impl.loadb
 JsonSerializable = classes.JsonSerializable
-set_serializer = _main_impl.set_serializer
-set_deserializer = _main_impl.set_deserializer
-announce_class = _main_impl.announce_class
-suppress_warnings = _main_impl.suppress_warnings
+set_serializer = _lizers_impl.set_serializer
+set_deserializer = _lizers_impl.set_deserializer
+announce_class = _extra_impl.announce_class
+suppress_warnings = _extra_impl.suppress_warnings
 
 KEY_TRANSFORMER_SNAKECASE = snakecase
 KEY_TRANSFORMER_CAMELCASE = camelcase
@@ -121,6 +129,7 @@ Verbosity = classes.verbosity.Verbosity
 # Redeclare the serializers and deserializers:
 default_tuple_serializer = serializers.default_tuple_serializer
 default_dict_serializer = serializers.default_dict_serializer
+default_iterable_serializer = serializers.default_iterable_serializer
 default_enum_serializer = serializers.default_enum_serializer
 default_datetime_serializer = serializers.default_datetime_serializer
 default_primitive_serializer = serializers.default_primitive_serializer

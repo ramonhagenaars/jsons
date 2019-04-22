@@ -1,7 +1,7 @@
 from typing import Union
 from jsons._compatibility_impl import tuple_with_ellipsis
+from jsons._load_impl import load
 from jsons.exceptions import UnfulfilledArgumentError
-from jsons._main_impl import load
 
 
 def default_tuple_deserializer(obj: list,

@@ -1,7 +1,7 @@
 from typing import Union
 from jsons._common_impl import get_class_name
 from jsons._compatibility_impl import get_union_params
-from jsons._main_impl import load
+from jsons._load_impl import load
 from jsons.exceptions import JsonsError, DeserializationError
 
 
@@ -24,7 +24,7 @@ def default_union_deserializer(obj: object, cls: Union, **kwargs) -> object:
     else:
         fork_inst = kwargs['fork_inst']
         args_msg = ', '.join([get_class_name(cls_, fork_inst=fork_inst)
-                              for cls_ in cls.__args__])
+                              for cls_ in get_union_params(cls)])
         err_msg = ('Could not match the object of type "{}" to any type of '
                    'the Union: {}'.format(str(cls), args_msg))
         raise DeserializationError(err_msg, obj, cls)

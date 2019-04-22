@@ -1,5 +1,5 @@
 from collections.abc import Iterable
-from jsons._main_impl import dump
+from jsons._dump_impl import dump
 
 
 def default_iterable_serializer(obj: Iterable, **kwargs) -> list:

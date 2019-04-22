@@ -1,4 +1,5 @@
 import datetime
+from abc import ABC
 from typing import List
 from unittest import TestCase
 from jsons._common_impl import StateHolder
@@ -102,6 +103,34 @@ class TestObject(TestCase):
         exp['child'] = exp.copy()
         dump = jsons.dump(obj, strip_class_variables=True)
         self.assertDictEqual(exp, dump)
+
+    def test_dump_object_strip_attr(self):
+        obj = AllDumpable(AllDumpable())
+        dump1 = jsons.dump(obj, strip_attr='v')
+        dump2 = jsons.dump(obj, strip_attr=('v', '_v'))
+        exp1 = {'_par_c': 10, 'par_v': None, 'par_p': 12,
+                'c': 1, '_c': 2, 'c_n': None, '_c_n': None,
+                'child': None, '_v': 4, 'v_n': None, '_v_n': None, 'p': 5,
+                '_p': 5, 'p_n': None, '_p_n': None}
+        exp1['child'] = exp1.copy()
+        exp2 = {'_par_c': 10, 'par_v': None, 'par_p': 12,
+                'c': 1, '_c': 2, 'c_n': None, '_c_n': None,
+                'child': None, 'v_n': None, '_v_n': None,
+                'p': 5, '_p': 5, 'p_n': None, '_p_n': None}
+        exp2['child'] = exp2.copy()
+        self.assertDictEqual(exp1, dump1)
+        self.assertDictEqual(exp2, dump2)
+
+    def test_dump_abc_class(self):
+        class A(ABC):
+            pass
+
+        class B(A):
+            def __init__(self, x: int):
+                self.x = x
+
+        dumped = jsons.dump(B(42))
+        self.assertDictEqual({'x': 42}, dumped)
 
     def test_dump_with_slots(self):
         class C:

@@ -2,6 +2,7 @@ import sys
 from pathlib import Path
 from unittest import TestCase, skipUnless
 import jsons
+from jsons._compatibility_impl import get_type_hints
 from jsons.exceptions import SignatureMismatchError
 
 try:
@@ -55,3 +56,12 @@ class TestSpecificVersions(TestCase):
 
         with self.assertRaises(SignatureMismatchError):
             jsons.load({'name': 'John', 'age': 88}, Person, strict=True)
+
+    @only_version_3(5, and_above=True)
+    def test_simple_dump_and_load_dataclass(self):
+
+        class C:
+            pass
+
+        hints = get_type_hints(C.__init__)
+        self.assertDictEqual({}, hints)

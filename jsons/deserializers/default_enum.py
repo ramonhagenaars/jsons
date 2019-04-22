@@ -4,6 +4,7 @@ from typing import Optional
 
 def default_enum_deserializer(obj: str,
                               cls: EnumMeta,
+                              *,
                               use_enum_name: Optional[bool] = None,
                               **kwargs) -> object:
     """

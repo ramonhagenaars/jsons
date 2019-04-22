@@ -1,7 +1,6 @@
 import datetime
 import re
-from jsons._datetime_impl import get_datetime_inst
-from jsons._main_impl import RFC3339_DATETIME_PATTERN
+from jsons._datetime_impl import get_datetime_inst, RFC3339_DATETIME_PATTERN
 
 
 def default_datetime_deserializer(obj: str,
