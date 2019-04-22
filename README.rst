@@ -94,6 +94,12 @@ Meta
 Recent updates
 ==============
 
+0.8.7
++++++
+- *Breaking change*: The default serializers and deserializers now use keyword-only arguments.
+- Feature: Added ``strip_attr`` argument for omitting specific attributes when serializing objects.
+- Feature: The private attributes from ``ABC`` are now excluded from a dump.
+
 0.8.6
 +++++
 - Feature: Support for typing.NewType.
@@ -116,11 +122,6 @@ Recent updates
 0.8.3
 +++++
 - Bugfix: Loading verbose dumped objects could fail if lists where involved.
-
-0.8.2
-+++++
-- Bugfix: Dumping a namedtuple resulted in a list rather than a dict.
-- Feature: Loading into named tuples can be from lists and dicts.
 
 
 Contributors
