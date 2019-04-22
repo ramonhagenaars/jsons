@@ -83,16 +83,28 @@ def set_deserializer(
 
 
 def get_serializer(
-        cls: type,  # TODO add docstring and make public!
+        cls: type,
         fork_inst: Optional[type] = StateHolder) -> callable:
+    """
+    Return the serializer function that would be used for the given ``cls``.
+    :param cls: the type for which a serializer is to be returned.
+    :param fork_inst: if given, it uses this fork of ``JsonSerializable``.
+    :return: a serializer function.
+    """
     serializer = _get_lizer(cls, fork_inst._serializers,
                             fork_inst._classes_serializers, fork_inst)
     return serializer
 
 
 def get_deserializer(
-        cls: type,  # TODO add docstring and make public!
+        cls: type,
         fork_inst: Optional[type] = StateHolder) -> callable:
+    """
+    Return the deserializer function that would be used for the given ``cls``.
+    :param cls: the type for which a deserializer is to be returned.
+    :param fork_inst: if given, it uses this fork of ``JsonSerializable``.
+    :return: a deserializer function.
+    """
     deserializer = _get_lizer(cls, fork_inst._deserializers,
                               fork_inst._classes_deserializers, fork_inst)
     return deserializer
