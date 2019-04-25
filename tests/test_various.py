@@ -1,5 +1,9 @@
+import uuid
 from typing import Optional, NewType
 from unittest import TestCase
+
+from dataclasses import dataclass
+
 import jsons
 
 
@@ -64,4 +68,30 @@ class TestVarious(TestCase):
         loaded = jsons.load(dumped, User)
 
         self.assertEqual('uid', loaded.uid)
+        self.assertEqual('name', loaded.name)
+
+    def test_custom_uuid_serialization(self):
+
+        @dataclass
+        class User:
+            user_id: uuid.UUID
+            name: str
+
+        user = User(uuid.uuid4(), 'name')
+
+        def custom_uuid_serializer(obj: uuid.UUID, **kwargs) -> str:
+            return str(obj)
+
+        def custom_uuid_deserializer(obj: str, cls, **kwargs) -> uuid.UUID:
+            return cls(obj)
+
+        jsons.set_serializer(custom_uuid_serializer, uuid.UUID)
+        jsons.set_deserializer(custom_uuid_deserializer, uuid.UUID)
+
+        dumped = jsons.dump(user)
+        self.assertEqual(dumped['user_id'], str(user.user_id))
+
+        loaded = jsons.load(dumped, User)
+        self.assertEqual(user.user_id, loaded.user_id)
+
         self.assertEqual('name', loaded.name)
