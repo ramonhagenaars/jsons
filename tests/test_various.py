@@ -5,6 +5,7 @@ from unittest import TestCase
 from dataclasses import dataclass
 
 import jsons
+from tests.test_specific_versions import only_version_3
 
 
 class C:
@@ -70,6 +71,7 @@ class TestVarious(TestCase):
         self.assertEqual('uid', loaded.uid)
         self.assertEqual('name', loaded.name)
 
+    @only_version_3(6, and_above=True)
     def test_custom_uuid_serialization(self):
 
         @dataclass
