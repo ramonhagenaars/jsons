@@ -52,6 +52,17 @@ class TestVarious(TestCase):
         loaded = jsons.load(source, Node)
         self.assertEqual(30, loaded.next.next.value)
 
+    def test_dump_load_endless_recursion(self):
+        class Narcissus:
+            @property
+            def mirror(self):
+                return self
+
+        n = Narcissus()
+        dumped_n = jsons.dump(n)
+        loaded_n = jsons.load(dumped_n, Narcissus)
+        self.assertTrue(isinstance(loaded_n.mirror.mirror.mirror, Narcissus))
+
     def test_dump_load_newtype(self):
         Uid = NewType('uid', str)
 

@@ -9,6 +9,7 @@ from jsons.serializers.default_dict import default_dict_serializer
 
 def default_object_serializer(
         obj: object,
+        cls: Optional[type] = None,
         *,
         key_transformer: Optional[Callable[[str], str]] = None,
         strip_nulls: bool = False,
@@ -23,6 +24,7 @@ def default_object_serializer(
     serialized. If ``key_transformer`` is given, it will be used to transform
     the casing (e.g. snake_case) to a different format (e.g. camelCase).
     :param obj: the object that is to be serialized.
+    :param cls: the type of the object that is to be dumped.
     :param key_transformer: a function that will be applied to all keys in the
     resulting dict.
     :param strip_nulls: if ``True`` the resulting dict will not contain null
@@ -48,8 +50,8 @@ def default_object_serializer(
     if (not isinstance(strip_attr, MutableSequence)
             and not isinstance(strip_attr, tuple)):
         strip_attr = (strip_attr,)
-    cls = kwargs['cls'] or obj.__class__
-    obj_dict = _get_dict_from_obj(obj, strip_privates, strip_properties,
+    cls = cls or obj.__class__
+    obj_dict = _get_dict_from_obj(obj, cls, strip_privates, strip_properties,
                                   strip_class_variables, strip_attr, **kwargs)
     kwargs_ = {**kwargs, 'verbose': verbose}
     verbose = Verbosity.from_value(verbose)
@@ -57,6 +59,7 @@ def default_object_serializer(
         kwargs_['_store_cls'] = True
     result = default_dict_serializer(
         obj_dict,
+        cls,
         key_transformer=key_transformer,
         strip_nulls=strip_nulls,
         strip_privates=strip_privates,
@@ -76,14 +79,18 @@ def default_object_serializer(
 
 def _get_dict_from_obj(
         obj,
-        strip_privates,
-        strip_properties,
-        strip_class_variables,
-        strip_attr,
-        cls=None, *_, **__) -> dict:
+        cls=None,
+        strip_privates=False,
+        strip_properties=False,
+        strip_class_variables=False,
+        strip_attr=False,
+        *_,
+        **__) -> dict:
     strip_attr = tuple(strip_attr) + _ABC_ATTRS
     excluded_elems = dir(JsonSerializable)
     props, other_cls_vars = _get_class_props(obj.__class__)
+    # Make sure to get the slots of cls, not of any parent:
+    slots = cls.__slots__ if '__slots__' in cls.__dict__ else {}
     return {attr: obj.__getattribute__(attr) for attr in dir(obj)
             if not attr.startswith('__')
             and not (strip_privates and attr.startswith('_'))
@@ -92,7 +99,7 @@ def _get_dict_from_obj(
             and attr not in strip_attr
             and attr != 'json'
             and not isinstance(obj.__getattribute__(attr), Callable)
-            and (not cls or attr in cls.__slots__)
+            and (not slots or attr in slots)
             and attr not in excluded_elems}
 
 

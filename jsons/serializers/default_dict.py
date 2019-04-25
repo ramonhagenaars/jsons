@@ -1,5 +1,7 @@
 from typing import Optional, Callable
+from jsons._common_impl import get_class_name
 from jsons._dump_impl import dump
+from jsons.exceptions import RecursionDetectedError, SerializationError
 
 
 def default_dict_serializer(
@@ -21,9 +23,21 @@ def default_dict_serializer(
     :return: a dict of which all elements are serialized.
     """
     result = dict()
+    fork_inst = kwargs['fork_inst']
     for key in obj:
-        dumped_elem = dump(obj[key], key_transformer=key_transformer,
-                           strip_nulls=strip_nulls, **kwargs)
+        dumped_elem = None
+        try:
+            dumped_elem = dump(obj[key], key_transformer=key_transformer,
+                               strip_nulls=strip_nulls, **kwargs)
+        except RecursionDetectedError:
+            fork_inst._warn('Recursive structure detected in attribute "{}" '
+                            'of object of type "{}", ignoring the attribute.'
+                            .format(key, get_class_name(cls)))
+        except SerializationError as err:
+            fork_inst._warn('Failed to dump attribute "{}" of object of type '
+                            '"{}". Reason: {}. Ignoring the attribute.'
+                            .format(key, get_class_name(cls), err.message))
+            break
         if not (strip_nulls and dumped_elem is None):
             if key_transformer:
                 key = key_transformer(key)

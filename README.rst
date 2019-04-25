@@ -94,6 +94,10 @@ Meta
 Recent updates
 ==============
 
+0.8.8
++++++
+- Feature: Added the ability to dump recursive objects
+
 0.8.7
 +++++
 - *Breaking change*: The default serializers and deserializers now use keyword-only arguments.
@@ -118,10 +122,6 @@ Recent updates
 - Feature: Support for textual type hints.
 - Feature: Automatically announce classes when dumped.
 - Bugfix: Support for ``from __future__ import annotations``
-
-0.8.3
-+++++
-- Bugfix: Loading verbose dumped objects could fail if lists where involved.
 
 
 Contributors
