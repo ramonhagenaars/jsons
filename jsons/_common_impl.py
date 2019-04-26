@@ -48,13 +48,14 @@ def get_class_name(cls: type,
     finding the class name.
     :return: the name of ``cls``, transformed if a transformer is given.
     """
+
+    transformer = transformer or (lambda x: x)
     cls_name = _get_special_cases(cls)
     if cls_name:
-        return cls_name
+        return transformer(cls_name)
     if cls in fork_inst._announced_classes:
-        return fork_inst._announced_classes[cls]
+        return transformer(fork_inst._announced_classes[cls])
     cls_name = _get_simple_name(cls)
-    transformer = transformer or (lambda x: x)
     if fully_qualified:
         module = _get_module(cls)
         if module:
