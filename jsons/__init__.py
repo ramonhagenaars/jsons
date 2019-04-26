@@ -115,7 +115,9 @@ loads = _load_impl.loads
 loadb = _load_impl.loadb
 JsonSerializable = classes.JsonSerializable
 set_serializer = _lizers_impl.set_serializer
+get_serializer = _lizers_impl.get_serializer
 set_deserializer = _lizers_impl.set_deserializer
+get_deserializer = _lizers_impl.get_deserializer
 announce_class = _extra_impl.announce_class
 suppress_warnings = _extra_impl.suppress_warnings
 

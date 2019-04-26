@@ -15,6 +15,11 @@ class JsonsError(Exception):
         :param message: the message describing the problem.
         """
         Exception.__init__(self, message)
+        self._message = message
+
+    @property
+    def message(self):
+        return self._message
 
 
 class ArgumentError(JsonsError, ValueError):
@@ -76,6 +81,13 @@ class DeserializationError(JsonsError):
 class SerializationError(JsonsError):
     """
     Raised when serialization failed for some reason.
+    """
+
+
+class RecursionDetectedError(SerializationError):
+    """
+    Raised when a recursive structure was detected and a stack overflow was
+    prevented during serialization.
     """
 
 
