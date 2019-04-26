@@ -8,16 +8,20 @@ def default_dict_serializer(
         obj: dict,
         cls: Optional[type] = None,
         *,
+        strict: bool = False,
         strip_nulls: bool = False,
         key_transformer: Optional[Callable[[str], str]] = None,
         **kwargs) -> dict:
     """
     Serialize the given ``obj`` to a dict of serialized objects.
     :param obj: the dict that is to be serialized.
-    :param key_transformer: a function that will be applied to all keys in the
-    resulting dict.
+    :param cls: the type of ``obj``; ``obj`` is dumped as if of that type.
+    :param strict: if ``True`` the serialization will raise upon any the
+    failure of any attribute. Otherwise it continues with a warning.
     :param strip_nulls: if ``True`` the resulting dict will not contain null
     values.
+    :param key_transformer: a function that will be applied to all keys in the
+    resulting dict.
     :param kwargs: any keyword arguments that may be given to the serialization
     process.
     :return: a dict of which all elements are serialized.
@@ -34,10 +38,13 @@ def default_dict_serializer(
                             'of object of type "{}", ignoring the attribute.'
                             .format(key, get_class_name(cls)))
         except SerializationError as err:
-            fork_inst._warn('Failed to dump attribute "{}" of object of type '
-                            '"{}". Reason: {}. Ignoring the attribute.'
-                            .format(key, get_class_name(cls), err.message))
-            break
+            if strict:
+                raise
+            else:
+                fork_inst._warn('Failed to dump attribute "{}" of object of type '
+                                '"{}". Reason: {}. Ignoring the attribute.'
+                                .format(key, get_class_name(cls), err.message))
+                break
         if not (strip_nulls and dumped_elem is None):
             if key_transformer:
                 key = key_transformer(key)

@@ -1,4 +1,5 @@
 import datetime
+import warnings
 from abc import ABC
 from typing import List
 from unittest import TestCase
@@ -449,6 +450,35 @@ class TestObject(TestCase):
         self.assertTrue(hasattr(loaded_without_slots, 'x'))
         self.assertTrue(hasattr(loaded_without_slots, 'y'))
         self.assertTrue(hasattr(loaded_without_slots, 'z'))
+
+    def test_dump_with_attr_fail(self):
+        class FailingClass:
+            @property
+            def i_will_fail(self):
+                raise KeyError('Told you so')
+
+        class C:
+            def __init__(self, x: int, y: FailingClass):
+                self.x = x
+                self.y = y
+
+        c = C(42, FailingClass())
+
+        with warnings.catch_warnings(record=True) as w:
+            dumped1 = jsons.dump(c)
+            self.assertDictEqual({'x': 42}, dumped1)
+            warn_msg = w[0].message.args[0]
+            self.assertTrue('y' in warn_msg)
+            self.assertTrue('Told you so' in warn_msg)
+
+        with self.assertRaises(SerializationError):
+            jsons.dump(c, strict=True)
+
+        try:
+            jsons.dump(c, strict=True)
+        except SerializationError as err:
+            self.assertTrue('y' in err.message)
+            self.assertTrue('Told you so' in err.message)
 
 
 class ParentDumpable:
