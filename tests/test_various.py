@@ -2,8 +2,6 @@ import uuid
 from typing import Optional, NewType
 from unittest import TestCase
 
-from dataclasses import dataclass
-
 import jsons
 from tests.test_specific_versions import only_version_3
 
@@ -73,18 +71,13 @@ class TestVarious(TestCase):
 
     @only_version_3(6, and_above=True)
     def test_custom_uuid_serialization(self):
-
-        @dataclass
-        class User:
-            user_id: uuid.UUID
-            name: str
-
+        from version_with_dataclasses import User
         user = User(uuid.uuid4(), 'name')
 
-        def custom_uuid_serializer(obj: uuid.UUID, **kwargs) -> str:
+        def custom_uuid_serializer(obj, **kwargs):
             return str(obj)
 
-        def custom_uuid_deserializer(obj: str, cls, **kwargs) -> uuid.UUID:
+        def custom_uuid_deserializer(obj, cls, **kwargs):
             return cls(obj)
 
         jsons.set_serializer(custom_uuid_serializer, uuid.UUID)
