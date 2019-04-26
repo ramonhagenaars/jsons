@@ -96,7 +96,9 @@ Recent updates
 
 0.8.8
 +++++
-- Feature: Added the ability to dump recursive objects
+- Feature: Added the ability to dump recursive objects.
+- Feature: Clearer messaging upon serialization errors.
+- Bugfix: Fix for failing to deserialize UUIDs.
 
 0.8.7
 +++++
@@ -135,6 +137,7 @@ Special thanks to the following contributors of code, discussions or suggestions
 - `gastlich <https://github.com/gastlich>`_
 - `cypreess <https://github.com/cypreess>`_
 - `casparjespersen <https://github.com/casparjespersen>`_
+- `ahmetkucuk <https://github.com/ahmetkucuk>`_
 
 .. |PyPI version| image:: https://badge.fury.io/py/jsons.svg
    :target: https://badge.fury.io/py/jsons
