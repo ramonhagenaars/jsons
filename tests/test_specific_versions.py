@@ -57,6 +57,19 @@ class TestSpecificVersions(TestCase):
         with self.assertRaises(SignatureMismatchError):
             jsons.load({'name': 'John', 'age': 88}, Person, strict=True)
 
+    @only_version_3(6, and_above=True)
+    def test_namedtuple_with_optional(self):
+        from version_with_dataclasses import (
+            NamedTupleWithOptional,
+            NamedTupleWithUnion
+        )
+
+        self.assertEqual(NamedTupleWithOptional(None),
+                         jsons.load({'arg': None}, NamedTupleWithOptional))
+
+        self.assertEqual(NamedTupleWithUnion(None),
+                         jsons.load({'arg': None}, NamedTupleWithUnion))
+
     @only_version_3(5, and_above=True)
     def test_simple_dump_and_load_dataclass(self):
 

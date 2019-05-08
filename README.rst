@@ -94,6 +94,10 @@ Meta
 Recent updates
 ==============
 
+0.8.9
++++++
+- Bugfix: NamedTuples could falsely raise an error when a justified ``None`` was provided.
+
 0.8.8
 +++++
 - Feature: Added the ability to dump recursive objects.
