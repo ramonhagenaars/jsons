@@ -97,6 +97,7 @@ Recent updates
 0.8.9
 +++++
 - Bugfix: NamedTuples could falsely raise an error when a justified ``None`` was provided.
+- *Breaking change*: Values of primitive types are now cast if possible (e.g. in ``jsons.load('42', int)``).
 
 0.8.8
 +++++
@@ -122,12 +123,6 @@ Recent updates
 - Feature: Support for OrderedDict.
 - Feature: Support for Defaultdict.
 - Feature: Support for ChainMap.
-
-0.8.4
-+++++
-- Feature: Support for textual type hints.
-- Feature: Automatically announce classes when dumped.
-- Bugfix: Support for ``from __future__ import annotations``
 
 
 Contributors

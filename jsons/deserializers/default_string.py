@@ -1,6 +1,7 @@
 from datetime import datetime
 from typing import Optional
 from jsons._load_impl import load
+from jsons.deserializers.default_primitive import default_primitive_deserializer
 from jsons.exceptions import DeserializationError
 
 
@@ -18,5 +19,5 @@ def default_string_deserializer(obj: str,
     try:
         result = load(obj, datetime, **kwargs)
     except DeserializationError:
-        result = obj
+        result = default_primitive_deserializer(obj, str)
     return result
