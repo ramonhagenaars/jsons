@@ -1,5 +1,5 @@
 import uuid
-from typing import Optional, NewType
+from typing import Optional, NewType, Any
 from unittest import TestCase
 
 import jsons
@@ -79,6 +79,14 @@ class TestVarious(TestCase):
 
         self.assertEqual('uid', loaded.uid)
         self.assertEqual('name', loaded.name)
+
+    def test_any(self):
+        class C:
+            def __init__(self, a: Any):
+                self.a = a
+
+        loaded = jsons.load({'a': 123}, C)
+        self.assertEqual(123, loaded.a)
 
     @only_version_3(6, and_above=True)
     def test_uuid_serialization(self):

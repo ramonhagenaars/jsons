@@ -1,6 +1,6 @@
 import uuid
 from dataclasses import dataclass
-from typing import NamedTuple, Optional, Union
+from typing import NamedTuple, Optional, Union, Any
 
 
 @dataclass
@@ -20,3 +20,7 @@ class NamedTupleWithOptional(NamedTuple):
 
 class NamedTupleWithUnion(NamedTuple):
     arg: Union[str, int, None]
+
+
+class NamedTupleWithAny(NamedTuple):
+    arg: Any

@@ -5,7 +5,7 @@ This module contains functionality for loading stuff from json.
 """
 import json
 from json import JSONDecodeError
-from typing import Optional, Dict, Callable, Tuple
+from typing import Optional, Dict, Callable, Tuple, Any
 from jsons._lizers_impl import get_deserializer
 from jsons.exceptions import DeserializationError, JsonsError, DecodeError
 from jsons._common_impl import (
@@ -175,5 +175,8 @@ def _check_and_get_cls_and_meta_hints(
 
 
 def _should_skip(json_obj: object, cls: type, strict: bool):
-    if not strict and (json_obj is None or type(json_obj) == cls):
+    if not strict:
+        if json_obj is None or type(json_obj) == cls:
+            return True
+    if cls is Any:
         return True

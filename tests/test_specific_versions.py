@@ -1,5 +1,7 @@
 import sys
+import uuid
 from pathlib import Path
+from typing import Any
 from unittest import TestCase, skipUnless
 import jsons
 from jsons._compatibility_impl import get_type_hints
@@ -61,7 +63,8 @@ class TestSpecificVersions(TestCase):
     def test_namedtuple_with_optional(self):
         from version_with_dataclasses import (
             NamedTupleWithOptional,
-            NamedTupleWithUnion
+            NamedTupleWithUnion,
+            NamedTupleWithAny
         )
 
         self.assertEqual(NamedTupleWithOptional(None),
@@ -69,6 +72,9 @@ class TestSpecificVersions(TestCase):
 
         self.assertEqual(NamedTupleWithUnion(None),
                          jsons.load({'arg': None}, NamedTupleWithUnion))
+
+        self.assertEqual(NamedTupleWithAny(123),
+                         jsons.load({'arg': 123}, NamedTupleWithAny))
 
     @only_version_3(5, and_above=True)
     def test_simple_dump_and_load_dataclass(self):
@@ -78,3 +84,25 @@ class TestSpecificVersions(TestCase):
 
         hints = get_type_hints(C.__init__)
         self.assertDictEqual({}, hints)
+
+    @only_version_3(6, and_above=True)
+    def test_custom_uuid_serialization(self):
+        from version_with_dataclasses import User
+        user = User(uuid.uuid4(), 'name')
+
+        def custom_uuid_serializer(obj, **kwargs):
+            return str(obj)
+
+        def custom_uuid_deserializer(obj, cls, **kwargs):
+            return cls(obj)
+
+        jsons.set_serializer(custom_uuid_serializer, uuid.UUID)
+        jsons.set_deserializer(custom_uuid_deserializer, uuid.UUID)
+
+        dumped = jsons.dump(user)
+        self.assertEqual(dumped['user_id'], str(user.user_id))
+
+        loaded = jsons.load(dumped, User)
+        self.assertEqual(user.user_id, loaded.user_id)
+
+        self.assertEqual('name', loaded.name)
