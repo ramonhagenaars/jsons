@@ -96,8 +96,9 @@ Recent updates
 
 0.8.9
 +++++
-- Bugfix: NamedTuples could falsely raise an error when a justified ``None`` was provided.
 - *Breaking change*: Values of primitive types are now cast if possible (e.g. in ``jsons.load('42', int)``).
+- Bugfix: NamedTuples could falsely raise an error when a justified ``None`` was provided.
+- Feature: Support for ``uuid.UUID``.
 
 0.8.8
 +++++
