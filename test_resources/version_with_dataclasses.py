@@ -9,5 +9,5 @@ class Person:
 
 @dataclass
 class User:
-    user_id: uuid.UUID
+    user_uuid: uuid.UUID
     name: str
