@@ -12,6 +12,7 @@ from jsons.serializers.default_iterable import default_iterable_serializer
 from jsons.serializers.default_object import default_object_serializer
 from jsons.serializers.default_primitive import default_primitive_serializer
 from jsons.serializers.default_tuple import default_tuple_serializer
+from jsons.serializers.default_uuid import default_uuid_serializer
 
 
 KEY_TRANSFORMER_SNAKECASE = snakecase
