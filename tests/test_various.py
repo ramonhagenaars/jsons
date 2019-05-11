@@ -88,6 +88,14 @@ class TestVarious(TestCase):
         loaded = jsons.load({'a': 123}, C)
         self.assertEqual(123, loaded.a)
 
+    def test_nonetype(self):
+        class C:
+            def __init__(self, a: type(None)):
+                self.a = a
+
+        loaded = jsons.load({'a': None}, C)
+        self.assertEqual(None, loaded.a)
+
     @only_version_3(6, and_above=True)
     def test_uuid_serialization(self):
         from version_with_dataclasses import User
