@@ -95,16 +95,3 @@ class TestVarious(TestCase):
 
         loaded = jsons.load({'a': None}, C)
         self.assertEqual(None, loaded.a)
-
-    @only_version_3(6, and_above=True)
-    def test_uuid_serialization(self):
-        from version_with_dataclasses import User
-        user = User(uuid.uuid4(), 'name')
-
-        dumped = jsons.dump(user)
-        self.assertEqual(dumped['user_uuid'], str(user.user_uuid))
-
-        loaded = jsons.load(dumped, User)
-        self.assertEqual(user.user_uuid, loaded.user_uuid)
-
-        self.assertEqual('name', loaded.name)
