@@ -1,5 +1,7 @@
 import sys
+import uuid
 from pathlib import Path
+from typing import Any
 from unittest import TestCase, skipUnless
 import jsons
 from jsons._compatibility_impl import get_type_hints
@@ -57,6 +59,23 @@ class TestSpecificVersions(TestCase):
         with self.assertRaises(SignatureMismatchError):
             jsons.load({'name': 'John', 'age': 88}, Person, strict=True)
 
+    @only_version_3(6, and_above=True)
+    def test_namedtuple_with_optional(self):
+        from version_with_dataclasses import (
+            NamedTupleWithOptional,
+            NamedTupleWithUnion,
+            NamedTupleWithAny
+        )
+
+        self.assertEqual(NamedTupleWithOptional(None),
+                         jsons.load({'arg': None}, NamedTupleWithOptional))
+
+        self.assertEqual(NamedTupleWithUnion(None),
+                         jsons.load({'arg': None}, NamedTupleWithUnion))
+
+        self.assertEqual(NamedTupleWithAny(123),
+                         jsons.load({'arg': 123}, NamedTupleWithAny))
+
     @only_version_3(5, and_above=True)
     def test_simple_dump_and_load_dataclass(self):
 
@@ -65,3 +84,16 @@ class TestSpecificVersions(TestCase):
 
         hints = get_type_hints(C.__init__)
         self.assertDictEqual({}, hints)
+
+    @only_version_3(6, and_above=True)
+    def test_uuid_serialization(self):
+        from version_with_dataclasses import User
+        user = User(uuid.uuid4(), 'name')
+
+        dumped = jsons.dump(user)
+        self.assertEqual(dumped['user_uuid'], str(user.user_uuid))
+
+        loaded = jsons.load(dumped, User)
+        self.assertEqual(user.user_uuid, loaded.user_uuid)
+
+        self.assertEqual('name', loaded.name)

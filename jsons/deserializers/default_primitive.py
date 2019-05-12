@@ -1,4 +1,5 @@
 from typing import Optional
+from jsons.exceptions import DeserializationError
 
 
 def default_primitive_deserializer(obj: object,
@@ -11,4 +12,11 @@ def default_primitive_deserializer(obj: object,
     :param kwargs: not used.
     :return: ``obj``.
     """
-    return obj
+    result = obj
+    if not isinstance(obj, cls):
+        try:
+            result = cls(obj)
+        except ValueError:
+            raise DeserializationError('Could not cast {} into {}'
+                                       .format(obj, cls.__name__), obj, cls)
+    return result

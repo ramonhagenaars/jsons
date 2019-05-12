@@ -38,3 +38,23 @@ class TestPrimitive(TestCase):
         self.assertEqual(None, jsons.load(None, datetime))
         with self.assertRaises(DeserializationError):
             jsons.load(None, datetime, strict=True)
+
+    def test_load_and_cast(self):
+
+        class C:
+            def __init__(self, x: int):
+                self.x = x
+
+        self.assertEqual(42, jsons.load('42', int))
+        self.assertEqual(42.0, jsons.load('42', float))
+        self.assertEqual('42', jsons.load(42, str))
+        self.assertEqual(True, jsons.load(42, bool))
+
+        with self.assertRaises(DeserializationError):
+            jsons.load('fortytwo', int)
+
+        try:
+            jsons.load('fortytwo', int)
+        except DeserializationError as err:
+            self.assertEqual('fortytwo', err.source)
+            self.assertEqual(int, err.target)
