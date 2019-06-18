@@ -178,8 +178,4 @@ def _check_and_get_cls_and_meta_hints(
 
 
 def _should_skip(json_obj: object, cls: type, strict: bool):
-    if not strict:
-        if json_obj is None or type(json_obj) == cls:
-            return True
-    if cls is Any:
-        return True
+    return (not strict and type(json_obj) == cls) or cls is Any

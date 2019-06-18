@@ -13,7 +13,7 @@ def default_primitive_deserializer(obj: object,
     :return: ``obj``.
     """
     result = obj
-    if not isinstance(obj, cls):
+    if obj is not None and not isinstance(obj, cls):
         try:
             result = cls(obj)
         except ValueError:
