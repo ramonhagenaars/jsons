@@ -120,7 +120,7 @@ def _get_lizer(
                               fully_qualified=True)
     lizer = (lizers.get(cls_name, None)
              or _get_lizer_by_parents(cls, lizers, classes_lizers, fork_inst))
-    if not lizer and not recursive:
+    if not lizer and not recursive and hasattr(cls, '__supertype__'):
         return _get_lizer(cls.__supertype__, lizers,
                           classes_lizers, fork_inst, True)
     return lizer

@@ -275,11 +275,11 @@ get_serializer
 +----------------+--------------------------------------------------------------------------+
 | *Description:* | Return the serializer function that would be used for the given ``cls``. |
 +----------------+---------------+----------------------------------------------------------+
-| *Arguments:*   | ``cls: type`` | The serializer function.                                 |
+| *Arguments:*   | ``cls: type`` | The type of which the deserializer is requested.         |
 +                +---------------+----------------------------------------------------------+
-|                | ``fork_inst`` | if given, it uses this fork of ``JsonSerializable``.     |
+|                | ``fork_inst`` | If given, it uses this fork of ``JsonSerializable``.     |
 +----------------+---------------+----------------------------------------------------------+
-| *Returns:*     | ``callable``  |                                                          |
+| *Returns:*     | ``callable``  | The serializer function.                                 |
 +----------------+---------------+----------------------------------------------------------+
 | *Example:*     | .. code:: python                                                         |
 |                |                                                                          |
@@ -327,11 +327,11 @@ get_deserializer
 +----------------+----------------------------------------------------------------------------+
 | *Description:* | Return the deserializer function that would be used for the given ``cls``. |
 +----------------+---------------+------------------------------------------------------------+
-| *Arguments:*   | ``cls: type`` | The deserializer function.                                 |
+| *Arguments:*   | ``cls: type`` | The type of which the deserializer is requested.           |
 +                +---------------+------------------------------------------------------------+
-|                | ``fork_inst`` | if given, it uses this fork of ``JsonSerializable``.       |
+|                | ``fork_inst`` | If given, it uses this fork of ``JsonSerializable``.       |
 +----------------+---------------+------------------------------------------------------------+
-| *Returns:*     | ``callable``  |                                                            |
+| *Returns:*     | ``callable``  | The deserializer function.                                 |
 +----------------+---------------+------------------------------------------------------------+
 | *Example:*     | .. code:: python                                                           |
 |                |                                                                            |
@@ -365,6 +365,54 @@ suppress_warnings
 |                |                                                                                                                 |
 |                |     >>> jsons.suppress_warnings()                                                                               |
 +----------------+-----------------------------------------------------------------------------------------------------------------+
+
+=============
+set_validator
+=============
+
++----------------+---------------------------------------------------------------------------------------------------------------------+
+| *Function:*    | ``jsons.set_validator``                                                                                             |
++----------------+---------------------------------------------------------------------------------------------------------------------+
+| *Description:* | Set a validator function for the given ``cls``. The function should accept an instance of the type it should        |
+|                | validate and must return ``False`` or raise any exception in case of a validation failure.                          |
++----------------+--------------------------------------+------------------------------------------------------------------------------+
+| *Arguments:*   | ``func: callable``                   | The function that takes an instance of type ``cls`` and returns a bool       |
+|                |                                      | (``True`` if the validation was successful).                                 |
++                +--------------------------------------+------------------------------------------------------------------------------+
+|                | ``cls: Union[type, Sequence[type]]`` | The type or types that ``func`` is able to validate.                         |
++                +--------------------------------------+------------------------------------------------------------------------------+
+|                | ``fork_inst``                        | If given, it registers ``func`` to this fork of ``JsonSerializable``, rather |
+|                |                                      | than the global ``jsons``.                                                   |
++----------------+--------------------------------------+------------------------------------------------------------------------------+
+| *Returns:*     | ``None``                             |                                                                              |
++----------------+--------------------------------------+------------------------------------------------------------------------------+
+| *Example:*     | .. code:: python                                                                                                    |
+|                |                                                                                                                     |
+|                |     >>> jsons.set_validator(lambda x: x >= 0, int)                                                                  |
+|                |     >>> jsons.load(-1)                                                                                              |
+|                |     jsons.exceptions.ValidationError: Validation failed.                                                            |
++----------------+---------------------------------------------------------------------------------------------------------------------+
+
+=============
+get_validator
+=============
+
++----------------+----------------------------------------------------------------------------+
+| *Function:*    | ``jsons.get_validator``                                                    |
++----------------+----------------------------------------------------------------------------+
+| *Description:* | Return the validator function that would be used for the given ``cls``.    |
++----------------+---------------+------------------------------------------------------------+
+| *Arguments:*   | ``cls: type`` | The type of which the validator is requested.              |
++                +---------------+------------------------------------------------------------+
+|                | ``fork_inst`` | If given, it uses this fork of ``JsonSerializable``.       |
++----------------+---------------+------------------------------------------------------------+
+| *Returns:*     | ``callable``  | The validator function.                                    |
++----------------+---------------+------------------------------------------------------------+
+| *Example:*     | .. code:: python                                                           |
+|                |                                                                            |
+|                |     >>> jsons.get_validator(str)                                           |
+|                |     <function str_validator at 0x02F36A98>                                 |
++----------------+----------------------------------------------------------------------------+
 
 *******
 Classes

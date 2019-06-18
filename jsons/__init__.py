@@ -90,18 +90,20 @@ from datetime import datetime
 from enum import Enum
 from typing import Union, List, Tuple, Iterable
 from uuid import UUID
-
 from jsons._key_transformers import snakecase, camelcase, pascalcase, lispcase
 from jsons import (
     _dump_impl,
     _load_impl,
     _lizers_impl,
+    _validation,
     _extra_impl,
     deserializers,
     serializers,
     classes
 )
 from jsons.exceptions import (
+    JsonsError,
+    ValidationError,
     DeserializationError,
     DecodeError,
     UnfulfilledArgumentError,
@@ -120,6 +122,9 @@ set_serializer = _lizers_impl.set_serializer
 get_serializer = _lizers_impl.get_serializer
 set_deserializer = _lizers_impl.set_deserializer
 get_deserializer = _lizers_impl.get_deserializer
+get_validator = _validation.get_validator
+set_validator = _validation.set_validator
+validate = _validation.validate
 announce_class = _extra_impl.announce_class
 suppress_warnings = _extra_impl.suppress_warnings
 

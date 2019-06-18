@@ -23,6 +23,8 @@ class StateHolder:
     _classes_deserializers = list()
     _serializers = dict()
     _deserializers = dict()
+    _validators = dict()
+    _classes_validators = list()
     _announced_classes = dict()
     _suppress_warnings = False
 
@@ -48,7 +50,6 @@ def get_class_name(cls: type,
     finding the class name.
     :return: the name of ``cls``, transformed if a transformer is given.
     """
-
     transformer = transformer or (lambda x: x)
     cls_name = _get_special_cases(cls)
     if cls_name:

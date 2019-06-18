@@ -7,6 +7,7 @@ import json
 from json import JSONDecodeError
 from typing import Optional, Dict, Callable, Tuple, Any
 from jsons._lizers_impl import get_deserializer
+from jsons._validation import validate
 from jsons.exceptions import DeserializationError, JsonsError, DecodeError
 from jsons._common_impl import (
     StateHolder,
@@ -67,6 +68,7 @@ def load(
     :return: an instance of ``cls`` if given, a dict otherwise.
     """
     if _should_skip(json_obj, cls, strict):
+        validate(json_obj, cls, fork_inst)
         return json_obj
     if isinstance(cls, str):
         cls = get_cls_from_str(cls, json_obj, fork_inst)
@@ -82,7 +84,9 @@ def load(
         **kwargs
     }
     try:
-        return deserializer(json_obj, cls, **kwargs_)
+        result = deserializer(json_obj, cls, **kwargs_)
+        validate(result, cls, fork_inst)
+        return result
     except Exception as err:
         if isinstance(err, JsonsError):
             raise

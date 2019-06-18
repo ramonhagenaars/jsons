@@ -94,6 +94,10 @@ Meta
 Recent updates
 ==============
 
+0.9.0
++++++
+- Feature: Added the ability to validate instances right after loading.
+
 0.8.9
 +++++
 - *Breaking change*: Values of primitive types are now cast if possible (e.g. in ``jsons.load('42', int)``).
@@ -116,14 +120,6 @@ Recent updates
 +++++
 - Feature: Support for typing.NewType.
 - Bugfix: Deserializing a ``Dict[K, V]`` failed in ``3.7``.
-
-0.8.5
-+++++
-- Feature: Support for Deque.
-- Feature: Support for Counter.
-- Feature: Support for OrderedDict.
-- Feature: Support for Defaultdict.
-- Feature: Support for ChainMap.
 
 
 Contributors
