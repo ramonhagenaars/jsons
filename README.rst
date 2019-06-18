@@ -97,6 +97,7 @@ Recent updates
 0.9.0
 +++++
 - Feature: Added the ability to validate instances right after loading.
+- Feature: Enhanced typing for the loader functions.
 
 0.8.9
 +++++

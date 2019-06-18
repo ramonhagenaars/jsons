@@ -1,5 +1,5 @@
-from typing import Optional
-from jsons._common_impl import get_class_name, StateHolder
+from typing import Optional, Type
+from jsons._common_impl import get_class_name, StateHolder, T
 from jsons._dump_impl import dump, dumps, dumpb
 from jsons._lizers_impl import set_serializer, set_deserializer
 from jsons._load_impl import load, loads, loadb
@@ -111,7 +111,7 @@ class JsonSerializable(StateHolder):
         return self.dumps()
 
     @classmethod
-    def from_json(cls: type, json_obj: object, **kwargs) -> object:
+    def from_json(cls: Type[T], json_obj: object, **kwargs) -> T:
         """
         See ``jsons.load``.
         :param json_obj: a JSON representation of an instance of the inheriting
@@ -132,7 +132,7 @@ class JsonSerializable(StateHolder):
         return dump(self, fork_inst=self.__class__, **kwargs)
 
     @classmethod
-    def load(cls: type, json_obj: object, **kwargs) -> object:
+    def load(cls: Type[T], json_obj: object, **kwargs) -> T:
         """
         See ``jsons.load``.
         :param kwargs: the keyword args are passed on to the serializer
@@ -152,7 +152,7 @@ class JsonSerializable(StateHolder):
         return dumps(self, fork_inst=self.__class__, **kwargs)
 
     @classmethod
-    def loads(cls: type, json_obj: str, **kwargs) -> object:
+    def loads(cls: Type[T], json_obj: str, **kwargs) -> T:
         """
         See ``jsons.loads``.
         :param kwargs: the keyword args are passed on to the serializer
@@ -172,7 +172,7 @@ class JsonSerializable(StateHolder):
         return dumpb(self, fork_inst=self.__class__, **kwargs)
 
     @classmethod
-    def loadb(cls: type, json_obj: bytes, **kwargs) -> object:
+    def loadb(cls: Type[T], json_obj: bytes, **kwargs) -> T:
         """
         See ``jsons.loadb``.
         :param kwargs: the keyword args are passed on to the serializer
@@ -183,11 +183,11 @@ class JsonSerializable(StateHolder):
         return loadb(json_obj, cls, fork_inst=cls, **kwargs)
 
     @classmethod
-    def set_serializer(cls: type,
+    def set_serializer(cls: Type[T],
                        func: callable,
                        cls_: type,
                        high_prio: Optional[bool] = True,
-                       fork: Optional[bool] = False) -> type:
+                       fork: Optional[bool] = False) -> T:
         """
         See ``jsons.set_serializer``.
         :param func: the serializer function.
@@ -202,11 +202,11 @@ class JsonSerializable(StateHolder):
         return type_
 
     @classmethod
-    def set_deserializer(cls: type,
+    def set_deserializer(cls: Type[T],
                          func: callable,
                          cls_: type,
                          high_prio: Optional[bool] = True,
-                         fork: Optional[bool] = False) -> type:
+                         fork: Optional[bool] = False) -> T:
         """
         See ``jsons.set_deserializer``.
         :param func: the deserializer function.

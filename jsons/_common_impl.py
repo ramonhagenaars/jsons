@@ -7,12 +7,13 @@ throughout `jsons`.
 import builtins
 import warnings
 from importlib import import_module
-from typing import Callable, Optional, Tuple
+from typing import Callable, Optional, Tuple, TypeVar
 from jsons.exceptions import UnknownClassError
 
 
 VALID_TYPES = (str, int, float, bool, list, tuple, set, dict, type(None))
 META_ATTR = '-meta'  # The name of the attribute holding meta info.
+T = TypeVar('T')
 
 
 class StateHolder:

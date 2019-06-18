@@ -15,16 +15,18 @@ from jsons._common_impl import (
     get_class_name,
     get_cls_and_meta,
     determine_precedence,
-    VALID_TYPES)
+    VALID_TYPES,
+    T
+)
 
 
 def load(
         json_obj: object,
-        cls: Optional[type] = None,
+        cls: Optional[T] = None,
         strict: bool = False,
         fork_inst: Optional[type] = StateHolder,
         attr_getters: Optional[Dict[str, Callable[[], object]]] = None,
-        **kwargs) -> object:
+        **kwargs) -> T:
     """
     Deserialize the given ``json_obj`` to an object of type ``cls``. If the
     contents of ``json_obj`` do not match the interface of ``cls``, a
@@ -95,10 +97,10 @@ def load(
 
 def loads(
         str_: str,
-        cls: Optional[type] = None,
+        cls: Optional[T] = None,
         jdkwargs: Optional[Dict[str, object]] = None,
         *args,
-        **kwargs) -> object:
+        **kwargs) -> T:
     """
     Extend ``json.loads``, allowing a string to be loaded into a dict or a
     Python instance of type ``cls``. Any extra (keyword) arguments are passed
@@ -125,11 +127,11 @@ def loads(
 
 def loadb(
         bytes_: bytes,
-        cls: Optional[type] = None,
+        cls: Optional[T] = None,
         encoding: str = 'utf-8',
         jdkwargs: Optional[Dict[str, object]] = None,
         *args,
-        **kwargs) -> object:
+        **kwargs) -> T:
     """
     Extend ``json.loads``, allowing bytes to be loaded into a dict or a Python
     instance of type ``cls``. Any extra (keyword) arguments are passed on to
