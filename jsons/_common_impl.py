@@ -141,6 +141,6 @@ def _get_simple_name(cls: type) -> str:
 
 def _get_module(cls: type) -> Optional[str]:
     builtin_module = str.__class__.__module__
-    module = cls.__module__
+    module = getattr(cls, '__module__', None)
     if module and module != builtin_module:
         return module

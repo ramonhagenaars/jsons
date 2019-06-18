@@ -98,6 +98,7 @@ Recent updates
 +++++
 - Feature: Added the ability to validate instances right after loading.
 - Feature: Enhanced typing for the loader functions.
+- Change: ``None`` can now be loaded, even in strict-mode.
 
 0.8.9
 +++++

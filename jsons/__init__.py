@@ -152,6 +152,7 @@ default_dict_deserializer = deserializers.default_dict_deserializer
 default_enum_deserializer = deserializers.default_enum_deserializer
 default_datetime_deserializer = deserializers.default_datetime_deserializer
 default_string_deserializer = deserializers.default_string_deserializer
+default_nonetype_deserializer = deserializers.default_nonetype_deserializer
 default_primitive_deserializer = deserializers.default_primitive_deserializer
 default_mapping_deserializer = deserializers.default_mapping_deserializer
 default_iterable_deserializer = deserializers.default_iterable_deserializer
@@ -175,7 +176,8 @@ set_deserializer(default_union_deserializer, Union)
 set_deserializer(default_enum_deserializer, Enum)
 set_deserializer(default_datetime_deserializer, datetime)
 set_deserializer(default_string_deserializer, str)
-set_deserializer(default_primitive_deserializer, (int, float, bool, None))
+set_deserializer(default_nonetype_deserializer, type(None))
+set_deserializer(default_primitive_deserializer, (int, float, bool))
 set_deserializer(default_mapping_deserializer, Mapping, False)
 set_deserializer(default_iterable_deserializer, Iterable, False)
 set_deserializer(default_object_deserializer, object, False)

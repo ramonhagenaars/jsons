@@ -38,3 +38,6 @@ class TestValidation(TestCase):
         jsons.set_validator(lambda x: x == 1, int)
         with self.assertRaises(ValidationError):
             jsons.load({'x': 3}, C)
+
+    def tearDown(self) -> None:
+        jsons.set_validator(lambda _: True, int)

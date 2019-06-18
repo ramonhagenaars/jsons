@@ -170,9 +170,6 @@ def _check_and_get_cls_and_meta_hints(
         msg = ('Invalid type: "{}", only arguments of the following types are '
                'allowed: {}'.format(invalid_type, ", ".join(valid_types)))
         raise DeserializationError(msg, json_obj, cls)
-    if json_obj is None:
-        raise DeserializationError('Cannot load None with strict=True',
-                                   json_obj, cls)
 
     cls_from_meta, meta = get_cls_and_meta(json_obj, fork_inst)
     meta_hints = meta.get('classes', {}) if meta else {}
