@@ -1,5 +1,4 @@
 import inspect
-from functools import partial
 from typing import Optional, Callable, Tuple
 from jsons._compatibility_impl import get_type_hints
 from jsons._load_impl import load
@@ -53,22 +52,28 @@ def _get_constructor_args(
     # Loop through the signature of cls: the type we try to deserialize to. For
     # every required parameter, we try to get the corresponding value from
     # json_obj.
-    signature_parameters = inspect.signature(cls.__init__).parameters
+    signature_parameters = _get_signature(cls)
     hints = get_type_hints(cls.__init__)
     attr_getters = dict(**(attr_getters or {}))
-    value_for_attr_part = partial(_get_value_for_attr,
-                                  obj=obj,
-                                  orig_cls=cls,
-                                  meta_hints=meta_hints,
-                                  attr_getters=attr_getters,
-                                  **kwargs)
-    args_gen = (value_for_attr_part(sig_key=sig_key,
-                                    cls=hints.get(sig_key, None),
-                                    sig=sig)
-                for sig_key, sig in signature_parameters.items()
-                if sig_key != 'self')
-    constructor_args_in_obj = {key: value for key, value in args_gen if key}
-    return constructor_args_in_obj
+
+    result = {}
+    for sig_key, sig in signature_parameters.items():
+        if sig_key != 'self':
+            key, value = _get_value_for_attr(obj=obj,
+                                             orig_cls=cls,
+                                             meta_hints=meta_hints,
+                                             attr_getters=attr_getters,
+                                             sig_key=sig_key,
+                                             cls=hints.get(sig_key, None),
+                                             sig=sig,
+                                             **kwargs)
+            if key:
+                result[key] = value
+    return result
+
+
+def _get_signature(cls):
+    return inspect.signature(cls.__init__).parameters
 
 
 def _get_value_for_attr(
