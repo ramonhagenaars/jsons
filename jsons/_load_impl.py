@@ -16,7 +16,8 @@ from jsons._common_impl import (
     get_cls_and_meta,
     determine_precedence,
     VALID_TYPES,
-    T
+    T,
+    can_match_with_none
 )
 
 
@@ -69,6 +70,7 @@ def load(
     :param kwargs: the keyword args are passed on to the deserializer function.
     :return: an instance of ``cls`` if given, a dict otherwise.
     """
+    _check_for_none(json_obj, cls)
     if _should_skip(json_obj, cls, strict):
         validate(json_obj, cls, fork_inst)
         return json_obj
@@ -179,3 +181,13 @@ def _check_and_get_cls_and_meta_hints(
 
 def _should_skip(json_obj: object, cls: type, strict: bool):
     return (not strict and type(json_obj) == cls) or cls is Any
+
+
+def _check_for_none(json_obj: object, cls: type):
+    # Check if the json_obj is None and whether or not that is fine.
+    if json_obj is None and not can_match_with_none(cls):
+        cls_name = get_class_name(cls).lower()
+        raise DeserializationError(
+            message='NoneType cannot be deserialized into {}'.format(cls_name),
+            source=json_obj,
+            target=cls)

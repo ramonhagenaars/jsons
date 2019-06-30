@@ -6,7 +6,7 @@ from jsons import UnfulfilledArgumentError, DecodeError, DeserializationError
 class TestException(TestCase):
     def test_exception_unfulfilled_arg(self):
         class C:
-            def __init__(self, x, y):
+            def __init__(self, x: int, y: int):
                 self.x = x
                 self.y = y
 

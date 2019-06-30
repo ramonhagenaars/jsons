@@ -1,4 +1,5 @@
 from typing import Union
+from jsons._common_impl import NoneType
 from jsons._compatibility_impl import tuple_with_ellipsis, get_union_params
 from jsons._load_impl import load
 from jsons.exceptions import UnfulfilledArgumentError
@@ -48,7 +49,7 @@ def default_namedtuple_deserializer(
 
         if field is None:
             hint = getattr(cls, '_field_types', {}).get(field_name)
-            if type(None) not in (get_union_params(hint) or []):
+            if NoneType not in (get_union_params(hint) or []):
                 # The value 'None' is not permitted here.
                 msg = ('No value present in {} for argument "{}"'
                        .format(obj, field_name))

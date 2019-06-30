@@ -7,11 +7,13 @@ throughout `jsons`.
 import builtins
 import warnings
 from importlib import import_module
-from typing import Callable, Optional, Tuple, TypeVar
+from typing import Callable, Optional, Tuple, TypeVar, Any
+from jsons._compatibility_impl import get_union_params
 from jsons.exceptions import UnknownClassError
 
 
-VALID_TYPES = (str, int, float, bool, list, tuple, set, dict, type(None))
+NoneType = type(None)
+VALID_TYPES = (str, int, float, bool, list, tuple, set, dict, NoneType)
 META_ATTR = '-meta'  # The name of the attribute holding meta info.
 T = TypeVar('T')
 
@@ -111,6 +113,15 @@ def get_cls_and_meta(
         cls = get_cls_from_str(cls_str, json_obj, fork_inst)
         return cls, json_obj[META_ATTR]
     return None, None
+
+
+def can_match_with_none(cls: type):
+    # Return True if cls allows None; None is a valid value with the given cls.
+    result = cls in (Any, object, None, NoneType)
+    if not result:
+        cls_name = get_class_name(cls).lower()
+        result = cls_name == 'union' and NoneType in get_union_params(cls)
+    return result
 
 
 def _lookup_announced_class(

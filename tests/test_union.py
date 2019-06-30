@@ -19,9 +19,22 @@ class TestUnion(TestCase):
             def __init__(self, x: Union[datetime.datetime, A]):
                 self.x = x
 
+        # Test loading with None value without type hint.
+        self.assertEqual(None, jsons.load({'x': None}, A).x)
+
+        # Test Optional with a value.
         self.assertEqual(1, jsons.load({'x': 1}, B).x)
+
+        # Test Optional with None value.
         self.assertEqual(None, jsons.load({'x': None}, B).x)
+
+        # Test Optional without value.
+        self.assertEqual(None, jsons.load({}, B).x)
+
+        # Test Union with a value.
         self.assertEqual(1, jsons.load({'x': {'x': 1}}, C).x.x)
+
+        # Test Union with invalid value.
         with self.assertRaises(DeserializationError):
             jsons.load({'x': 'no match in the union'}, C).x
 

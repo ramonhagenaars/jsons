@@ -8,7 +8,8 @@ from jsons._common_impl import (
     get_class_name,
     META_ATTR,
     get_cls_from_str,
-    determine_precedence
+    determine_precedence,
+    can_match_with_none
 )
 
 
@@ -80,7 +81,6 @@ def _get_value_for_attr(
         attr_getters,
         **kwargs):
     # Find a value for the attribute (with signature sig_key).
-    result = None, None
     if obj and sig_key in obj:
         # This argument is in obj.
         result = sig_key, _get_value_from_obj(obj, cls, sig, sig_key,
@@ -92,9 +92,14 @@ def _get_value_for_attr(
     elif sig.default != inspect.Parameter.empty:
         # There is a default value for this argument.
         result = sig_key, sig.default
-    elif sig.kind not in (inspect.Parameter.VAR_POSITIONAL,
-                          inspect.Parameter.VAR_KEYWORD):
-        # This argument is no *args or **kwargs and has no value.
+    elif sig.kind in (inspect.Parameter.VAR_POSITIONAL,
+                      inspect.Parameter.VAR_KEYWORD):
+        # This argument is either *args or **kwargs.
+        result = None, None
+    elif can_match_with_none(cls):
+        # It is fine that there is no value.
+        result = sig_key, None
+    else:
         raise UnfulfilledArgumentError(
             'No value found for "{}"'.format(sig_key), sig_key, obj, orig_cls)
     return result

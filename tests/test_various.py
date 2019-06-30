@@ -1,9 +1,7 @@
-import uuid
 from typing import Optional, NewType, Any
 from unittest import TestCase
-
 import jsons
-from tests.test_specific_versions import only_version_3
+from jsons import NoneType
 
 
 class C:
@@ -90,7 +88,7 @@ class TestVarious(TestCase):
 
     def test_nonetype(self):
         class C:
-            def __init__(self, a: type(None)):
+            def __init__(self, a: NoneType):
                 self.a = a
 
         loaded = jsons.load({'a': None}, C)
