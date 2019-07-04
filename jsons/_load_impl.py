@@ -6,6 +6,7 @@ This module contains functionality for loading stuff from json.
 import json
 from json import JSONDecodeError
 from typing import Optional, Dict, Callable, Tuple, Any
+from jsons._cache import clear
 from jsons._lizers_impl import get_deserializer
 from jsons._validation import validate
 from jsons.exceptions import DeserializationError, JsonsError, DecodeError
@@ -80,18 +81,27 @@ def load(
         json_obj, cls, fork_inst, kwargs.get('_inferred_cls', False))
 
     deserializer = get_deserializer(cls, fork_inst)
+
+    # Is this the initial call or a nested?
+    initial = kwargs.get('_initial', True)
+
     kwargs_ = {
         'strict': strict,
         'fork_inst': fork_inst,
         'attr_getters': attr_getters,
         'meta_hints': meta_hints,
+        '_initial': False,
         **kwargs
     }
     try:
         result = deserializer(json_obj, cls, **kwargs_)
         validate(result, cls, fork_inst)
+        if initial:
+            # Clear all lru caches right before returning the initial call.
+            clear()
         return result
     except Exception as err:
+        clear()
         if isinstance(err, JsonsError):
             raise
         raise DeserializationError(str(err), json_obj, cls)

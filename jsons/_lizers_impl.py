@@ -5,6 +5,7 @@ This module contains functionality for setting and getting serializers and
 deserializers.
 """
 from typing import Optional, Dict, Sequence, Union
+from jsons._cache import cached
 from jsons._common_impl import StateHolder, get_class_name
 from jsons._compatibility_impl import get_naked_class
 
@@ -96,6 +97,7 @@ def get_serializer(
     return serializer
 
 
+@cached
 def get_deserializer(
         cls: type,
         fork_inst: Optional[type] = StateHolder) -> callable:

@@ -4,6 +4,7 @@ PRIVATE MODULE: do not import (from) it directly.
 This module contains functionality for validating objects.
 """
 from typing import Union, Sequence, Callable
+from jsons._cache import cached
 from jsons.exceptions import ValidationError
 from jsons._common_impl import StateHolder, get_class_name
 from jsons._lizers_impl import _get_lizer
@@ -32,6 +33,7 @@ def set_validator(
     fork_inst._classes_validators.append(cls)
 
 
+@cached
 def get_validator(
         cls: type,
         fork_inst: type = StateHolder) -> callable:

@@ -1,5 +1,6 @@
 import inspect
 from typing import Optional, Callable, Tuple
+from jsons._cache import cached
 from jsons._compatibility_impl import get_type_hints
 from jsons._load_impl import load
 from jsons.exceptions import SignatureMismatchError, UnfulfilledArgumentError
@@ -72,6 +73,7 @@ def _get_constructor_args(
     return result
 
 
+@cached
 def _get_signature(cls):
     return inspect.signature(cls.__init__).parameters
 
