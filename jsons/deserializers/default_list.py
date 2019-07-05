@@ -1,5 +1,6 @@
 from threading import Thread
 from jsons._load_impl import load
+from jsons.exceptions import JsonsError
 
 
 def default_list_deserializer(
@@ -24,7 +25,12 @@ def default_list_deserializer(
         # from and the precedence of classes can be determined.
         kwargs_['_inferred_cls'] = True
 
-    func = _single_threaded if threads == 1 else _multi_threaded
+    if threads == 1:
+        func = _single_threaded
+    elif threads > 1:
+        func = _multi_threaded
+    else:
+        raise JsonsError('Invalid number of threads: {}'.format(threads))
     return func(obj, cls_, threads, **kwargs_)
 
 
@@ -47,20 +53,23 @@ def _multi_threaded(
     # First, create a list with the correct size for the threads to fill.
     result = [0] * len(obj)
 
+    threads_used = min(threads, len(obj))
+    threads_left = threads - threads_used or 1
+
     # Divide the list in parts.
-    slice_size = int(len(obj) / threads)
-    rest_size = len(obj) % threads
+    slice_size = int(len(obj) / threads_used)
+    rest_size = len(obj) % threads_used
 
     # Start the threads and store them to join them later.
     threads_instances = []
-    for i in range(threads):
+    for i in range(threads_used):
         start = i
         end = (i + 1) * slice_size
-        if i == 0:
+        if i == threads_used - 1:
             end += rest_size
         thread = Thread(
             target=_fill,
-            args=(obj, cls, result, start, end, kwargs))
+            args=(obj, cls, result, start, end, threads_left, kwargs))
         thread.start()
         threads_instances.append(thread)
 
@@ -70,8 +79,15 @@ def _multi_threaded(
     return result
 
 
-def _fill(obj: list, cls: type, result: list, start: int, end: int, kwargs: dict):
+def _fill(
+        obj: list,
+        cls: type,
+        result: list,
+        start: int,
+        end: int,
+        threads: int,
+        kwargs: dict):
     # Fill result with the loaded objects of obj within the range start - end.
     for i_ in range(start, end):
-        loaded = load(obj[i_], cls, **kwargs)
+        loaded = load(obj[i_], cls, threads=threads, **kwargs)
         result[i_] = loaded

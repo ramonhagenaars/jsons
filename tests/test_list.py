@@ -1,6 +1,7 @@
 import datetime
 from typing import List
 from unittest import TestCase
+from jsons.exceptions import JsonsError
 import jsons
 
 
@@ -38,6 +39,20 @@ class TestList(TestCase):
         list_ = [1, 2, 3, [4, 5, [dat]]]
         expectation = [1, 2, 3, [4, 5, ['2018-07-08T21:34:00Z']]]
         self.assertEqual(list_, jsons.load(expectation))
+
+    def test_load_list_multithreaded(self):
+        dat = datetime.datetime(year=2018, month=7, day=8, hour=21, minute=34,
+                                tzinfo=datetime.timezone.utc)
+        list_ = [1, 2, 3, [4, 5, [dat]]]
+        expectation = [1, 2, 3, [4, 5, ['2018-07-08T21:34:00Z']]]
+        self.assertEqual(list_, jsons.load(expectation, threads=3))
+
+        with self.assertRaises(JsonsError):
+            jsons.load(expectation, threads=-1)
+
+        self.assertEqual([1], jsons.load(['1'], List[int], threads=2))
+        self.assertEqual([1, 1, 1, 1], jsons.load(['1', '1', '1', '1'],
+                                                  List[int], threads=16))
 
     def test_load_list_with_generic(self):
         class C:
