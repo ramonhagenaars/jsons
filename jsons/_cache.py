@@ -10,7 +10,8 @@ from typing import Callable
 
 class _Wrapper:
     """
-    A wrapper around a function that needs to be cached.
+    A wrapper around a function that needs to be cached. This wrapper allows
+    for a single point from which cache can be cleared.
     """
     instances = deque([])
 
