@@ -1,4 +1,5 @@
 import datetime
+from multiprocessing import Process
 from typing import List
 from unittest import TestCase
 from jsons.exceptions import JsonsError
@@ -52,14 +53,21 @@ class TestList(TestCase):
                                 tzinfo=datetime.timezone.utc)
         list_ = [1, 2, 3, [4, 5, [dat]]]
         expectation = [1, 2, 3, [4, 5, ['2018-07-08T21:34:00Z']]]
-        self.assertEqual(list_, jsons.load(expectation, threads=3))
+        self.assertEqual(list_, jsons.load(expectation, tasks=3))
 
         with self.assertRaises(JsonsError):
             jsons.load(expectation, tasks=-1)
 
-        self.assertEqual([1], jsons.load(['1'], List[int], threads=2))
+        self.assertEqual([1], jsons.load(['1'], List[int], tasks=2))
+
+        # More tasks than elements should still work.
         self.assertEqual([1, 1, 1, 1], jsons.load(['1', '1', '1', '1'],
-                                                  List[int], threads=16))
+                                                  List[int], tasks=16))
+
+        # Changing the task_type.
+        self.assertEqual([1, 1, 1, 1], jsons.load(['1', '1', '1', '1'],
+                                                  List[int], tasks=16,
+                                                  task_type=Process))
 
     def test_load_list_with_generic(self):
         class C:

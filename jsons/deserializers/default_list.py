@@ -1,4 +1,4 @@
-from threading import Thread
+import multiprocessing
 from jsons._load_impl import load
 from jsons.exceptions import JsonsError
 
@@ -8,7 +8,7 @@ def default_list_deserializer(
         cls: type = None,
         *,
         tasks: int = 1,
-        task_type: type = Thread,
+        task_type: type = multiprocessing.Process,
         **kwargs) -> list:
     """
     Deserialize a list by deserializing all items of that list.
@@ -53,7 +53,8 @@ def _multi_task(
     # Load the elements of the list with multiple tasks.
 
     # First, create a list with the correct size for the tasks to fill.
-    result = [0] * len(obj)
+    manager = multiprocessing.Manager()
+    result = manager.list([0] * len(obj))
 
     tasks_used = min(tasks, len(obj))
     tasks_left = tasks - tasks_used or 1
@@ -78,7 +79,7 @@ def _multi_task(
     for task in tasks_instances:
         task.join()
 
-    return result
+    return list(result)
 
 
 def _fill(
