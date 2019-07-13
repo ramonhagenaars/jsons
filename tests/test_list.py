@@ -40,6 +40,13 @@ class TestList(TestCase):
         expectation = [1, 2, 3, [4, 5, ['2018-07-08T21:34:00Z']]]
         self.assertEqual(list_, jsons.load(expectation))
 
+    def test_load_list2(self):
+        dat = datetime.datetime(year=2018, month=7, day=8, hour=21, minute=34,
+                                tzinfo=datetime.timezone.utc)
+        list_ = [dat]
+        expectation = ['2018-07-08T21:34:00Z']
+        self.assertEqual(list_, jsons.load(expectation))
+
     def test_load_list_multithreaded(self):
         dat = datetime.datetime(year=2018, month=7, day=8, hour=21, minute=34,
                                 tzinfo=datetime.timezone.utc)
@@ -48,7 +55,7 @@ class TestList(TestCase):
         self.assertEqual(list_, jsons.load(expectation, threads=3))
 
         with self.assertRaises(JsonsError):
-            jsons.load(expectation, threads=-1)
+            jsons.load(expectation, tasks=-1)
 
         self.assertEqual([1], jsons.load(['1'], List[int], threads=2))
         self.assertEqual([1, 1, 1, 1], jsons.load(['1', '1', '1', '1'],

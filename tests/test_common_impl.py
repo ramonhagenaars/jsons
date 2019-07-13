@@ -13,7 +13,7 @@ class TestCommonImpl(TestCase):
             pass
 
         self.assertEqual('C', get_class_name(C))
-        self.assertEqual('tests.test_common_impl.C',
+        self.assertEqual('{}.C'.format(__name__),
                          get_class_name(C, fully_qualified=True))
 
     def test_get_class_name_of_none(self):
