@@ -17,7 +17,7 @@ class JsonSerializable(StateHolder):
     _fork_counter = 0
 
     @classmethod
-    def fork(cls, name: Optional[str] = None) -> type:
+    def fork(cls, name: Optional[str] = None) -> Type['JsonSerializable']:
         """
         Create a 'fork' of ``JsonSerializable``: a new ``type`` with a separate
         configuration of serializers and deserializers.
@@ -37,7 +37,8 @@ class JsonSerializable(StateHolder):
         return result
 
     @classmethod
-    def with_dump(cls, fork: Optional[bool] = False, **kwargs) -> type:
+    def with_dump(cls, fork: Optional[bool] = False, **kwargs) \
+            -> Type['JsonSerializable']:
         """
         Return a class (``type``) that is based on JsonSerializable with the
         ``dump`` method being automatically provided the given ``kwargs``.
