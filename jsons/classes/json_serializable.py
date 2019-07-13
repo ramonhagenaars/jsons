@@ -66,7 +66,8 @@ class JsonSerializable(StateHolder):
         return type_
 
     @classmethod
-    def with_load(cls, fork: Optional[bool] = False, **kwargs) -> type:
+    def with_load(cls, fork: Optional[bool] = False, **kwargs) \
+            -> Type['JsonSerializable']:
         """
         Return a class (``type``) that is based on JsonSerializable with the
         ``load`` method being automatically provided the given ``kwargs``.
@@ -90,7 +91,7 @@ class JsonSerializable(StateHolder):
         """
         @classmethod
         def _wrapper(cls_, inst, **kwargs_):
-            return load(inst, cls_, **{**kwargs_, **kwargs})
+            return load(inst, cls_, fork_inst=cls_, **{**kwargs_, **kwargs})
         type_ = cls.fork() if fork else cls
         type_.load = _wrapper
         return type_
