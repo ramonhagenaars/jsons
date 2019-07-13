@@ -7,13 +7,15 @@ def default_list_deserializer(
         obj: list,
         cls: type = None,
         *,
-        threads: int = 1,
+        tasks: int = 1,
+        task_type: type = Thread,
         **kwargs) -> list:
     """
     Deserialize a list by deserializing all items of that list.
     :param obj: the list that needs deserializing.
     :param cls: the type optionally with a generic (e.g. List[str]).
-    :param threads: the number of threads that is allowed to use.
+    :param tasks: the allowed number of tasks (threads or processes).
+    :param task_type: the type that is used for multitasking.
     :param kwargs: any keyword arguments.
     :return: a deserialized list instance.
     """
@@ -25,56 +27,56 @@ def default_list_deserializer(
         # from and the precedence of classes can be determined.
         kwargs_['_inferred_cls'] = True
 
-    if threads == 1:
-        func = _single_threaded
-    elif threads > 1:
-        func = _multi_threaded
+    if tasks == 1:
+        result = _single_task(obj, cls_, **kwargs_)
+    elif tasks > 1:
+        result = _multi_task(obj, cls_, tasks, task_type, **kwargs_)
     else:
-        raise JsonsError('Invalid number of threads: {}'.format(threads))
-    return func(obj, cls_, threads, **kwargs_)
+        raise JsonsError('Invalid number of tasks: {}'.format(tasks))
+    return result
 
 
-def _single_threaded(
-        # Load the elements of the list in a single thread.
+def _single_task(
+        # Load the elements of the list in a single task.
         obj: list,
         cls: type,
-        threads: int,
         **kwargs):
-    return [load(x, cls, threads=1, **kwargs) for x in obj]
+    return [load(x, cls, tasks=1, **kwargs) for x in obj]
 
 
-def _multi_threaded(
+def _multi_task(
         obj: list,
         cls: type,
-        threads: int,
+        tasks: int,
+        task_type: type,
         **kwargs):
-    # Load the elements of the list with multiple threads.
+    # Load the elements of the list with multiple tasks.
 
-    # First, create a list with the correct size for the threads to fill.
+    # First, create a list with the correct size for the tasks to fill.
     result = [0] * len(obj)
 
-    threads_used = min(threads, len(obj))
-    threads_left = threads - threads_used or 1
+    tasks_used = min(tasks, len(obj))
+    tasks_left = tasks - tasks_used or 1
 
     # Divide the list in parts.
-    slice_size = int(len(obj) / threads_used)
-    rest_size = len(obj) % threads_used
+    slice_size = int(len(obj) / tasks_used)
+    rest_size = len(obj) % tasks_used
 
-    # Start the threads and store them to join them later.
-    threads_instances = []
-    for i in range(threads_used):
+    # Start the tasks and store them to join them later.
+    tasks_instances = []
+    for i in range(tasks_used):
         start = i
         end = (i + 1) * slice_size
-        if i == threads_used - 1:
+        if i == tasks_used - 1:
             end += rest_size
-        thread = Thread(
+        task = task_type(
             target=_fill,
-            args=(obj, cls, result, start, end, threads_left, kwargs))
-        thread.start()
-        threads_instances.append(thread)
+            args=(obj, cls, result, start, end, tasks_left, kwargs))
+        task.start()
+        tasks_instances.append(task)
 
-    for thread in threads_instances:
-        thread.join()
+    for task in tasks_instances:
+        task.join()
 
     return result
 
@@ -85,9 +87,9 @@ def _fill(
         result: list,
         start: int,
         end: int,
-        threads: int,
+        tasks: int,
         kwargs: dict):
     # Fill result with the loaded objects of obj within the range start - end.
     for i_ in range(start, end):
-        loaded = load(obj[i_], cls, threads=threads, **kwargs)
+        loaded = load(obj[i_], cls, tasks=tasks, **kwargs)
         result[i_] = loaded
