@@ -93,3 +93,10 @@ class TestVarious(TestCase):
 
         loaded = jsons.load({'a': None}, C)
         self.assertEqual(None, loaded.a)
+
+    def test_deserialize_none(self):
+        fork_inst = jsons.fork()
+        jsons.set_deserializer(lambda *_, **__: 42,
+                               cls=None, fork_inst=fork_inst)
+        self.assertEqual(42, jsons.load('Anything', cls=NoneType,
+                                        fork_inst=fork_inst))
