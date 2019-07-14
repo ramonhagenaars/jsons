@@ -95,6 +95,7 @@ from jsons._key_transformers import snakecase, camelcase, pascalcase, lispcase
 from jsons import (
     _dump_impl,
     _load_impl,
+    _fork_impl,
     _lizers_impl,
     _validation,
     _extra_impl,
@@ -118,6 +119,7 @@ dumpb = _dump_impl.dumpb
 load = _load_impl.load
 loads = _load_impl.loads
 loadb = _load_impl.loadb
+fork = _fork_impl.fork
 JsonSerializable = classes.JsonSerializable
 set_serializer = _lizers_impl.set_serializer
 get_serializer = _lizers_impl.get_serializer

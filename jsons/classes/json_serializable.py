@@ -1,6 +1,7 @@
 from typing import Optional, Type
 from jsons._common_impl import get_class_name, StateHolder, T
 from jsons._dump_impl import dump, dumps, dumpb
+from jsons._fork_impl import fork
 from jsons._lizers_impl import set_serializer, set_deserializer
 from jsons._load_impl import load, loads, loadb
 
@@ -14,8 +15,6 @@ class JsonSerializable(StateHolder):
     ``from_json`` on that class, which is equivalent to calling ``json.load``
     with that class as an argument.
     """
-    _fork_counter = 0
-
     @classmethod
     def fork(cls, name: Optional[str] = None) -> Type['JsonSerializable']:
         """
@@ -24,17 +23,7 @@ class JsonSerializable(StateHolder):
         :param name: the ``__name__`` of the new ``type``.
         :return: a new ``type`` based on ``JsonSerializable``.
         """
-        cls._fork_counter += 1
-        class_name = name or '{}_fork{}'.format(get_class_name(cls,
-                                                               fork_inst=cls),
-                                                cls._fork_counter)
-        result = type(class_name, (cls,), {})
-        result._classes_serializers = cls._classes_serializers.copy()
-        result._classes_deserializers = cls._classes_deserializers.copy()
-        result._serializers = cls._serializers.copy()
-        result._deserializers = cls._deserializers.copy()
-        result._fork_counter = 0
-        return result
+        return fork(cls, name=name)
 
     @classmethod
     def with_dump(cls, fork: Optional[bool] = False, **kwargs) \

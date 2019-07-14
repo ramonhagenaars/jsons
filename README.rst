@@ -98,8 +98,10 @@ Recent updates
 +++++
 - Feature: Added the ability to validate instances right after loading.
 - Feature: Enhanced typing for the loader functions.
-- Feature: Added the ability to use multiple threads with deserializing lists.
+- Feature: Added the ability to use multiple processes or threads with deserializing lists.
+- Feature: Added the ``jsons.fork()`` function.
 - Change: ``None`` can now be loaded with the right type hints, even in strict-mode.
+- Bugfix: A fork from ``JsonSerializable`` did not copy its settings.
 
 0.8.9
 +++++

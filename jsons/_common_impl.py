@@ -22,6 +22,7 @@ class StateHolder:
     """
     This class holds the registered serializers and deserializers.
     """
+    _fork_counter = 0
     _classes_serializers = list()
     _classes_deserializers = list()
     _serializers = dict()
