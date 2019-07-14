@@ -1,9 +1,10 @@
 import datetime
 from multiprocessing import Process
+from threading import Thread
 from typing import List
 from unittest import TestCase
-from jsons.exceptions import JsonsError
 import jsons
+from jsons.exceptions import JsonsError
 
 
 class TestList(TestCase):
@@ -53,21 +54,45 @@ class TestList(TestCase):
                                 tzinfo=datetime.timezone.utc)
         list_ = [1, 2, 3, [4, 5, [dat]]]
         expectation = [1, 2, 3, [4, 5, ['2018-07-08T21:34:00Z']]]
-        self.assertEqual(list_, jsons.load(expectation, tasks=3))
+        self.assertEqual(list_, jsons.load(expectation, tasks=3,
+                                           task_type=Thread))
 
         with self.assertRaises(JsonsError):
-            jsons.load(expectation, tasks=-1)
+            jsons.load(expectation, tasks=-1,
+                       task_type=Thread)
 
-        self.assertEqual([1], jsons.load(['1'], List[int], tasks=2))
+        self.assertEqual([1], jsons.load(['1'], List[int], tasks=2,
+                                         task_type=Thread))
 
         # More tasks than elements should still work.
         self.assertEqual([1, 1, 1, 1], jsons.load(['1', '1', '1', '1'],
-                                                  List[int], tasks=16))
-
-        # Changing the task_type.
-        self.assertEqual([1, 1, 1, 1], jsons.load(['1', '1', '1', '1'],
                                                   List[int], tasks=16,
-                                                  task_type=Process))
+                                                  task_type=Thread))
+
+    # Note: mock.patch won't work because of a subclass check.
+    def test_load_list_multiprocess(self):
+
+        class ProcessMock(Process):
+            def __init__(self, target, args, *_, **__):
+                # Make no super call.
+                self.target = target
+                self.args = args
+
+            def start(self):
+                return self.target(*self.args)
+
+            def join(self, *_, **__) -> None:
+                pass
+
+        class ManagerMock:
+            def list(self, l, *_, **__):
+                return l
+
+        jsons.deserializers.default_list.Manager = ManagerMock
+
+        self.assertEqual([1, 1, 1, 1], jsons.load(['1', '1', '1', '1'],
+                                                  List[int], tasks=2,
+                                                  task_type=ProcessMock))
 
     def test_load_list_with_generic(self):
         class C:
