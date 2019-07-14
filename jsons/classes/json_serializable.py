@@ -1,5 +1,5 @@
 from typing import Optional, Type
-from jsons._common_impl import get_class_name, StateHolder, T
+from jsons._common_impl import StateHolder, T
 from jsons._dump_impl import dump, dumps, dumpb
 from jsons._fork_impl import fork
 from jsons._lizers_impl import set_serializer, set_deserializer
