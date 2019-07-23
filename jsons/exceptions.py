@@ -22,6 +22,12 @@ class JsonsError(Exception):
         return self._message
 
 
+class ValidationError(JsonsError):
+    """
+    Raised when the validation of an object failed.
+    """
+
+
 class ArgumentError(JsonsError, ValueError):
     """
     Raised when serialization or deserialization went wrong caused by a wrong

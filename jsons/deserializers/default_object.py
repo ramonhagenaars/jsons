@@ -1,6 +1,6 @@
 import inspect
-from functools import partial
 from typing import Optional, Callable, Tuple
+from jsons._cache import cached
 from jsons._compatibility_impl import get_type_hints
 from jsons._load_impl import load
 from jsons.exceptions import SignatureMismatchError, UnfulfilledArgumentError
@@ -8,7 +8,8 @@ from jsons._common_impl import (
     get_class_name,
     META_ATTR,
     get_cls_from_str,
-    determine_precedence
+    determine_precedence,
+    can_match_with_none
 )
 
 
@@ -52,22 +53,29 @@ def _get_constructor_args(
     # Loop through the signature of cls: the type we try to deserialize to. For
     # every required parameter, we try to get the corresponding value from
     # json_obj.
-    signature_parameters = inspect.signature(cls.__init__).parameters
+    signature_parameters = _get_signature(cls)
     hints = get_type_hints(cls.__init__)
     attr_getters = dict(**(attr_getters or {}))
-    value_for_attr_part = partial(_get_value_for_attr,
-                                  obj=obj,
-                                  orig_cls=cls,
-                                  meta_hints=meta_hints,
-                                  attr_getters=attr_getters,
-                                  **kwargs)
-    args_gen = (value_for_attr_part(sig_key=sig_key,
-                                    cls=hints.get(sig_key, None),
-                                    sig=sig)
-                for sig_key, sig in signature_parameters.items()
-                if sig_key != 'self')
-    constructor_args_in_obj = {key: value for key, value in args_gen if key}
-    return constructor_args_in_obj
+
+    result = {}
+    for sig_key, sig in signature_parameters.items():
+        if sig_key != 'self':
+            key, value = _get_value_for_attr(obj=obj,
+                                             orig_cls=cls,
+                                             meta_hints=meta_hints,
+                                             attr_getters=attr_getters,
+                                             sig_key=sig_key,
+                                             cls=hints.get(sig_key, None),
+                                             sig=sig,
+                                             **kwargs)
+            if key:
+                result[key] = value
+    return result
+
+
+@cached
+def _get_signature(cls):
+    return inspect.signature(cls.__init__).parameters
 
 
 def _get_value_for_attr(
@@ -80,7 +88,6 @@ def _get_value_for_attr(
         attr_getters,
         **kwargs):
     # Find a value for the attribute (with signature sig_key).
-    result = None, None
     if obj and sig_key in obj:
         # This argument is in obj.
         result = sig_key, _get_value_from_obj(obj, cls, sig, sig_key,
@@ -92,9 +99,14 @@ def _get_value_for_attr(
     elif sig.default != inspect.Parameter.empty:
         # There is a default value for this argument.
         result = sig_key, sig.default
-    elif sig.kind not in (inspect.Parameter.VAR_POSITIONAL,
-                          inspect.Parameter.VAR_KEYWORD):
-        # This argument is no *args or **kwargs and has no value.
+    elif sig.kind in (inspect.Parameter.VAR_POSITIONAL,
+                      inspect.Parameter.VAR_KEYWORD):
+        # This argument is either *args or **kwargs.
+        result = None, None
+    elif can_match_with_none(cls):
+        # It is fine that there is no value.
+        result = sig_key, None
+    else:
         raise UnfulfilledArgumentError(
             'No value found for "{}"'.format(sig_key), sig_key, obj, orig_cls)
     return result

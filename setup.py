@@ -7,7 +7,7 @@ with open('README.rst', 'r') as fh:
 
 setup(
     name='jsons',
-    version='0.8.9',
+    version='0.9.0',
     author='Ramon Hagenaars',
     author_email='ramon.hagenaars@gmail.com',
     description='For serializing Python objects to JSON (dicts) and back',
@@ -34,6 +34,7 @@ setup(
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
-        'Programming Language :: Python :: 3.7'
+        'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8'
     ]
 )

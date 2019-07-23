@@ -7,6 +7,7 @@ with multiple Python versions.
 import sys
 import typing
 from enum import Enum
+from jsons._cache import cached
 
 
 class Flag(Enum):
@@ -37,6 +38,7 @@ class Flag(Enum):
     __ror__ = __or__
 
 
+@cached
 def tuple_with_ellipsis(tup: type) -> bool:
     # Python3.5: Tuples have __tuple_use_ellipsis__
     # Python3.7: Tuples have __args__
@@ -46,12 +48,14 @@ def tuple_with_ellipsis(tup: type) -> bool:
     return use_el
 
 
+@cached
 def get_union_params(un: type) -> list:
     # Python3.5: Unions have __union_params__
     # Python3.7: Unions have __args__
     return getattr(un, '__union_params__', getattr(un, '__args__', None))
 
 
+@cached
 def get_naked_class(cls: type) -> type:
     # Python3.5: typing classes have __extra__
     # Python3.6: typing classes have __extra__
@@ -63,6 +67,7 @@ def get_naked_class(cls: type) -> type:
     return getattr(cls, attr, cls)
 
 
+@cached
 def get_type_hints(func: callable):
     # Python3.5: get_type_hints raises on classes without explicit constructor
     try:

@@ -33,12 +33,6 @@ class TestPrimitive(TestCase):
     def test_load_bool(self):
         self.assertEqual(True, jsons.load(True))
 
-    def test_load_none(self):
-        self.assertEqual(None, jsons.load(None))
-        self.assertEqual(None, jsons.load(None, datetime))
-        with self.assertRaises(DeserializationError):
-            jsons.load(None, datetime, strict=True)
-
     def test_load_and_cast(self):
 
         class C:

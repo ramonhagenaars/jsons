@@ -6,7 +6,9 @@ This module contains functionality for loading stuff from json.
 import json
 from json import JSONDecodeError
 from typing import Optional, Dict, Callable, Tuple, Any
+from jsons._cache import clear
 from jsons._lizers_impl import get_deserializer
+from jsons._validation import validate
 from jsons.exceptions import DeserializationError, JsonsError, DecodeError
 from jsons._common_impl import (
     StateHolder,
@@ -14,16 +16,19 @@ from jsons._common_impl import (
     get_class_name,
     get_cls_and_meta,
     determine_precedence,
-    VALID_TYPES)
+    VALID_TYPES,
+    T,
+    can_match_with_none
+)
 
 
 def load(
         json_obj: object,
-        cls: Optional[type] = None,
+        cls: Optional[T] = None,
         strict: bool = False,
         fork_inst: Optional[type] = StateHolder,
         attr_getters: Optional[Dict[str, Callable[[], object]]] = None,
-        **kwargs) -> object:
+        **kwargs) -> T:
     """
     Deserialize the given ``json_obj`` to an object of type ``cls``. If the
     contents of ``json_obj`` do not match the interface of ``cls``, a
@@ -66,7 +71,9 @@ def load(
     :param kwargs: the keyword args are passed on to the deserializer function.
     :return: an instance of ``cls`` if given, a dict otherwise.
     """
+    _check_for_none(json_obj, cls)
     if _should_skip(json_obj, cls, strict):
+        validate(json_obj, cls, fork_inst)
         return json_obj
     if isinstance(cls, str):
         cls = get_cls_from_str(cls, json_obj, fork_inst)
@@ -74,16 +81,27 @@ def load(
         json_obj, cls, fork_inst, kwargs.get('_inferred_cls', False))
 
     deserializer = get_deserializer(cls, fork_inst)
+
+    # Is this the initial call or a nested?
+    initial = kwargs.get('_initial', True)
+
     kwargs_ = {
         'strict': strict,
         'fork_inst': fork_inst,
         'attr_getters': attr_getters,
         'meta_hints': meta_hints,
+        '_initial': False,
         **kwargs
     }
     try:
-        return deserializer(json_obj, cls, **kwargs_)
+        result = deserializer(json_obj, cls, **kwargs_)
+        validate(result, cls, fork_inst)
+        if initial:
+            # Clear all lru caches right before returning the initial call.
+            clear()
+        return result
     except Exception as err:
+        clear()
         if isinstance(err, JsonsError):
             raise
         raise DeserializationError(str(err), json_obj, cls)
@@ -91,10 +109,10 @@ def load(
 
 def loads(
         str_: str,
-        cls: Optional[type] = None,
+        cls: Optional[T] = None,
         jdkwargs: Optional[Dict[str, object]] = None,
         *args,
-        **kwargs) -> object:
+        **kwargs) -> T:
     """
     Extend ``json.loads``, allowing a string to be loaded into a dict or a
     Python instance of type ``cls``. Any extra (keyword) arguments are passed
@@ -121,11 +139,11 @@ def loads(
 
 def loadb(
         bytes_: bytes,
-        cls: Optional[type] = None,
+        cls: Optional[T] = None,
         encoding: str = 'utf-8',
         jdkwargs: Optional[Dict[str, object]] = None,
         *args,
-        **kwargs) -> object:
+        **kwargs) -> T:
     """
     Extend ``json.loads``, allowing bytes to be loaded into a dict or a Python
     instance of type ``cls``. Any extra (keyword) arguments are passed on to
@@ -164,9 +182,6 @@ def _check_and_get_cls_and_meta_hints(
         msg = ('Invalid type: "{}", only arguments of the following types are '
                'allowed: {}'.format(invalid_type, ", ".join(valid_types)))
         raise DeserializationError(msg, json_obj, cls)
-    if json_obj is None:
-        raise DeserializationError('Cannot load None with strict=True',
-                                   json_obj, cls)
 
     cls_from_meta, meta = get_cls_and_meta(json_obj, fork_inst)
     meta_hints = meta.get('classes', {}) if meta else {}
@@ -175,8 +190,14 @@ def _check_and_get_cls_and_meta_hints(
 
 
 def _should_skip(json_obj: object, cls: type, strict: bool):
-    if not strict:
-        if json_obj is None or type(json_obj) == cls:
-            return True
-    if cls is Any:
-        return True
+    return (not strict and type(json_obj) == cls) or cls is Any
+
+
+def _check_for_none(json_obj: object, cls: type):
+    # Check if the json_obj is None and whether or not that is fine.
+    if json_obj is None and not can_match_with_none(cls):
+        cls_name = get_class_name(cls).lower()
+        raise DeserializationError(
+            message='NoneType cannot be deserialized into {}'.format(cls_name),
+            source=json_obj,
+            target=cls)

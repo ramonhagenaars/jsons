@@ -90,18 +90,22 @@ from datetime import datetime
 from enum import Enum
 from typing import Union, List, Tuple, Iterable
 from uuid import UUID
-
+from jsons._common_impl import NoneType
 from jsons._key_transformers import snakecase, camelcase, pascalcase, lispcase
 from jsons import (
     _dump_impl,
     _load_impl,
+    _fork_impl,
     _lizers_impl,
+    _validation,
     _extra_impl,
     deserializers,
     serializers,
     classes
 )
 from jsons.exceptions import (
+    JsonsError,
+    ValidationError,
     DeserializationError,
     DecodeError,
     UnfulfilledArgumentError,
@@ -115,11 +119,15 @@ dumpb = _dump_impl.dumpb
 load = _load_impl.load
 loads = _load_impl.loads
 loadb = _load_impl.loadb
+fork = _fork_impl.fork
 JsonSerializable = classes.JsonSerializable
 set_serializer = _lizers_impl.set_serializer
 get_serializer = _lizers_impl.get_serializer
 set_deserializer = _lizers_impl.set_deserializer
 get_deserializer = _lizers_impl.get_deserializer
+get_validator = _validation.get_validator
+set_validator = _validation.set_validator
+validate = _validation.validate
 announce_class = _extra_impl.announce_class
 suppress_warnings = _extra_impl.suppress_warnings
 
@@ -147,6 +155,7 @@ default_dict_deserializer = deserializers.default_dict_deserializer
 default_enum_deserializer = deserializers.default_enum_deserializer
 default_datetime_deserializer = deserializers.default_datetime_deserializer
 default_string_deserializer = deserializers.default_string_deserializer
+default_nonetype_deserializer = deserializers.default_nonetype_deserializer
 default_primitive_deserializer = deserializers.default_primitive_deserializer
 default_mapping_deserializer = deserializers.default_mapping_deserializer
 default_iterable_deserializer = deserializers.default_iterable_deserializer
@@ -170,7 +179,8 @@ set_deserializer(default_union_deserializer, Union)
 set_deserializer(default_enum_deserializer, Enum)
 set_deserializer(default_datetime_deserializer, datetime)
 set_deserializer(default_string_deserializer, str)
-set_deserializer(default_primitive_deserializer, (int, float, bool, None))
+set_deserializer(default_nonetype_deserializer, NoneType)
+set_deserializer(default_primitive_deserializer, (int, float, bool))
 set_deserializer(default_mapping_deserializer, Mapping, False)
 set_deserializer(default_iterable_deserializer, Iterable, False)
 set_deserializer(default_object_deserializer, object, False)
