@@ -1,3 +1,4 @@
+import datetime
 from unittest import TestCase
 import jsons
 
@@ -51,6 +52,23 @@ class TestJsonSerializable(TestCase):
         self.assertDictEqual(person_json, {'myName': 'John'})
         self.assertEqual(person_loaded.my_name, 'John')
         self.assertTrue(isinstance(person_loaded, Person))
+
+    def test_with_load(self):
+        defaults = {'ham': lambda: 'spam'}
+        forked = jsons.JsonSerializable.with_load(attr_getters=defaults, fork=True)
+        forked.set_deserializer(
+            lambda sec, cls, **kwargs: datetime.timedelta(seconds=sec),
+            datetime.timedelta
+        )
+
+        class Foo(forked):
+            def __init__(self, bar: datetime.timedelta, ham: str):
+                self.bar = bar
+                self.ham = ham
+
+        loaded = Foo.from_json({'bar': 42})
+        self.assertEqual('spam', loaded.ham)
+        self.assertEqual(datetime.timedelta(seconds=42), loaded.bar)
 
     def test_jsonserializable_fork(self):
         f1 = jsons.JsonSerializable.fork()

@@ -37,9 +37,9 @@ class TestObject(TestCase):
         dumped = jsons.dump(c, verbose=jsons.Verbosity.WITH_CLASS_INFO)
         expectation = {
             'classes': {
-                '/': 'tests.test_object.C',
-                '/b': 'tests.test_object.B',
-                '/b/a': 'tests.test_object.A'
+                '/': '{}.C'.format(__name__),
+                '/b': '{}.B'.format(__name__),
+                '/b/a': '{}.A'.format(__name__)
             }
         }
 
@@ -49,9 +49,9 @@ class TestObject(TestCase):
         jsons.announce_class(B, 'custom_name')
         expectation2 = {
             'classes': {
-                '/': 'tests.test_object.C',
+                '/': '{}.C'.format(__name__),
                 '/b': 'custom_name',
-                '/b/a': 'tests.test_object.A'
+                '/b/a': '{}.A'.format(__name__)
             }
         }
 

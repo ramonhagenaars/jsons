@@ -16,6 +16,7 @@ from jsons.deserializers.default_string import default_string_deserializer
 from jsons.deserializers.default_union import default_union_deserializer
 from jsons.deserializers.default_uuid import default_uuid_deserializer
 from jsons.deserializers.default_complex import default_complex_deserializer
+from jsons.deserializers.default_nonetype import default_nonetype_deserializer
 from jsons.deserializers.default_primitive import (
     default_primitive_deserializer
 )
