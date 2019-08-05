@@ -20,6 +20,6 @@ def default_complex_deserializer(obj: Dict[str, float],
         try:
             float(value)
         except TypeError:
-            raise AttributeError(f"Cannot deserialize {obj} to a complex number, can't cast value of '{key}' to float")
+            raise AttributeError("Cannot deserialize {} to a complex number, can't cast value of '{}' to float".format(obj, key))
 
     return complex(real, imag)
