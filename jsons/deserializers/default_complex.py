@@ -1,5 +1,8 @@
 from typing import Dict
 
+from jsons.exceptions import DeserializationError
+from jsons._load_impl import load
+
 
 def default_complex_deserializer(obj: Dict[str, float],
                                  cls: type = complex,
@@ -11,15 +14,15 @@ def default_complex_deserializer(obj: Dict[str, float],
     :param kwargs: not used.
     :return: an instance of ``complex``.
     """
-    real = obj.get('real')
-    imag = obj.get('imag')
-    clean_obj = {'real': real, 'imag': imag}
-    for key, value in clean_obj.items():
-        if not value:
-            raise AttributeError("Cannot deserialize {} to a complex number, does not contain key '{}'".format(obj, key))
-        try:
-            float(value)
-        except TypeError:
-            raise AttributeError("Cannot deserialize {} to a complex number, can't cast value of '{}' to float".format(obj, key))
-
-    return complex(real, imag)
+    try:
+        clean_obj = load({'real': obj['real'], 'imag': obj['imag']},
+                         cls=Dict[str, float])
+        return complex(clean_obj['real'], clean_obj['imag'])
+    except KeyError as err:
+        raise AttributeError("Cannot deserialize {} to a complex number, "
+                             "does not contain key '{}'"
+                             .format(obj, err.args[0]))
+    except DeserializationError as err:
+        raise AttributeError("Cannot deserialize {} to a complex number, "
+                             "cannot cast value {} to float"
+                             .format(obj, err.source))
