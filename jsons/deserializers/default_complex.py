@@ -16,7 +16,7 @@ def default_complex_deserializer(obj: Dict[str, float],
     clean_obj = {'real': real, 'imag': imag}
     for key, value in clean_obj.items():
         if not value:
-            raise AttributeError(f"Cannot deserialize {obj} to a complex number, does not contain key '{key}'")
+            raise AttributeError("Cannot deserialize {} to a complex number, does not contain key '{}'".format(obj, key))
         try:
             float(value)
         except TypeError:
