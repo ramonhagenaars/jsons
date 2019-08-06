@@ -161,6 +161,7 @@ default_mapping_deserializer = deserializers.default_mapping_deserializer
 default_iterable_deserializer = deserializers.default_iterable_deserializer
 default_object_deserializer = deserializers.default_object_deserializer
 default_uuid_deserializer = deserializers.default_uuid_deserializer
+default_complex_serializer = deserializers.default_complex_deserializer
 
 # Set the serializers:
 set_serializer(default_tuple_serializer, (tuple, Tuple))
@@ -185,3 +186,4 @@ set_deserializer(default_mapping_deserializer, Mapping, False)
 set_deserializer(default_iterable_deserializer, Iterable, False)
 set_deserializer(default_object_deserializer, object, False)
 set_deserializer(default_uuid_deserializer, UUID)
+set_deserializer(default_complex_serializer, complex)
