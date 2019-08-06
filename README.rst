@@ -94,6 +94,10 @@ Meta
 Recent updates
 ==============
 
+0.10.0
+++++++
+- Feature: Added a deserializer for complex numbers.
+
 0.9.0
 +++++
 - Feature: Added the ability to validate instances right after loading.
@@ -121,11 +125,6 @@ Recent updates
 - Feature: Added ``strip_attr`` argument for omitting specific attributes when serializing objects.
 - Feature: The private attributes from ``ABC`` are now excluded from a dump.
 
-0.8.6
-+++++
-- Feature: Support for typing.NewType.
-- Bugfix: Deserializing a ``Dict[K, V]`` failed in ``3.7``.
-
 
 Contributors
 ============
@@ -139,6 +138,7 @@ Special thanks to the following contributors of code, discussions or suggestions
 - `cypreess <https://github.com/cypreess>`_
 - `casparjespersen <https://github.com/casparjespersen>`_
 - `ahmetkucuk <https://github.com/ahmetkucuk>`_
+- `robinklaassen <https://github.com/robinklaassen>`_
 
 .. |PyPI version| image:: https://badge.fury.io/py/jsons.svg
    :target: https://badge.fury.io/py/jsons
