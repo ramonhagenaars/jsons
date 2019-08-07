@@ -5,7 +5,7 @@ This module contains functionality for loading stuff from json.
 """
 import json
 from json import JSONDecodeError
-from typing import Optional, Dict, Callable, Tuple, Any
+from typing import Optional, Dict, Callable, Tuple, Any, Type
 from jsons._cache import clear
 from jsons._lizers_impl import get_deserializer
 from jsons._validation import validate
@@ -24,7 +24,7 @@ from jsons._common_impl import (
 
 def load(
         json_obj: object,
-        cls: Optional[T] = None,
+        cls: Optional[Type[T]] = None,
         strict: bool = False,
         fork_inst: Optional[type] = StateHolder,
         attr_getters: Optional[Dict[str, Callable[[], object]]] = None,
@@ -109,7 +109,7 @@ def load(
 
 def loads(
         str_: str,
-        cls: Optional[T] = None,
+        cls: Optional[Type[T]] = None,
         jdkwargs: Optional[Dict[str, object]] = None,
         *args,
         **kwargs) -> T:
@@ -139,7 +139,7 @@ def loads(
 
 def loadb(
         bytes_: bytes,
-        cls: Optional[T] = None,
+        cls: Optional[Type[T]] = None,
         encoding: str = 'utf-8',
         jdkwargs: Optional[Dict[str, object]] = None,
         *args,
