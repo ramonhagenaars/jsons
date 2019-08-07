@@ -94,6 +94,10 @@ Meta
 Recent updates
 ==============
 
+0.10.1
+++++++
+- Change: Correction of the type hints of ``load``, ``loads``, ``loadb``.
+
 0.10.0
 ++++++
 - Feature: Added a deserializer for complex numbers.
@@ -119,12 +123,6 @@ Recent updates
 - Feature: Clearer messaging upon serialization errors.
 - Bugfix: Fix for failing to deserialize UUIDs.
 
-0.8.7
-+++++
-- *Breaking change*: The default serializers and deserializers now use keyword-only arguments.
-- Feature: Added ``strip_attr`` argument for omitting specific attributes when serializing objects.
-- Feature: The private attributes from ``ABC`` are now excluded from a dump.
-
 
 Contributors
 ============
@@ -139,6 +137,7 @@ Special thanks to the following contributors of code, discussions or suggestions
 - `casparjespersen <https://github.com/casparjespersen>`_
 - `ahmetkucuk <https://github.com/ahmetkucuk>`_
 - `robinklaassen <https://github.com/robinklaassen>`_
+- `jochembroekhoff <https://github.com/jochembroekhoff>`_
 
 .. |PyPI version| image:: https://badge.fury.io/py/jsons.svg
    :target: https://badge.fury.io/py/jsons
