@@ -1,4 +1,5 @@
 import datetime
+from enum import Enum
 from typing import Dict
 from unittest import TestCase
 import jsons
@@ -15,6 +16,23 @@ class TestDict(TestCase):
         self.assertEqual(loaded['a']['b']['c']['d'].hour, 21)
         self.assertEqual(loaded['a']['b']['c']['d'].minute, 34)
         self.assertEqual(loaded['a']['b']['c']['d'].second, 0)
+
+    def test_load_dict_with_enum_keys(self):
+
+        class Color(Enum):
+            RED = 1
+            GREEN = 2
+            BLUE = 3
+
+        source1 = {'RED': 255, 'GREEN': 128, 'BLUE': 128}
+        source2 = {'red': 255, 'GReeN': 128, 'BlUe': 128}
+        expected = {Color.RED: 255, Color.GREEN: 128, Color.BLUE: 128}
+
+        loaded1 = jsons.load(source1, Dict[Color, int])
+        self.assertDictEqual(expected, loaded1)
+
+        loaded2 = jsons.load(source2, Dict[Color, int], key_transformer=lambda x: x.upper())
+        self.assertDictEqual(expected, loaded2)
 
     def test_load_dict_with_generic(self):
         class A:

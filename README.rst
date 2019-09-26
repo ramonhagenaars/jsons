@@ -94,6 +94,10 @@ Meta
 Recent updates
 ==============
 
+0.10.2
+++++++
+- Bugfix: Loading ``Dict[K, V]`` did not parse ``K``.
+
 0.10.1
 ++++++
 - Change: Correction of the type hints of ``load``, ``loads``, ``loadb``.
@@ -116,12 +120,6 @@ Recent updates
 - *Breaking change*: Values of primitive types are now cast if possible (e.g. in ``jsons.load('42', int)``).
 - Bugfix: NamedTuples could falsely raise an error when a justified ``None`` was provided.
 - Feature: Support for ``uuid.UUID``.
-
-0.8.8
-+++++
-- Feature: Added the ability to dump recursive objects.
-- Feature: Clearer messaging upon serialization errors.
-- Bugfix: Fix for failing to deserialize UUIDs.
 
 
 Contributors
