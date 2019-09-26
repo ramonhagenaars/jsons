@@ -17,10 +17,14 @@ def default_dict_deserializer(
     :param kwargs: any keyword arguments.
     :return: a deserialized dict instance.
     """
-    key_transformer = key_transformer or (lambda key: key)
-    kwargs_ = {**{'key_transformer': key_transformer}, **kwargs}
-    if hasattr(cls, '__args__') and len(cls.__args__) > 1:
-        sub_cls = cls.__args__[1]
-        kwargs_['cls'] = sub_cls
-    return {key_transformer(key): load(obj[key], **kwargs_)
-            for key in obj}
+    key_tfr = key_transformer or (lambda key: key)
+    if hasattr(cls, '__args__') and len(cls.__args__) == 2:
+        cls_k, cls_v = cls.__args__
+        kwargs_k = {**kwargs, 'cls': cls_k}
+        kwargs_v = {**kwargs, 'cls': cls_v}
+        res = {load(key_tfr(k), **kwargs_k): load(obj[k], **kwargs_v)
+               for k in obj}
+    else:
+        res = {key_tfr(key): load(obj[key], **kwargs)
+               for key in obj}
+    return res
