@@ -93,18 +93,28 @@ def load(
         '_initial': False,
         **kwargs
     }
+
+    return _do_load(json_obj, deserializer, cls, initial, **kwargs_)
+
+
+def _do_load(json_obj: object,
+             deserializer: callable,
+             cls: type,
+             initial: bool,
+             **kwargs):
     try:
-        result = deserializer(json_obj, cls, **kwargs_)
-        validate(result, cls, fork_inst)
-        if initial:
-            # Clear all lru caches right before returning the initial call.
-            clear()
-        return result
+        result = deserializer(json_obj, cls, **kwargs)
+        validate(result, cls, kwargs['fork_inst'])
     except Exception as err:
         clear()
         if isinstance(err, JsonsError):
             raise
         raise DeserializationError(str(err), json_obj, cls)
+    else:
+        if initial:
+            # Clear all lru caches right before returning the initial call.
+            clear()
+        return result
 
 
 def loads(
