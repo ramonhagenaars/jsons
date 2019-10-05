@@ -56,6 +56,7 @@ def default_object_serializer(
     kwargs_ = {**kwargs, 'verbose': verbose}
     verbose = Verbosity.from_value(verbose)
     if Verbosity.WITH_CLASS_INFO in verbose:
+        # Set a flag in kwargs to temporarily store -cls.
         kwargs_['_store_cls'] = True
     result = default_dict_serializer(
         obj_dict,
@@ -69,9 +70,7 @@ def default_object_serializer(
         **kwargs_)
     cls_name = get_class_name(cls, fully_qualified=True,
                               fork_inst=kwargs['fork_inst'])
-    if kwargs.get('_store_cls'):
-        result['-cls'] = cls_name
-    else:
+    if not kwargs.get('_store_cls'):
         result = _get_dict_with_meta(result, cls_name, verbose,
                                      kwargs['fork_inst'])
     return result
@@ -147,9 +146,12 @@ def _fill_collection_of_types(
         cls_name_: Optional[str],
         prefix: str,
         collection_of_types_: dict) -> str:
-    # This function loops through obj to fill collection_of_types_ with the
-    # class names.
-    cls_name_ = cls_name_ or obj_.pop('-cls')
+    # This function loops through obj_ to fill collection_of_types_ with the
+    # class names. All of the -cls attributes are removed in the process.
+    if not cls_name_ and '-cls' in obj_:
+        cls_name_ = obj_['-cls']
+    if '-cls' in obj_:
+        del obj_['-cls']
     for attr in obj_:
         if attr != META_ATTR and isinstance(obj_[attr], dict):
             attr_class = _fill_collection_of_types(obj_[attr],

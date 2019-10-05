@@ -1,4 +1,5 @@
 from typing import Optional, Callable
+from typish import get_type
 from jsons._common_impl import get_class_name
 from jsons._dump_impl import dump
 from jsons.exceptions import RecursionDetectedError, SerializationError
@@ -31,8 +32,14 @@ def default_dict_serializer(
     for key in obj:
         dumped_elem = None
         try:
-            dumped_elem = dump(obj[key], key_transformer=key_transformer,
+            dumped_elem = dump(obj[key],
+                               key_transformer=key_transformer,
                                strip_nulls=strip_nulls, **kwargs)
+
+            if isinstance(dumped_elem, dict) and '_store_cls' in kwargs:
+                cls_ = get_type(obj[key])
+                _store_cls_info(dumped_elem, cls_, **kwargs)
+
         except RecursionDetectedError:
             fork_inst._warn('Recursive structure detected in attribute "{}" '
                             'of object of type "{}", ignoring the attribute.'
@@ -50,3 +57,13 @@ def default_dict_serializer(
                 key = key_transformer(key)
             result[key] = dumped_elem
     return result
+
+
+def _store_cls_info(result: dict, cls: type, **kwargs):
+    if kwargs.get('_store_cls'):
+        if cls.__module__ == 'typing':
+            cls_name = repr(cls)
+        else:
+            cls_name = get_class_name(cls, fully_qualified=True,
+                                      fork_inst=kwargs['fork_inst'])
+        result['-cls'] = cls_name

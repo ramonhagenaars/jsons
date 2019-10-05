@@ -79,6 +79,8 @@ def get_cls_from_str(cls_str: str, source: object, fork_inst) -> type:
     cls = getattr(builtins, cls_str, None)
     if cls:
         return cls
+    if '[' in cls_str and ']' in cls_str:
+        return _get_generic_cls_from_str(cls_str, source, fork_inst)
     try:
         splitted = cls_str.split('.')
         module_name = '.'.join(splitted[:-1])
@@ -88,6 +90,16 @@ def get_cls_from_str(cls_str: str, source: object, fork_inst) -> type:
     except (ImportError, AttributeError, ValueError):
         cls = _lookup_announced_class(cls_str, source, fork_inst)
     return cls
+
+
+def _get_generic_cls_from_str(cls_str: str, source: object, fork_inst) -> type:
+    # If cls_str represents a generic type, try to parse the sub types.
+    origin_str, subtypes_str = cls_str.split('[')
+    subtypes_str = subtypes_str[0:-1]  # Remove the ']'.
+    origin = get_cls_from_str(origin_str, source, fork_inst)
+    subtypes = [get_cls_from_str(s.strip(), source, fork_inst)
+                for s in subtypes_str.split(',')]
+    return origin[tuple(subtypes)]
 
 
 def determine_precedence(
