@@ -94,6 +94,12 @@ Meta
 Recent updates
 ==============
 
+1.0.0
++++++
+- Feature: Added a serializer/deserializer for ``time``.
+- Feature: Added a serializer/deserializer for ``date``.
+- Bugfix: Dumping verbose did not store the types of dicts (``Dict[K, V]``).
+
 0.10.2
 ++++++
 - Bugfix: Loading ``Dict[K, V]`` did not parse ``K``.
@@ -114,12 +120,6 @@ Recent updates
 - Feature: Added the ``jsons.fork()`` function.
 - Change: ``None`` can now be loaded with the right type hints, even in strict-mode.
 - Bugfix: A fork from ``JsonSerializable`` did not copy its settings.
-
-0.8.9
-+++++
-- *Breaking change*: Values of primitive types are now cast if possible (e.g. in ``jsons.load('42', int)``).
-- Bugfix: NamedTuples could falsely raise an error when a justified ``None`` was provided.
-- Feature: Support for ``uuid.UUID``.
 
 
 Contributors
