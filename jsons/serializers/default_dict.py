@@ -36,9 +36,7 @@ def default_dict_serializer(
                                key_transformer=key_transformer,
                                strip_nulls=strip_nulls, **kwargs)
 
-            if isinstance(dumped_elem, dict) and '_store_cls' in kwargs:
-                cls_ = get_type(obj[key])
-                _store_cls_info(dumped_elem, cls_, **kwargs)
+            _store_cls_info(dumped_elem, key, obj, **kwargs)
 
         except RecursionDetectedError:
             fork_inst._warn('Recursive structure detected in attribute "{}" '
@@ -48,8 +46,9 @@ def default_dict_serializer(
             if strict:
                 raise
             else:
-                fork_inst._warn('Failed to dump attribute "{}" of object of type '
-                                '"{}". Reason: {}. Ignoring the attribute.'
+                fork_inst._warn('Failed to dump attribute "{}" of object of '
+                                'type "{}". Reason: {}. Ignoring the '
+                                'attribute.'
                                 .format(key, get_class_name(cls), err.message))
                 break
         if not (strip_nulls and dumped_elem is None):
@@ -59,8 +58,9 @@ def default_dict_serializer(
     return result
 
 
-def _store_cls_info(result: dict, cls: type, **kwargs):
-    if kwargs.get('_store_cls'):
+def _store_cls_info(result: object, attr: str, original_obj: dict, **kwargs):
+    if isinstance(result, dict) and kwargs.get('_store_cls'):
+        cls = get_type(original_obj[attr])
         if cls.__module__ == 'typing':
             cls_name = repr(cls)
         else:

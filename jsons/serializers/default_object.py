@@ -148,10 +148,7 @@ def _fill_collection_of_types(
         collection_of_types_: dict) -> str:
     # This function loops through obj_ to fill collection_of_types_ with the
     # class names. All of the -cls attributes are removed in the process.
-    if not cls_name_ and '-cls' in obj_:
-        cls_name_ = obj_['-cls']
-    if '-cls' in obj_:
-        del obj_['-cls']
+    cls_name_ = _get_class_name_and_strip_cls(cls_name_, obj_)
     for attr in obj_:
         if attr != META_ATTR and isinstance(obj_[attr], dict):
             attr_class = _fill_collection_of_types(obj_[attr],
@@ -160,6 +157,15 @@ def _fill_collection_of_types(
                                                    collection_of_types_)
             collection_of_types_[prefix + attr] = attr_class
     return cls_name_
+
+
+def _get_class_name_and_strip_cls(cls_name: Optional[str], obj: dict) -> str:
+    result = cls_name
+    if not cls_name and '-cls' in obj:
+        result = obj['-cls']
+    if '-cls' in obj:
+        del obj['-cls']
+    return result
 
 
 _ABC_ATTRS = ('_abc_registry', '_abc_cache', '_abc_negative_cache',
