@@ -3,7 +3,7 @@ from unittest import TestCase
 import jsons
 
 
-class TestDate(TestCase):
+class TestTime(TestCase):
     def test_dump_time(self):
         d = datetime(year=2018, month=7, day=8, hour=21, minute=34).time()
         dumped = jsons.dump(d)

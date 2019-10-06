@@ -8,6 +8,8 @@ from jsons._key_transformers import snakecase, camelcase, pascalcase, lispcase
 from jsons.deserializers.default_datetime import default_datetime_deserializer
 from jsons.deserializers.default_date import default_date_deserializer
 from jsons.deserializers.default_time import default_time_deserializer
+from jsons.deserializers.default_timezone import default_timezone_deserializer
+from jsons.deserializers.default_timedelta import default_timedelta_deserializer
 from jsons.deserializers.default_dict import default_dict_deserializer
 from jsons.deserializers.default_enum import default_enum_deserializer
 from jsons.deserializers.default_list import default_list_deserializer

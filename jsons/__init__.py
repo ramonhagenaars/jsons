@@ -86,7 +86,7 @@ Alternatively, you can make use of the `JsonSerializable` class.
 
 """
 from collections.abc import Mapping
-from datetime import datetime, date, time
+from datetime import datetime, date, time, timezone, timedelta
 from enum import Enum
 from typing import Union, List, Tuple, Iterable
 from uuid import UUID
@@ -146,6 +146,8 @@ default_enum_serializer = serializers.default_enum_serializer
 default_datetime_serializer = serializers.default_datetime_serializer
 default_date_serializer = serializers.default_date_serializer
 default_time_serializer = serializers.default_time_serializer
+default_timezone_serializer = serializers.default_timezone_serializer
+default_timedelta_serializer = serializers.default_timedelta_serializer
 default_primitive_serializer = serializers.default_primitive_serializer
 default_object_serializer = serializers.default_object_serializer
 default_uuid_serializer = serializers.default_uuid_serializer
@@ -158,6 +160,8 @@ default_enum_deserializer = deserializers.default_enum_deserializer
 default_datetime_deserializer = deserializers.default_datetime_deserializer
 default_date_deserializer = deserializers.default_date_deserializer
 default_time_deserializer = deserializers.default_time_deserializer
+default_timezone_deserializer = deserializers.default_timezone_deserializer
+default_timedelta_deserializer = deserializers.default_timedelta_deserializer
 default_string_deserializer = deserializers.default_string_deserializer
 default_nonetype_deserializer = deserializers.default_nonetype_deserializer
 default_primitive_deserializer = deserializers.default_primitive_deserializer
@@ -173,6 +177,8 @@ set_serializer(default_enum_serializer, Enum)
 set_serializer(default_datetime_serializer, datetime)
 set_serializer(default_date_serializer, date)
 set_serializer(default_time_serializer, time)
+set_serializer(default_timezone_serializer, timezone)
+set_serializer(default_timedelta_serializer, timedelta)
 set_serializer(default_primitive_serializer, (str, int, float, bool, None))
 set_serializer(default_dict_serializer, Mapping, False)
 set_serializer(default_iterable_serializer, Iterable, False)
@@ -187,6 +193,8 @@ set_deserializer(default_enum_deserializer, Enum)
 set_deserializer(default_datetime_deserializer, datetime)
 set_deserializer(default_date_deserializer, date)
 set_deserializer(default_time_deserializer, time)
+set_deserializer(default_timezone_deserializer, timezone)
+set_deserializer(default_timedelta_deserializer, timedelta)
 set_deserializer(default_string_deserializer, str)
 set_deserializer(default_nonetype_deserializer, NoneType)
 set_deserializer(default_primitive_deserializer, (int, float, bool))

@@ -8,6 +8,8 @@ from jsons._key_transformers import snakecase, camelcase, pascalcase, lispcase
 from jsons.serializers.default_datetime import default_datetime_serializer
 from jsons.serializers.default_date import default_date_serializer
 from jsons.serializers.default_time import default_time_serializer
+from jsons.serializers.default_timezone import default_timezone_serializer
+from jsons.serializers.default_timedelta import default_timedelta_serializer
 from jsons.serializers.default_dict import default_dict_serializer
 from jsons.serializers.default_enum import default_enum_serializer
 from jsons.serializers.default_iterable import default_iterable_serializer

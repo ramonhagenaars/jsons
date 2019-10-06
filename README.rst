@@ -97,6 +97,8 @@ Recent updates
 1.0.0
 +++++
 - Feature: Added a serializer/deserializer for ``time``.
+- Feature: Added a serializer/deserializer for ``timezone``.
+- Feature: Added a serializer/deserializer for ``timedelta``.
 - Feature: Added a serializer/deserializer for ``date``.
 - Bugfix: Dumping verbose did not store the types of dicts (``Dict[K, V]``).
 
