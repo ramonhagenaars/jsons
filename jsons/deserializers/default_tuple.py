@@ -17,16 +17,17 @@ def default_tuple_deserializer(obj: list,
     :param kwargs: any keyword arguments.
     :return: a deserialized tuple instance.
     """
-    cls_args = get_args(cls)
-    if not cls_args:
-        return load(obj, tuple, **kwargs)
     if hasattr(cls, '_fields'):
         return default_namedtuple_deserializer(obj, cls, **kwargs)
-    tuple_types = getattr(cls, '__tuple_params__', cls_args)
-    if tuple_with_ellipsis(cls):
-        tuple_types = [tuple_types[0]] * len(obj)
-    list_ = [load(value, tuple_types[i], **kwargs)
-             for i, value in enumerate(obj)]
+    cls_args = get_args(cls)
+    if cls_args:
+        tuple_types = getattr(cls, '__tuple_params__', cls_args)
+        if tuple_with_ellipsis(cls):
+            tuple_types = [tuple_types[0]] * len(obj)
+        list_ = [load(value, tuple_types[i], **kwargs)
+                 for i, value in enumerate(obj)]
+    else:
+        list_ = [load(value, **kwargs) for i, value in enumerate(obj)]
     return tuple(list_)
 
 
