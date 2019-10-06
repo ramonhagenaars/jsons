@@ -38,9 +38,20 @@ class TestList(TestCase):
     def test_load_list(self):
         dat = datetime.datetime(year=2018, month=7, day=8, hour=21, minute=34,
                                 tzinfo=datetime.timezone.utc)
-        list_ = [1, 2, 3, [4, 5, [dat]]]
-        expectation = [1, 2, 3, [4, 5, ['2018-07-08T21:34:00Z']]]
-        self.assertEqual(list_, jsons.load(expectation))
+        expectation = [1, 2, 3, [4, 5, [dat]]]
+
+        loaded = jsons.load([1, 2, 3, [4, 5, ['2018-07-08T21:34:00Z']]])
+
+        self.assertEqual(expectation, loaded)
+
+    def test_load_list_typing(self):
+        dat = datetime.datetime(year=2018, month=7, day=8, hour=21, minute=34,
+                                tzinfo=datetime.timezone.utc)
+        expectation = [1, 2, 3, [4, 5, [dat]]]
+
+        loaded = jsons.load([1, 2, 3, [4, 5, ['2018-07-08T21:34:00Z']]], List)
+
+        self.assertEqual(expectation, loaded)
 
     def test_load_list2(self):
         dat = datetime.datetime(year=2018, month=7, day=8, hour=21, minute=34,

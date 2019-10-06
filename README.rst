@@ -101,6 +101,9 @@ Recent updates
 - Feature: Added a serializer/deserializer for ``timedelta``.
 - Feature: Added a serializer/deserializer for ``date``.
 - Bugfix: Dumping verbose did not store the types of dicts (``Dict[K, V]``).
+- Bugfix: Loading with ``List`` (no generic type) failed.
+- Bugfix: Loading with ``Dict`` (no generic type) failed.
+- Bugfix: Loading with ``Tuple`` (no generic type) failed.
 
 0.10.2
 ++++++

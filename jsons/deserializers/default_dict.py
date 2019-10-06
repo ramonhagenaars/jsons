@@ -1,4 +1,5 @@
 from typing import Optional, Callable
+from typish import get_args
 from jsons._load_impl import load
 
 
@@ -18,8 +19,9 @@ def default_dict_deserializer(
     :return: a deserialized dict instance.
     """
     key_tfr = key_transformer or (lambda key: key)
-    if hasattr(cls, '__args__') and len(cls.__args__) == 2:
-        cls_k, cls_v = cls.__args__
+    cls_args = get_args(cls)
+    if len(cls_args) == 2:
+        cls_k, cls_v = cls_args
         kwargs_k = {**kwargs, 'cls': cls_k}
         kwargs_v = {**kwargs, 'cls': cls_v}
         res = {load(key_tfr(k), **kwargs_k): load(obj[k], **kwargs_v)

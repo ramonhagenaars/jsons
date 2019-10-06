@@ -1,4 +1,5 @@
 from typing import Union
+from typish import get_args
 from jsons._common_impl import NoneType
 from jsons._compatibility_impl import tuple_with_ellipsis, get_union_params
 from jsons._load_impl import load
@@ -16,9 +17,12 @@ def default_tuple_deserializer(obj: list,
     :param kwargs: any keyword arguments.
     :return: a deserialized tuple instance.
     """
+    cls_args = get_args(cls)
+    if not cls_args:
+        return load(obj, tuple, **kwargs)
     if hasattr(cls, '_fields'):
         return default_namedtuple_deserializer(obj, cls, **kwargs)
-    tuple_types = getattr(cls, '__tuple_params__', getattr(cls, '__args__', []))
+    tuple_types = getattr(cls, '__tuple_params__', cls_args)
     if tuple_with_ellipsis(cls):
         tuple_types = [tuple_types[0]] * len(obj)
     list_ = [load(value, tuple_types[i], **kwargs)
