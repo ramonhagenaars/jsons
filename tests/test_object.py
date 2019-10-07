@@ -1,7 +1,7 @@
 import datetime
 import warnings
 from abc import ABC
-from typing import List
+from typing import List, Dict
 from unittest import TestCase
 from jsons._common_impl import StateHolder
 from jsons.exceptions import SignatureMismatchError, UnknownClassError, \
@@ -68,6 +68,28 @@ class TestObject(TestCase):
         dumped5 = jsons.dump(c, verbose=jsons.Verbosity.WITH_EVERYTHING)
         self.assertTrue('dump_time' in dumped5['-meta'])
         self.assertTrue('classes' in dumped5['-meta'])
+
+    def test_dump_object_verbose_with_dict(self):
+
+        class C:
+            def __init__(self, d: Dict[int, float]):
+                self.d = d
+
+        c = C({42: 42.0})
+
+        expectation = {
+            'classes': {
+                '/': '{}.C'.format(__name__),
+                '/d': 'typing.Dict[int, float]',
+            }
+        }
+
+        dumped = jsons.dump(c, verbose=jsons.Verbosity.WITH_CLASS_INFO)
+        self.assertDictEqual(expectation, dumped['-meta'])
+
+        loaded = jsons.load(dumped)
+
+        self.assertDictEqual({42: 42.0}, loaded.d)
 
     def test_dump_object_strip_properties(self):
         obj = AllDumpable(AllDumpable())
@@ -240,6 +262,7 @@ class TestObject(TestCase):
         jsons.announce_class(Foo)
         jsons.announce_class(BarA)
         jsons.announce_class(BarB)
+        jsons.announce_class(BarBase)
 
         foo = Foo(bar=BarA(a=5))
         dumped = jsons.dump(foo, verbose=True)
