@@ -17,6 +17,16 @@ class TestDict(TestCase):
         self.assertEqual(loaded['a']['b']['c']['d'].minute, 34)
         self.assertEqual(loaded['a']['b']['c']['d'].second, 0)
 
+    def test_load_dict_typing(self):
+        dumped = {'a': {'b': {'c': {'d': '2018-07-08T21:34:00Z'}}}}
+        loaded = jsons.load(dumped, Dict)
+        self.assertEqual(loaded['a']['b']['c']['d'].year, 2018)
+        self.assertEqual(loaded['a']['b']['c']['d'].month, 7)
+        self.assertEqual(loaded['a']['b']['c']['d'].day, 8)
+        self.assertEqual(loaded['a']['b']['c']['d'].hour, 21)
+        self.assertEqual(loaded['a']['b']['c']['d'].minute, 34)
+        self.assertEqual(loaded['a']['b']['c']['d'].second, 0)
+
     def test_load_dict_with_enum_keys(self):
 
         class Color(Enum):

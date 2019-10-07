@@ -48,6 +48,13 @@ class TestTuple(TestCase):
         cls = Tuple[int, Tuple[List[datetime.datetime]]]
         self.assertEqual(tup, jsons.load(expectation, cls))
 
+    def test_load_tuple_typing(self):
+        expectation = (1, '2', 3.0)
+
+        loaded = jsons.load((1, '2', 3.0), Tuple)
+
+        self.assertEqual(expectation, loaded)
+
     def test_load_namedtuple_with_types(self):
         dat = datetime.datetime(year=2018, month=7, day=8, hour=21, minute=34,
                                 tzinfo=datetime.timezone.utc)

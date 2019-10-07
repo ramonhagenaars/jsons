@@ -7,29 +7,38 @@ from datetime import datetime, timezone, timedelta, time, date
 from typing import Union
 
 
-RFC3339_DATETIME_PATTERN = '%Y-%m-%dT%H:%M:%S'
+RFC3339_DATE_PATTERN = '%Y-%m-%d'
+RFC3339_TIME_PATTERN = '%H:%M:%S'
+RFC3339_DATETIME_PATTERN = '{}T{}'.format(
+    RFC3339_DATE_PATTERN, RFC3339_TIME_PATTERN)
 
 
 def to_str(
-        dt: datetime,
+        dt: Union[datetime, date],
         strip_microseconds: bool,
         fork_inst: type,
         pattern: str = RFC3339_DATETIME_PATTERN) -> str:
     offset = get_offset_str(dt, fork_inst)
-    if not strip_microseconds and dt.microsecond:
+    if not strip_microseconds and getattr(dt, 'microsecond', None):
         pattern += '.%f'
     return dt.strftime("{}{}".format(pattern, offset))
 
 
-def get_offset_str(obj: Union[datetime, timedelta], fork_inst: type) -> str:
+def get_offset_str(
+        obj: Union[datetime, date, timedelta],
+        fork_inst: type) -> str:
     """
     Return the textual offset of the given ``obj``.
     :param obj: a datetime or timedelta instance.
+    :param fork_inst: the state holder that is used.
     :return: the offset following RFC3339.
     """
-    func = (_datetime_offset_str if isinstance(obj, datetime)
-            else _timedelta_offset_str)
-    return func(obj, fork_inst)
+    result = ''
+    if isinstance(obj, datetime):
+        result = _datetime_offset_str(obj, fork_inst)
+    elif isinstance(obj, timedelta):
+        result = _timedelta_offset_str(obj, fork_inst)
+    return result
 
 
 def get_datetime_inst(obj: str, pattern: str) -> datetime:
@@ -39,8 +48,13 @@ def get_datetime_inst(obj: str, pattern: str) -> datetime:
     :param pattern: the datetime pattern.
     :return: a datetime instance with timezone info.
     """
-    func = _datetime_utc_inst if obj[-1] == 'Z' else _datetime_offset_inst
-    return func(obj, pattern)
+    if obj[-1] == 'Z':
+        result = _datetime_utc_inst(obj, pattern)
+    elif 'T' in pattern:
+        result = _datetime_offset_inst(obj, pattern)
+    else:
+        result = datetime.strptime(obj, pattern)
+    return result
 
 
 def _datetime_offset_str(obj: datetime, fork_inst: type) -> str:

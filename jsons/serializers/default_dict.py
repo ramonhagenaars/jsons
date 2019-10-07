@@ -1,4 +1,5 @@
 from typing import Optional, Callable
+from typish import get_type
 from jsons._common_impl import get_class_name
 from jsons._dump_impl import dump
 from jsons.exceptions import RecursionDetectedError, SerializationError
@@ -31,8 +32,12 @@ def default_dict_serializer(
     for key in obj:
         dumped_elem = None
         try:
-            dumped_elem = dump(obj[key], key_transformer=key_transformer,
+            dumped_elem = dump(obj[key],
+                               key_transformer=key_transformer,
                                strip_nulls=strip_nulls, **kwargs)
+
+            _store_cls_info(dumped_elem, key, obj, **kwargs)
+
         except RecursionDetectedError:
             fork_inst._warn('Recursive structure detected in attribute "{}" '
                             'of object of type "{}", ignoring the attribute.'
@@ -41,8 +46,9 @@ def default_dict_serializer(
             if strict:
                 raise
             else:
-                fork_inst._warn('Failed to dump attribute "{}" of object of type '
-                                '"{}". Reason: {}. Ignoring the attribute.'
+                fork_inst._warn('Failed to dump attribute "{}" of object of '
+                                'type "{}". Reason: {}. Ignoring the '
+                                'attribute.'
                                 .format(key, get_class_name(cls), err.message))
                 break
         if not (strip_nulls and dumped_elem is None):
@@ -50,3 +56,14 @@ def default_dict_serializer(
                 key = key_transformer(key)
             result[key] = dumped_elem
     return result
+
+
+def _store_cls_info(result: object, attr: str, original_obj: dict, **kwargs):
+    if isinstance(result, dict) and kwargs.get('_store_cls'):
+        cls = get_type(original_obj[attr])
+        if cls.__module__ == 'typing':
+            cls_name = repr(cls)
+        else:
+            cls_name = get_class_name(cls, fully_qualified=True,
+                                      fork_inst=kwargs['fork_inst'])
+        result['-cls'] = cls_name

@@ -1,4 +1,5 @@
 from multiprocessing import Process, Manager
+from typish import get_args
 from jsons._load_impl import load
 from jsons.exceptions import JsonsError
 
@@ -21,8 +22,9 @@ def default_list_deserializer(
     """
     cls_ = None
     kwargs_ = {**kwargs}
-    if cls and hasattr(cls, '__args__'):
-        cls_ = cls.__args__[0]
+    cls_args = get_args(cls)
+    if cls_args:
+        cls_ = cls_args[0]
         # Mark the cls as 'inferred' so that later it is known where cls came
         # from and the precedence of classes can be determined.
         kwargs_['_inferred_cls'] = True
