@@ -28,7 +28,7 @@
 
 * *Type hints for the win!*
 
-**Example of a model to serialize:**
+Example of a model to serialize:
 
 .. code:: python
 
@@ -39,7 +39,7 @@
     ...
     >>> p = Person('Guido van Rossum', birthday_guido)
 
-**Example of using jsons to serialize:**
+Example of using jsons to serialize:
 
 .. code:: python
 
@@ -47,7 +47,7 @@
     >>> out
     {'birthday': '1956-01-31T12:00:00Z', 'name': 'Guido van Rossum'}
 
-**Example of using jsons to deserialize:**
+Example of using jsons to deserialize:
 
 .. code:: python
 
