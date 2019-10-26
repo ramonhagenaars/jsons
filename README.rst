@@ -1,6 +1,8 @@
 |PyPI version| |Docs| |Build Status| |Code Coverage| |Scrutinizer Code Quality|
 |Downloads| |Maintainability|
 
+|
+
 .. raw:: html
 
   <p align="center">
@@ -52,13 +54,6 @@ Example of using jsons to deserialize:
 ************
 Installation
 ************
-
-.. image:: https://github.com/ramonhagenaars/jsons/blob/master/resources/jsons-logo.svg
-  :align: center
-  :width: 20
-
-
-
 
 ::
 
