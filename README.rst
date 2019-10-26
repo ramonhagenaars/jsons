@@ -1,20 +1,12 @@
 |PyPI version| |Docs| |Build Status| |Code Coverage| |Scrutinizer Code Quality|
 |Downloads| |Maintainability|
 
-::
 
-
-       _
-      (_)
-       _ ___  ___  _ __  ___
-      | / __|/ _ \| '_ \/ __|
-      | \__ | (_) | | | \__ \
-      | |___/\___/|_| |_|___/
-     _/ | JSON SERIALIZATION
-    |__/      MADE EASY!
-
-
-
+.. image:: https://github.com/ramonhagenaars/jsons/blob/master/resources/jsons-logo.svg
+  :align: center
+  :width: 150
+  
+|       
 
 * *Python 3.5+*
 
