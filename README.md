@@ -8,7 +8,9 @@
 
 
 <p align='center'>
-  <img width='150' src='https://github.com/ramonhagenaars/jsons/raw/master/resources/jsons-logo.svg?sanitize=true' /> 
+  <a href='https://jsons.readthedocs.io/en/latest/'>
+    <img width='150' src='https://github.com/ramonhagenaars/jsons/raw/master/resources/jsons-logo.svg?sanitize=true' />
+  </a> 
 </p>
 
   - *Python 3.5+*
