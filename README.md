@@ -8,7 +8,7 @@
 
 
 <p align='center'>
-  <img width='150' src='https://github.com/ramonhagenaars/jsons/blob/master/resources/jsons-logo.svg' /> 
+  <img width='150' src='https://github.com/ramonhagenaars/jsons/raw/master/resources/jsons-logo.svg?sanitize=true' /> 
 </p>
 
   - *Python 3.5+*

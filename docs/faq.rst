@@ -1,17 +1,3 @@
-
-::
-
-       _                     
-      (_)                    
-       _ ___  ___  _ __  ___ 
-      | / __|/ _ \| '_ \/ __|
-      | \__ | (_) | | | \__ \
-      | |___/\___/|_| |_|___/
-     _/ | JSON SERIALIZATION                   
-    |__/      MADE EASY!               
-
-      Official Documentation  
-
 ##########################
 Frequently Asked Questions
 ##########################

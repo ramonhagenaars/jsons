@@ -4,19 +4,6 @@
    contain the root `toctree` directive.
 
 
-::
-
-       _
-      (_)
-       _ ___  ___  _ __  ___
-      | / __|/ _ \| '_ \/ __|
-      | \__ | (_) | | | \__ \
-      | |___/\___/|_| |_|___/
-     _/ | JSON SERIALIZATION
-    |__/      MADE EASY!
-
-      Official Documentation
-
 |PyPI version| |Code Coverage| |Scrutinizer Code Quality|
 
 *~ Any Python objects to/from JSON, easily! ~*
