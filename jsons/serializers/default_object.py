@@ -1,5 +1,7 @@
 from datetime import datetime, timezone
 from typing import Optional, Callable, Union, MutableSequence, Tuple
+
+from jsons._cache import cached
 from jsons._common_impl import get_class_name, META_ATTR
 from jsons._datetime_impl import to_str
 from jsons.classes import JsonSerializable
@@ -102,6 +104,7 @@ def _get_dict_from_obj(
             and attr not in excluded_elems}
 
 
+@cached
 def _get_class_props(cls):
     props = []
     other_cls_vars = []

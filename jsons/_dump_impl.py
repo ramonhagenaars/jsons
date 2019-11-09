@@ -5,6 +5,8 @@ This module contains functionality for dumping stuff to json.
 """
 import json
 from typing import Optional, Dict
+
+from jsons._cache import clear
 from jsons._common_impl import StateHolder, get_class_name
 from jsons._extra_impl import announce_class
 from jsons._lizers_impl import get_serializer
@@ -33,7 +35,7 @@ def dump(obj: object,
     :param kwargs: the keyword args are passed on to the serializer function.
     :return: the serialized obj as a JSON type.
     """
-    kwargs = _check_for_recursion(obj, **kwargs)
+    kwargs = _check_for_recursion(obj, kwargs)
     if cls and not hasattr(cls, '__slots__'):
         raise SerializationError('Invalid type: "{}". Only types that have a '
                                  '__slots__ defined are allowed when '
@@ -46,13 +48,18 @@ def dump(obj: object,
         'fork_inst': fork_inst,
         **kwargs
     }
-
     announce_class(cls_, fork_inst=fork_inst)
+    kwargs['_objects'].remove(id(obj))
+    return _do_dump(obj, serializer, cls, kwargs_)
+
+
+def _do_dump(obj, serializer, cls, kwargs):
     try:
-        result = serializer(obj, cls=cls, **kwargs_)
-        kwargs['_objects'].remove(id(obj))
+        result = serializer(obj, cls=cls, **kwargs)
+        clear()
         return result
     except Exception as err:
+        clear()
         raise SerializationError(str(err))
 
 
@@ -103,7 +110,7 @@ def dumpb(obj: object,
     return dumped_str.encode(encoding=encoding)
 
 
-def _check_for_recursion(obj: object, **kwargs) -> dict:
+def _check_for_recursion(obj: object, kwargs) -> dict:
     kwargs['_objects'] = kwargs.get('_objects', set())
     if id(obj) in kwargs['_objects']:
         raise RecursionDetectedError('Endless recursion detected')

@@ -83,6 +83,7 @@ def set_deserializer(
         fork_inst._deserializers['nonetype'] = func
 
 
+@cached
 def get_serializer(
         cls: type,
         fork_inst: Optional[type] = StateHolder) -> callable:
