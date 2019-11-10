@@ -8,6 +8,8 @@ import builtins
 import warnings
 from importlib import import_module
 from typing import Callable, Optional, Tuple, TypeVar, Any
+
+from jsons._cache import cached
 from jsons._compatibility_impl import get_union_params
 from jsons.exceptions import UnknownClassError
 
@@ -40,6 +42,7 @@ class StateHolder:
             warnings.warn(msg_, *args, **kwargs)
 
 
+@cached
 def get_class_name(cls: type,
                    transformer: Optional[Callable[[str], str]] = None,
                    fully_qualified: bool = False,

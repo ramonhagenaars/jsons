@@ -64,7 +64,7 @@ def default_dict_serializer(
 
 
 def _store_cls_info(result: object, attr: str, original_obj: dict, kwargs):
-    if isinstance(result, dict) and kwargs.get('_store_cls'):
+    if kwargs.get('_store_cls', None) and isinstance(result, dict):
         cls = get_type(original_obj[attr])
         if cls.__module__ == 'typing':
             cls_name = repr(cls)
