@@ -1,4 +1,4 @@
-from typing import Optional, Callable
+from typing import Optional, Callable, Dict
 from typish import get_type
 from jsons._common_impl import get_class_name
 from jsons._dump_impl import dump
@@ -12,6 +12,7 @@ def default_dict_serializer(
         strict: bool = False,
         strip_nulls: bool = False,
         key_transformer: Optional[Callable[[str], str]] = None,
+        types: Optional[Dict[str, type]] = None,
         **kwargs) -> dict:
     """
     Serialize the given ``obj`` to a dict of serialized objects.
@@ -23,21 +24,25 @@ def default_dict_serializer(
     values.
     :param key_transformer: a function that will be applied to all keys in the
     resulting dict.
+    :param types: a ``dict`` with attribute names (keys) and their types
+    (values).
     :param kwargs: any keyword arguments that may be given to the serialization
     process.
     :return: a dict of which all elements are serialized.
     """
     result = dict()
+    types = types or dict()
     fork_inst = kwargs['fork_inst']
     for key in obj:
         dumped_elem = None
+        cls_ = types.get(key, None)
         try:
             dumped_elem = dump(obj[key],
+                               cls=cls_,
                                key_transformer=key_transformer,
                                strip_nulls=strip_nulls, **kwargs)
 
             _store_cls_info(dumped_elem, key, obj, **kwargs)
-
         except RecursionDetectedError:
             fork_inst._warn('Recursive structure detected in attribute "{}" '
                             'of object of type "{}", ignoring the attribute.'
