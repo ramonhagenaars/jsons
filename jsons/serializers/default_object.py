@@ -112,13 +112,8 @@ def _get_attributes_from_class(
         strip_class_variables: bool,
         strip_attr: tuple) -> Dict[str, Optional[type]]:
     # Get the attributes that are known in the class.
-    if '__slots__' in cls.__dict__:
-        attributes = {attr: None for attr in cls.__slots__}
-    elif hasattr(cls, '__annotations__'):
-        attributes = cls.__annotations__
-    else:
-        attributes = {}
-    return _filter_attributes(cls, attributes, strip_privates,
+    attributes_and_types = _get_attributes_and_types(cls)
+    return _filter_attributes(cls, attributes_and_types, strip_privates,
                               strip_properties, strip_class_variables,
                               strip_attr)
 
@@ -130,12 +125,24 @@ def _get_attributes_from_object(
         strip_class_variables: bool,
         strip_attr: tuple) -> Dict[str, Optional[type]]:
     # Get the attributes that are known in the object.
-    attributes = {attr: None for attr in dir(obj)}
-    # TODO maybe check if we can still get the types of these attributes
     cls = obj.__class__
+    attributes_and_types = _get_attributes_and_types(cls)
+    attributes = {attr: attributes_and_types.get(attr, None)
+                  for attr in dir(obj)}
     return _filter_attributes(cls, attributes, strip_privates,
                               strip_properties, strip_class_variables,
                               strip_attr)
+
+
+@cached
+def _get_attributes_and_types(cls) -> Dict[str, Optional[type]]:
+    if '__slots__' in cls.__dict__:
+        attributes = {attr: None for attr in cls.__slots__}
+    elif hasattr(cls, '__annotations__'):
+        attributes = cls.__annotations__
+    else:
+        attributes = {}
+    return attributes
 
 
 def _filter_attributes(
@@ -159,17 +166,6 @@ def _filter_attributes(
             and attr != 'json'
             and not isfunction(getattr(cls, attr, None))
             and attr not in excluded_elems}
-
-
-    # return [(attr, type_) for attr, type_ in attributes.items()
-    #         if not attr.startswith('__')
-    #         and not (strip_privates and attr.startswith('_'))
-    #         and not (strip_properties and attr in props)
-    #         and not (strip_class_variables and attr in other_cls_vars)
-    #         and attr not in strip_attr
-    #         and attr != 'json'
-    #         and not isfunction(getattr(cls, attr, None))
-    #         and attr not in excluded_elems]
 
 
 def _get_class_props(cls: type) -> Tuple[list, list]:
