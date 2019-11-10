@@ -182,7 +182,7 @@ class TestObject(TestCase):
 
         c = Child('John', 'William')
         dumped1 = jsons.dump(c)
-        dumped2 = jsons.dump(c, Parent)
+        dumped2 = jsons.dump(c, cls=Parent, strict=True)
         self.assertDictEqual({'child_name': 'John',
                               'parent_name': 'William'}, dumped1)
         self.assertDictEqual({'parent_name': 'William'}, dumped2)

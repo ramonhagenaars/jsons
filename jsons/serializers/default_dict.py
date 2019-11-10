@@ -20,6 +20,8 @@ def default_dict_serializer(
     :param cls: the type of ``obj``; ``obj`` is dumped as if of that type.
     :param strict: if ``True`` the serialization will raise upon any the
     failure of any attribute. Otherwise it continues with a warning.
+    :param strict: a bool to determine if the serializer should be strict
+    (i.e. only dumping stuff that is known to ``cls``).
     :param strip_nulls: if ``True`` the resulting dict will not contain null
     values.
     :param key_transformer: a function that will be applied to all keys in the
@@ -35,14 +37,15 @@ def default_dict_serializer(
     fork_inst = kwargs['fork_inst']
     for key in obj:
         dumped_elem = None
+        obj_ = obj[key]
         cls_ = types.get(key, None)
         try:
-            dumped_elem = dump(obj[key],
+            dumped_elem = dump(obj_,
                                cls=cls_,
                                key_transformer=key_transformer,
                                strip_nulls=strip_nulls, **kwargs)
 
-            _store_cls_info(dumped_elem, key, obj, kwargs)
+            _store_cls_info(dumped_elem, obj_, kwargs)
         except RecursionDetectedError:
             fork_inst._warn('Recursive structure detected in attribute "{}" '
                             'of object of type "{}", ignoring the attribute.'
@@ -63,9 +66,9 @@ def default_dict_serializer(
     return result
 
 
-def _store_cls_info(result: object, attr: str, original_obj: dict, kwargs):
+def _store_cls_info(result: object, original_obj: dict, kwargs):
     if kwargs.get('_store_cls', None) and isinstance(result, dict):
-        cls = get_type(original_obj[attr])
+        cls = get_type(original_obj)
         if cls.__module__ == 'typing':
             cls_name = repr(cls)
         else:

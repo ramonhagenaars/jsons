@@ -104,7 +104,7 @@ class TestSpecificVersions(TestCase):
 
         c = Child(a=1, b=2)
 
-        dumped = jsons.dump(c, Parent)
+        dumped = jsons.dump(c, cls=Parent, strict=True)
         expected = {'a': 1}
 
         self.assertDictEqual(expected, dumped)

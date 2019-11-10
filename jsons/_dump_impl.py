@@ -15,6 +15,8 @@ from jsons.exceptions import SerializationError, RecursionDetectedError
 
 def dump(obj: object,
          cls: Optional[type] = None,
+         *,
+         strict: bool = False,
          fork_inst: Optional[type] = StateHolder,
          **kwargs) -> object:
     """
@@ -31,6 +33,8 @@ def dump(obj: object,
     ``obj``.
     :param obj: a Python instance of any sort.
     :param cls: if given, ``obj`` will be dumped as if it is of type ``type``.
+    :param strict: a bool to determine if the serializer should be strict
+    (i.e. only dumping stuff that is known to ``cls``).
     :param fork_inst: if given, it uses this fork of ``JsonSerializable``.
     :param kwargs: the keyword args are passed on to the serializer function.
     :return: the serialized obj as a JSON type.
@@ -45,6 +49,7 @@ def dump(obj: object,
     kwargs_ = {
         'fork_inst': fork_inst,
         '_initial': False,
+        'strict': strict,
         **kwargs
     }
     announce_class(cls_, fork_inst=fork_inst)

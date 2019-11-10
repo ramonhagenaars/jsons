@@ -25,6 +25,7 @@ from jsons._common_impl import (
 def load(
         json_obj: object,
         cls: Optional[Type[T]] = None,
+        *,
         strict: bool = False,
         fork_inst: Optional[type] = StateHolder,
         attr_getters: Optional[Dict[str, Callable[[], object]]] = None,

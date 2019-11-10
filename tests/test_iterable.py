@@ -25,8 +25,8 @@ class TestIterable(TestCase):
 
         l = [B(a=1, b=2), B(a=3, b=4)]
 
-        dumped1 = jsons.dump(l, List[A])
-        dumped2 = jsons.dump(l, List[B])
+        dumped1 = jsons.dump(l, List[A], strict=True)
+        dumped2 = jsons.dump(l, List[B], strict=True)
 
         expected1 = [{'a': 1}, {'a': 3}]
         expected2 = [{'a': 1, 'b': 2}, {'a': 3, 'b': 4}]
@@ -37,7 +37,7 @@ class TestIterable(TestCase):
     def test_dump_tuple_with_cls(self):
         t = (1, '2', 3, '4')
 
-        dumped = jsons.dump(t, Tuple[int, str, int, int])
+        dumped = jsons.dump(t, Tuple[int, str, int, int], strict=True)
 
         expected = [1, '2', 3, 4]  # Note that the last element is an int.
 
@@ -47,4 +47,4 @@ class TestIterable(TestCase):
         t = (1, '2', 3, '4')
 
         with self.assertRaises(SerializationError):
-            jsons.dump(t, Tuple[int, str, int])  # Not enough types.
+            jsons.dump(t, Tuple[int, str, int], strict=True)  # Not enough types.
