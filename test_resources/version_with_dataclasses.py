@@ -24,3 +24,13 @@ class NamedTupleWithUnion(NamedTuple):
 
 class NamedTupleWithAny(NamedTuple):
     arg: Any
+
+
+@dataclass
+class Parent:
+    a: int
+
+
+@dataclass
+class Child(Parent):
+    b: int

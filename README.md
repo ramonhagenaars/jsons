@@ -84,6 +84,11 @@ list_of_tuples = jsons.load(some_dict, List[Tuple[AClass, AnotherClass]])
 
 ## Recent updates
 
+### 1.1.0
+
+  - Feature: When using ``dump(obj, cls=x)``, ``x`` can now also be just a dataclass (previously, only a class with ``__slots__``).
+  
+
 ### 1.0.0
 
   - Feature: Added a serializer/deserializer for `time`.

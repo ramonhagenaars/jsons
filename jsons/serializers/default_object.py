@@ -1,7 +1,7 @@
 from datetime import datetime, timezone
+from inspect import isfunction
 from typing import Optional, Callable, Union, MutableSequence, Tuple
 
-from jsons._cache import cached
 from jsons._common_impl import get_class_name, META_ATTR
 from jsons._datetime_impl import to_str
 from jsons.classes import JsonSerializable
@@ -48,7 +48,7 @@ def default_object_serializer(
     """
     if obj is None:
         return obj
-    strip_attr = strip_attr or []
+    strip_attr = strip_attr or tuple()
     if (not isinstance(strip_attr, MutableSequence)
             and not isinstance(strip_attr, tuple)):
         strip_attr = (strip_attr,)
@@ -87,25 +87,41 @@ def _get_dict_from_obj(
         strip_attr=False,
         *_,
         **__) -> dict:
+    attributes = _get_attributes(obj.__class__, dir(obj), cls, strip_privates,
+                                 strip_properties, strip_class_variables,
+                                 strip_attr)
+
+    return {attr: obj.__getattribute__(attr) for attr in attributes}
+
+
+def _get_attributes(
+        obj_cls,
+        obj_dir,
+        cls,
+        strip_privates,
+        strip_properties,
+        strip_class_variables,
+        strip_attr):
     strip_attr = tuple(strip_attr) + _ABC_ATTRS
     excluded_elems = dir(JsonSerializable)
-    props, other_cls_vars = _get_class_props(obj.__class__)
-    # Make sure to get the slots of cls, not of any parent:
-    slots = cls.__slots__ if '__slots__' in cls.__dict__ else {}
-    return {attr: obj.__getattribute__(attr) for attr in dir(obj)
+    props, other_cls_vars = _get_class_props(obj_cls)
+    if '__slots__' in cls.__dict__:
+        slots = cls.__slots__
+    else:
+        slots = getattr(cls, '__dataclass_fields__', {})
+    return [attr for attr in obj_dir
             if not attr.startswith('__')
             and not (strip_privates and attr.startswith('_'))
             and not (strip_properties and attr in props)
             and not (strip_class_variables and attr in other_cls_vars)
             and attr not in strip_attr
             and attr != 'json'
-            and not isinstance(obj.__getattribute__(attr), Callable)
+            and not isfunction(getattr(cls, attr, None))
             and (not slots or attr in slots)
-            and attr not in excluded_elems}
+            and attr not in excluded_elems]
 
 
-@cached
-def _get_class_props(cls):
+def _get_class_props(cls) -> Tuple[list, list]:
     props = []
     other_cls_vars = []
     for n, v in _get_complete_class_dict(cls).items():
@@ -114,7 +130,7 @@ def _get_class_props(cls):
     return props, other_cls_vars
 
 
-def _get_complete_class_dict(cls):
+def _get_complete_class_dict(cls) -> dict:
     cls_dict = {}
     # Loop reversed so values of sub-classes override those of super-classes.
     for cls_or_elder in reversed(cls.mro()):

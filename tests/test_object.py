@@ -183,9 +183,9 @@ class TestObject(TestCase):
         c = Child('John', 'William')
         dumped1 = jsons.dump(c)
         dumped2 = jsons.dump(c, Parent)
-        self.assertDictEqual(dumped1, {'child_name': 'John',
-                                       'parent_name': 'William'})
-        self.assertDictEqual(dumped2, {'parent_name': 'William'})
+        self.assertDictEqual({'child_name': 'John',
+                              'parent_name': 'William'}, dumped1)
+        self.assertDictEqual({'parent_name': 'William'}, dumped2)
 
     def test_dump_as_parent_type_without_slots(self):
         class Parent:
