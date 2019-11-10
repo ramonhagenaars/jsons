@@ -38,19 +38,25 @@ def dump(obj: object,
     kwargs = _check_for_recursion(obj, kwargs)
     cls_ = cls or obj.__class__
     serializer = get_serializer(cls_, fork_inst)
+
+    # Is this the initial call or a nested?
+    initial = kwargs.get('_initial', True)
+
     kwargs_ = {
         'fork_inst': fork_inst,
+        '_initial': False,
         **kwargs
     }
     announce_class(cls_, fork_inst=fork_inst)
     kwargs['_objects'].remove(id(obj))
-    return _do_dump(obj, serializer, cls, kwargs_)
+    return _do_dump(obj, serializer, cls, initial, kwargs_)
 
 
-def _do_dump(obj, serializer, cls, kwargs):
+def _do_dump(obj, serializer, cls, initial, kwargs):
     try:
         result = serializer(obj, cls=cls, **kwargs)
-        clear()
+        if initial:
+            clear()
         return result
     except Exception as err:
         clear()
