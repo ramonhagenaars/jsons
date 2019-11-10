@@ -1,7 +1,8 @@
 from datetime import datetime, timezone
 from inspect import isfunction
-from typing import Optional, Callable, Union, MutableSequence, Tuple
+from typing import Optional, Callable, Union, MutableSequence, Tuple, List, Dict
 
+from jsons._cache import cached
 from jsons._common_impl import get_class_name, META_ATTR
 from jsons._datetime_impl import to_str
 from jsons.classes import JsonSerializable
@@ -21,7 +22,7 @@ def default_object_serializer(
         strip_class_variables: bool = False,
         strip_attr: Union[str, MutableSequence[str], Tuple[str]] = None,
         verbose: Union[Verbosity, bool] = False,
-        **kwargs) -> dict:
+        **kwargs) -> Optional[dict]:
     """
     Serialize the given ``obj`` to a dict. All values within ``obj`` are also
     serialized. If ``key_transformer`` is given, it will be used to transform
@@ -50,27 +51,27 @@ def default_object_serializer(
     if obj is None:
         return obj
 
-    # TODO move to private function
-    if (cls and not hasattr(cls, '__slots__')
-            and not hasattr(cls, '__dataclass_fields__')):
-        raise SerializationError('Invalid type: "{}". Only dataclasses or '
-                                 'types that have a __slots__ defined are '
-                                 'allowed when providing "cls".'
-                                 .format(get_class_name(cls, fork_inst=kwargs['fork_inst'], fully_qualified=True)))
+    _check_slots(cls, kwargs)
+    strip_attr = _normalize_strip_attr(strip_attr)
 
-    strip_attr = strip_attr or tuple()
-    if (not isinstance(strip_attr, MutableSequence)
-            and not isinstance(strip_attr, tuple)):
-        strip_attr = (strip_attr,)
+    if cls:
+        attributes = _get_attributes_from_class(
+            cls, strip_privates, strip_properties, strip_class_variables,
+            strip_attr)
+    else:
+        attributes = _get_attributes_from_object(
+            obj, strip_privates, strip_properties, strip_class_variables,
+            strip_attr)
+        cls = obj.__class__
 
-    cls = cls or obj.__class__
-    obj_dict = _get_dict_from_obj(obj, cls, strip_privates, strip_properties,
-                                  strip_class_variables, strip_attr, **kwargs)
+    obj_dict = {attr: obj.__getattribute__(attr) for attr, _ in attributes}
+
     kwargs_ = {**kwargs, 'verbose': verbose}
     verbose = Verbosity.from_value(verbose)
     if Verbosity.WITH_CLASS_INFO in verbose:
         # Set a flag in kwargs to temporarily store -cls.
         kwargs_['_store_cls'] = True
+
     result = default_dict_serializer(
         obj_dict,
         cls,
@@ -89,38 +90,71 @@ def default_object_serializer(
     return result
 
 
-def _get_dict_from_obj(
-        obj,
-        cls=None,
-        strip_privates=False,
-        strip_properties=False,
-        strip_class_variables=False,
-        strip_attr=False,
-        *_,
-        **__) -> dict:
-    attributes = _get_attributes(obj.__class__, dir(obj), cls, strip_privates,
-                                 strip_properties, strip_class_variables,
-                                 strip_attr)
-
-    return {attr: obj.__getattribute__(attr) for attr in attributes}
+def _check_slots(cls: type, kwargs):
+    # Check for __slots__ or __dataclass_fields__.
+    if (cls and not hasattr(cls, '__slots__')  # TODO also allow __annotations__
+            and not hasattr(cls, '__dataclass_fields__')):
+        raise SerializationError('Invalid type: "{}". Only dataclasses or '
+                                 'types that have a __slots__ defined are '
+                                 'allowed when providing "cls".'
+                                 .format(get_class_name(cls, fork_inst=kwargs['fork_inst'], fully_qualified=True)))
 
 
-def _get_attributes(
-        obj_cls,
-        obj_dir,
-        cls,
-        strip_privates,
-        strip_properties,
-        strip_class_variables,
-        strip_attr):
-    strip_attr = tuple(strip_attr) + _ABC_ATTRS
-    excluded_elems = dir(JsonSerializable)
-    props, other_cls_vars = _get_class_props(obj_cls)
+def _normalize_strip_attr(strip_attr) -> tuple:
+    # Make sure that strip_attr is always a tuple.
+    strip_attr = strip_attr or tuple()
+    if (not isinstance(strip_attr, MutableSequence)
+            and not isinstance(strip_attr, tuple)):
+        strip_attr = (strip_attr,)
+    return strip_attr
+
+
+@cached
+def _get_attributes_from_class(
+        cls: type,
+        strip_privates: bool,
+        strip_properties: bool,
+        strip_class_variables: bool,
+        strip_attr: tuple) -> List[Tuple[str, type]]:
+    # Get the attributes that are known in the class.
     if '__slots__' in cls.__dict__:
-        slots = cls.__slots__
+        attributes = {attr: None for attr in cls.__slots__}
+    elif hasattr(cls, '__annotations__'):
+        attributes = cls.__annotations__
     else:
-        slots = getattr(cls, '__dataclass_fields__', {})
-    return [attr for attr in obj_dir
+        attributes = {}
+    return _filter_attributes(cls, attributes, strip_privates,
+                              strip_properties, strip_class_variables,
+                              strip_attr)
+
+
+def _get_attributes_from_object(
+        obj: object,
+        strip_privates: bool,
+        strip_properties: bool,
+        strip_class_variables: bool,
+        strip_attr: tuple) -> List[Tuple[str, type]]:
+    # Get the attributes that are known in the object.
+    attributes = {attr: None for attr in dir(obj)}
+    # TODO maybe check if we can still get the types of these attributes
+    cls = obj.__class__
+    return _filter_attributes(cls, attributes, strip_privates,
+                              strip_properties, strip_class_variables,
+                              strip_attr)
+
+
+def _filter_attributes(
+        cls: type,
+        attributes: Dict[str, Optional[type]],
+        strip_privates: bool,
+        strip_properties: bool,
+        strip_class_variables: bool,
+        strip_attr: tuple) -> List[Tuple[str, type]]:
+    # Filter the given attributes with the given preferences.
+    strip_attr = strip_attr + _ABC_ATTRS
+    excluded_elems = dir(JsonSerializable)
+    props, other_cls_vars = _get_class_props(cls)
+    return [(attr, type_) for attr, type_ in attributes.items()
             if not attr.startswith('__')
             and not (strip_privates and attr.startswith('_'))
             and not (strip_properties and attr in props)
@@ -128,11 +162,10 @@ def _get_attributes(
             and attr not in strip_attr
             and attr != 'json'
             and not isfunction(getattr(cls, attr, None))
-            and (not slots or attr in slots)
             and attr not in excluded_elems]
 
 
-def _get_class_props(cls) -> Tuple[list, list]:
+def _get_class_props(cls: type) -> Tuple[list, list]:
     props = []
     other_cls_vars = []
     for n, v in _get_complete_class_dict(cls).items():
@@ -141,7 +174,7 @@ def _get_class_props(cls) -> Tuple[list, list]:
     return props, other_cls_vars
 
 
-def _get_complete_class_dict(cls) -> dict:
+def _get_complete_class_dict(cls: type) -> dict:
     cls_dict = {}
     # Loop reversed so values of sub-classes override those of super-classes.
     for cls_or_elder in reversed(cls.mro()):
