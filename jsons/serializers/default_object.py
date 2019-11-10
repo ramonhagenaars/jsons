@@ -6,6 +6,7 @@ from jsons._common_impl import get_class_name, META_ATTR
 from jsons._datetime_impl import to_str
 from jsons.classes import JsonSerializable
 from jsons.classes.verbosity import Verbosity
+from jsons.exceptions import SerializationError
 from jsons.serializers.default_dict import default_dict_serializer
 
 
@@ -48,10 +49,20 @@ def default_object_serializer(
     """
     if obj is None:
         return obj
+
+    # TODO move to private function
+    if (cls and not hasattr(cls, '__slots__')
+            and not hasattr(cls, '__dataclass_fields__')):
+        raise SerializationError('Invalid type: "{}". Only dataclasses or '
+                                 'types that have a __slots__ defined are '
+                                 'allowed when providing "cls".'
+                                 .format(get_class_name(cls, fork_inst=kwargs['fork_inst'], fully_qualified=True)))
+
     strip_attr = strip_attr or tuple()
     if (not isinstance(strip_attr, MutableSequence)
             and not isinstance(strip_attr, tuple)):
         strip_attr = (strip_attr,)
+
     cls = cls or obj.__class__
     obj_dict = _get_dict_from_obj(obj, cls, strip_privates, strip_properties,
                                   strip_class_variables, strip_attr, **kwargs)

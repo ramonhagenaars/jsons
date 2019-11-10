@@ -36,13 +36,6 @@ def dump(obj: object,
     :return: the serialized obj as a JSON type.
     """
     kwargs = _check_for_recursion(obj, kwargs)
-    if (cls and not hasattr(cls, '__slots__')
-            and not hasattr(cls, '__dataclass_fields__')):
-        raise SerializationError('Invalid type: "{}". Only dataclasses or '
-                                 'types that have a __slots__ defined are '
-                                 'allowed when providing "cls".'
-                         .format(get_class_name(cls, fork_inst=fork_inst,
-                                                fully_qualified=True)))
     cls_ = cls or obj.__class__
     serializer = get_serializer(cls_, fork_inst)
     kwargs_ = {
