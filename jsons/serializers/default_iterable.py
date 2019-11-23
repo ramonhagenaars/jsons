@@ -1,9 +1,11 @@
 from collections.abc import Iterable
+from multiprocessing import Process
 from typing import Tuple
 
 from typish import get_args
 
 from jsons._dump_impl import dump
+from jsons._multitasking import multi_task
 from jsons.exceptions import SerializationError
 
 
@@ -12,6 +14,8 @@ def default_iterable_serializer(
         cls: type = None,
         *,
         strict: bool = False,
+        tasks: int = 1,
+        task_type: type = Process,
         **kwargs) -> list:
     """
     Serialize the given ``obj`` to a list of serialized objects.
@@ -19,6 +23,8 @@ def default_iterable_serializer(
     :param cls: the (subscripted) type of the iterable.
     :param strict: a bool to determine if the serializer should be strict
     (i.e. only dumping stuff that is known to ``cls``).
+    :param tasks: the allowed number of tasks (threads or processes).
+    :param task_type: the type that is used for multitasking.
     :param kwargs: any keyword arguments that may be given to the serialization
     process.
     :return: a list of which all elements are serialized.
@@ -31,8 +37,15 @@ def default_iterable_serializer(
         subclasses = _get_subclasses(obj, cls)
     else:
         subclasses = _get_subclasses(obj, None)
-    return [dump(elem, cls=subclasses[i], **kwargs_)
-            for i, elem in enumerate(obj)]
+
+    if tasks < 2:
+        result = [dump(elem, cls=subclasses[i], **kwargs_)
+                  for i, elem in enumerate(obj)]
+    else:
+        zipped_objs = list(zip(obj, subclasses))
+        result = multi_task(f, zipped_objs, tasks, task_type, **kwargs_)
+
+    return result
 
 
 def _get_subclasses(obj: Iterable, cls: type = None) -> Tuple[type, ...]:
@@ -51,3 +64,9 @@ def _get_subclasses(obj: Iterable, cls: type = None) -> Tuple[type, ...]:
                .format(len(subclasses), cls, len(obj), len(obj)))
         raise SerializationError(msg)
     return subclasses
+
+
+def f(obj_cls_tuple: Tuple[object, type], *args, **kwargs):
+    kwargs_ = {**kwargs}
+    kwargs_['tasks'] = 1
+    return dump(*obj_cls_tuple, *args, **kwargs_)

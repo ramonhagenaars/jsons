@@ -1,6 +1,9 @@
-from multiprocessing import Process, Manager
+from multiprocessing import Process
+
 from typish import get_args
+
 from jsons._load_impl import load
+from jsons._multitasking import multi_task
 from jsons.exceptions import JsonsError
 
 
@@ -30,72 +33,9 @@ def default_list_deserializer(
         kwargs_['_inferred_cls'] = True
 
     if tasks == 1:
-        result = _single_task(obj, cls_, **kwargs_)
+        result = [load(elem, cls=cls_, tasks=1, **kwargs_) for elem in obj]
     elif tasks > 1:
-        result = _multi_task(obj, cls_, tasks, task_type, **kwargs_)
+        result = multi_task(load, obj, tasks, task_type, cls_, **kwargs_)
     else:
         raise JsonsError('Invalid number of tasks: {}'.format(tasks))
     return result
-
-
-def _single_task(
-        # Load the elements of the list in a single task.
-        obj: list,
-        cls: type,
-        **kwargs):
-    return [load(x, cls, tasks=1, **kwargs) for x in obj]
-
-
-def _multi_task(
-        obj: list,
-        cls: type,
-        tasks: int,
-        task_type: type,
-        **kwargs):
-    # Load the elements of the list with multiple tasks.
-
-    # First, create a list with the correct size for the tasks to fill.
-    if issubclass(task_type, Process):
-        manager = Manager()
-        result = manager.list([0] * len(obj))
-    else:
-        result = [0] * len(obj)
-
-    tasks_used = min(tasks, len(obj))
-    tasks_left = tasks - tasks_used or 1
-
-    # Divide the list in parts.
-    slice_size = int(len(obj) / tasks_used)
-    rest_size = len(obj) % tasks_used
-
-    # Start the tasks and store them to join them later.
-    tasks_instances = []
-    for i in range(tasks_used):
-        start = i
-        end = (i + 1) * slice_size
-        if i == tasks_used - 1:
-            end += rest_size
-        task = task_type(
-            target=_fill,
-            args=(obj, cls, result, start, end, tasks_left, kwargs))
-        task.start()
-        tasks_instances.append(task)
-
-    for task in tasks_instances:
-        task.join()
-
-    return list(result)
-
-
-def _fill(
-        obj: list,
-        cls: type,
-        result: list,
-        start: int,
-        end: int,
-        tasks: int,
-        kwargs: dict):
-    # Fill result with the loaded objects of obj within the range start - end.
-    for i_ in range(start, end):
-        loaded = load(obj[i_], cls, tasks=tasks, **kwargs)
-        result[i_] = loaded

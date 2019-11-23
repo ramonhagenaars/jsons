@@ -35,6 +35,31 @@ class TestList(TestCase):
         loaded = jsons.load(dumped)
         self.assertEqual(Child, type(loaded.c2s[0]))
 
+    # Note: mock.patch won't work because of a subclass check.
+    def test_dump_list_multiprocess(self):
+
+        class ProcessMock:
+            def __init__(self, target, args, *_, **__):
+                # Make no super call.
+                self.target = target
+                self.args = args
+
+            def start(self):
+                return self.target(*self.args)
+
+            def join(self, *_, **__) -> None:
+                pass
+
+        class ManagerMock:
+            def list(self, l, *_, **__):
+                return l
+
+        jsons.deserializers.default_list.Manager = ManagerMock
+
+        dumped = jsons.dump(['1', '1', '1', '1'], List[int], strict=True,
+                            tasks=2, task_type=ProcessMock)
+        self.assertEqual([1, 1, 1, 1], dumped)
+
     def test_load_list(self):
         dat = datetime.datetime(year=2018, month=7, day=8, hour=21, minute=34,
                                 tzinfo=datetime.timezone.utc)
@@ -83,7 +108,7 @@ class TestList(TestCase):
     # Note: mock.patch won't work because of a subclass check.
     def test_load_list_multiprocess(self):
 
-        class ProcessMock(Process):
+        class ProcessMock:
             def __init__(self, target, args, *_, **__):
                 # Make no super call.
                 self.target = target
