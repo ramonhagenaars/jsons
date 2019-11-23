@@ -1,8 +1,6 @@
 from typing import Optional, Callable, Dict
-from typish import get_type
-from jsons._common_impl import get_class_name
+
 from jsons._dump_impl import dump
-from jsons.exceptions import RecursionDetectedError, SerializationError
 
 
 def default_dict_serializer(
@@ -34,44 +32,15 @@ def default_dict_serializer(
     """
     result = dict()
     types = types or dict()
-    fork_inst = kwargs['fork_inst']
     for key in obj:
-        dumped_elem = None
         obj_ = obj[key]
         cls_ = types.get(key, None)
-        try:
-            dumped_elem = dump(obj_,
-                               cls=cls_,
-                               key_transformer=key_transformer,
-                               strip_nulls=strip_nulls, **kwargs)
-
-            _store_cls_info(dumped_elem, obj_, kwargs)
-        except RecursionDetectedError:
-            fork_inst._warn('Recursive structure detected in attribute "{}" '
-                            'of object of type "{}", ignoring the attribute.'
-                            .format(key, get_class_name(cls)))
-        except SerializationError as err:
-            if strict:
-                raise
-            else:
-                fork_inst._warn('Failed to dump attribute "{}" of object of '
-                                'type "{}". Reason: {}. Ignoring the '
-                                'attribute.'
-                                .format(key, get_class_name(cls), err.message))
-                break
+        dumped_elem = dump(obj_,
+                           cls=cls_,
+                           key_transformer=key_transformer,
+                           strip_nulls=strip_nulls, **kwargs)
         if not (strip_nulls and dumped_elem is None):
             if key_transformer:
                 key = key_transformer(key)
             result[key] = dumped_elem
     return result
-
-
-def _store_cls_info(result: object, original_obj: dict, kwargs):
-    if kwargs.get('_store_cls', None) and isinstance(result, dict):
-        cls = get_type(original_obj)
-        if cls.__module__ == 'typing':
-            cls_name = repr(cls)
-        else:
-            cls_name = get_class_name(cls, fully_qualified=True,
-                                      fork_inst=kwargs['fork_inst'])
-        result['-cls'] = cls_name
