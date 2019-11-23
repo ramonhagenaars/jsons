@@ -2,6 +2,7 @@ from datetime import datetime
 from unittest import TestCase
 import jsons
 from jsons import DeserializationError
+from jsons.exceptions import SerializationError
 
 
 class TestPrimitive(TestCase):
@@ -20,6 +21,25 @@ class TestPrimitive(TestCase):
 
     def test_dump_none(self):
         self.assertEqual(None, jsons.dump(None))
+
+    def test_dump_and_cast(self):
+
+        class C:
+            def __init__(self, x: int):
+                self.x = x
+
+        self.assertEqual(42, jsons.dump('42', int))
+        self.assertEqual(42.0, jsons.dump('42', float))
+        self.assertEqual('42', jsons.dump(42, str))
+        self.assertEqual(True, jsons.dump(42, bool))
+
+        with self.assertRaises(SerializationError):
+            jsons.dump('fortytwo', int)
+
+        try:
+            jsons.dump('fortytwo', int)
+        except SerializationError as err:
+            self.assertTrue('fortytwo' in err.message)
 
     def test_load_str(self):
         self.assertEqual('some string', jsons.load('some string'))

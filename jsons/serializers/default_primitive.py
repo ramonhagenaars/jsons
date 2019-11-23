@@ -18,5 +18,5 @@ def default_primitive_serializer(obj: object,
             result = cls(obj)
         except ValueError:
             raise SerializationError('Could not cast {} into {}'
-                                     .format(obj, cls.__name__), obj, cls)
+                                     .format(obj, cls.__name__))
     return result
