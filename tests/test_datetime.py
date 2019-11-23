@@ -2,6 +2,8 @@ import datetime
 import warnings
 from unittest import TestCase
 import jsons
+from jsons._common_impl import StateHolder
+from jsons._datetime_impl import get_offset_str
 
 
 class TestDatetime(TestCase):
@@ -82,3 +84,20 @@ class TestDatetime(TestCase):
                                 tzinfo=tzinfo)
         loaded = jsons.load('2018-07-08T21:34:00-02:00')
         self.assertEqual(loaded, dat)
+
+    def test_get_offset_str(self):
+        dat = datetime.datetime(year=2018, month=7, day=8, hour=21, minute=34,
+                                tzinfo=datetime.timezone.utc)
+
+        td = datetime.timedelta(hours=3)
+
+        dat2 = datetime.datetime(year=2018, month=7, day=8, hour=21, minute=34,
+                                tzinfo=datetime.timezone(td))
+
+        offset_str_dat = get_offset_str(dat, StateHolder)
+        offset_str_dat2 = get_offset_str(dat2, StateHolder)
+        offset_str_td = get_offset_str(td, StateHolder)
+
+        self.assertEqual('Z', offset_str_dat)
+        self.assertEqual('+03:00', offset_str_dat2)
+        self.assertEqual('+03:00', offset_str_td)
