@@ -3,7 +3,9 @@ from multiprocessing import Process
 from threading import Thread
 from typing import List
 from unittest import TestCase
+
 import jsons
+from jsons import _multitasking
 from jsons.exceptions import JsonsError
 
 
@@ -38,7 +40,7 @@ class TestList(TestCase):
     # Note: mock.patch won't work because of a subclass check.
     def test_dump_list_multiprocess(self):
 
-        class ProcessMock:
+        class ProcessMock(Process):
             def __init__(self, target, args, *_, **__):
                 # Make no super call.
                 self.target = target
@@ -54,7 +56,7 @@ class TestList(TestCase):
             def list(self, l, *_, **__):
                 return l
 
-        jsons.deserializers.default_list.Manager = ManagerMock
+        jsons._multitasking.Manager = ManagerMock
 
         dumped = jsons.dump(['1', '1', '1', '1'], List[int], strict=True,
                             tasks=2, task_type=ProcessMock)
@@ -108,7 +110,7 @@ class TestList(TestCase):
     # Note: mock.patch won't work because of a subclass check.
     def test_load_list_multiprocess(self):
 
-        class ProcessMock:
+        class ProcessMock(Process):
             def __init__(self, target, args, *_, **__):
                 # Make no super call.
                 self.target = target
@@ -124,7 +126,7 @@ class TestList(TestCase):
             def list(self, l, *_, **__):
                 return l
 
-        jsons.deserializers.default_list.Manager = ManagerMock
+        jsons._multitasking.Manager = ManagerMock
 
         self.assertEqual([1, 1, 1, 1], jsons.load(['1', '1', '1', '1'],
                                                   List[int], tasks=2,
