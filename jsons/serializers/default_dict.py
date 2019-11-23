@@ -15,7 +15,7 @@ def default_dict_serializer(
     """
     Serialize the given ``obj`` to a dict of serialized objects.
     :param obj: the dict that is to be serialized.
-    :param cls: the type of ``obj``; ``obj`` is dumped as if of that type.
+    :param cls: not used.
     :param strict: if ``True`` the serialization will raise upon any the
     failure of any attribute. Otherwise it continues with a warning.
     :param strict: a bool to determine if the serializer should be strict
@@ -38,7 +38,9 @@ def default_dict_serializer(
         dumped_elem = dump(obj_,
                            cls=cls_,
                            key_transformer=key_transformer,
-                           strip_nulls=strip_nulls, **kwargs)
+                           strip_nulls=strip_nulls,
+                           strict=strict,
+                           **kwargs)
         if not (strip_nulls and dumped_elem is None):
             if key_transformer:
                 key = key_transformer(key)
