@@ -37,7 +37,7 @@ def get_offset_str(
     if isinstance(obj, datetime):
         result = _datetime_offset_str(obj, fork_inst)
     elif isinstance(obj, timedelta):
-        result = _timedelta_offset_str(obj, fork_inst)
+        result = _timedelta_offset_str(obj)
     return result
 
 
@@ -74,11 +74,11 @@ def _datetime_offset_str(obj: datetime, fork_inst: type) -> str:
     offset = 'Z'
     if tzone.tzname(None) not in ('UTC', 'UTC+00:00'):
         tdelta = tzone.utcoffset(None) or tzone.adjusted_offset
-        offset = _timedelta_offset_str(tdelta, fork_inst)
+        offset = _timedelta_offset_str(tdelta)
     return offset
 
 
-def _timedelta_offset_str(tdelta: timedelta, fork_inst: type) -> str:
+def _timedelta_offset_str(tdelta: timedelta) -> str:
     """
     Return a textual offset (e.g. +01:00 or Z) for the given timedelta.
     :param tdelta: the timedelta instance.
