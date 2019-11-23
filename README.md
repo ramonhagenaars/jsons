@@ -91,6 +91,7 @@ list_of_tuples = jsons.load(some_dict, List[Tuple[AClass, AnotherClass]])
   - Feature: Added ``strict`` parameter to ``dump`` to indicate that dumping a certain ``cls`` will ignore any extra data.
   - Feature: Dumping iterables with generic types (e.g. ``dump(obj, List[str])``) will now dump with respect to that types (if ``strict``)
   - Feature: The ``default_dict`` serializer now optionally accepts types: ``Optional[Dict[str, type]]``.
+  - Bugfix: ``set_validator`` with multiple types did not work.
 
 ### 1.0.0
 
