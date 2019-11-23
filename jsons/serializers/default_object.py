@@ -5,7 +5,7 @@ from typing import Optional, Callable, Union, MutableSequence, Tuple, Dict
 from typish import get_type
 
 from jsons._cache import cached
-from jsons._common_impl import get_class_name, META_ATTR
+from jsons._common_impl import get_class_name, META_ATTR, StateHolder
 from jsons._datetime_impl import to_str
 from jsons._dump_impl import dump
 from jsons.classes import JsonSerializable
@@ -25,6 +25,7 @@ def default_object_serializer(
         strip_attr: Union[str, MutableSequence[str], Tuple[str]] = None,
         verbose: Union[Verbosity, bool] = False,
         strict: bool = False,
+        fork_inst: Optional[type] = StateHolder,
         **kwargs) -> Optional[dict]:
     """
     Serialize the given ``obj`` to a dict. All values within ``obj`` are also
@@ -49,13 +50,14 @@ def default_object_serializer(
     information (e.g. on how to deserialize).
     :param strict: a bool to determine if the serializer should be strict
     (i.e. only dumping stuff that is known to ``cls``).
+    :param fork_inst: if given, it uses this fork of ``JsonSerializable``.
     :param kwargs: any keyword arguments that are to be passed to the
     serializer functions.
     :return: a Python dict holding the values of ``obj``.
     """
     if obj is None:
         return obj
-    _check_slots(cls, kwargs)
+    _check_slots(cls, fork_inst)
     strip_attr = _normalize_strip_attr(strip_attr)
     if strict and cls:
         attributes = _get_attributes_from_class(
@@ -69,14 +71,46 @@ def default_object_serializer(
     verbose = Verbosity.from_value(verbose)
     kwargs_ = {
         **kwargs,
+        'fork_inst': fork_inst,
         'verbose': verbose,
         'strict': strict,
         # Set a flag in kwargs to temporarily store -cls:
         '_store_cls': Verbosity.WITH_CLASS_INFO in verbose
     }
 
+    result = _do_serialize(obj=obj,
+                           cls=cls,
+                           attributes=attributes,
+                           kwargs=kwargs_,
+                           key_transformer=key_transformer,
+                           strip_nulls=strip_nulls,
+                           strip_privates=strip_privates,
+                           strip_properties=strip_properties,
+                           strip_class_variables=strip_class_variables,
+                           strip_attr=strip_attr,
+                           strict=strict,
+                           fork_inst=fork_inst)
+
+    cls_name = get_class_name(cls, fully_qualified=True, fork_inst=fork_inst)
+    if not kwargs.get('_store_cls'):
+        result = _get_dict_with_meta(result, cls_name, verbose, fork_inst)
+    return result
+
+
+def _do_serialize(
+        obj: object,
+        cls: type,
+        attributes: Dict[str, Optional[type]],
+        kwargs: dict,
+        key_transformer: Optional[Callable[[str], str]] = None,
+        strip_nulls: bool = False,
+        strip_privates: bool = False,
+        strip_properties: bool = False,
+        strip_class_variables: bool = False,
+        strip_attr: Union[str, MutableSequence[str], Tuple[str]] = None,
+        strict: bool = False,
+        fork_inst: Optional[type] = StateHolder) -> Dict[str, object]:
     result = dict()
-    fork_inst = kwargs['fork_inst']
     for attr_name, cls_ in attributes.items():
         attr = obj.__getattribute__(attr_name)
         dumped_elem = None
@@ -89,9 +123,9 @@ def default_object_serializer(
                                strip_properties=strip_properties,
                                strip_class_variables=strip_class_variables,
                                strip_attr=strip_attr,
-                               **kwargs_)
+                               **kwargs)
 
-            _store_cls_info(dumped_elem, attr, kwargs_)
+            _store_cls_info(dumped_elem, attr, kwargs)
         except RecursionDetectedError:
             fork_inst._warn('Recursive structure detected in attribute "{}" '
                             'of object of type "{}", ignoring the attribute.'
@@ -109,13 +143,10 @@ def default_object_serializer(
             if key_transformer:
                 attr_name = key_transformer(attr_name)
             result[attr_name] = dumped_elem
-    cls_name = get_class_name(cls, fully_qualified=True, fork_inst=fork_inst)
-    if not kwargs.get('_store_cls'):
-        result = _get_dict_with_meta(result, cls_name, verbose, fork_inst)
     return result
 
 
-def _check_slots(cls: type, kwargs):
+def _check_slots(cls: type, fork_inst: Optional[type]):
     # Check for __slots__ or __dataclass_fields__.
     if (cls and not hasattr(cls, '__slots__')
             and not hasattr(cls, '__annotations__')
@@ -123,7 +154,7 @@ def _check_slots(cls: type, kwargs):
         raise SerializationError('Invalid type: "{}". Only dataclasses or '
                                  'types that have a __slots__ defined are '
                                  'allowed when providing "cls".'
-                                 .format(get_class_name(cls, fork_inst=kwargs['fork_inst'], fully_qualified=True)))
+                                 .format(get_class_name(cls, fork_inst=fork_inst, fully_qualified=True)))
 
 
 def _normalize_strip_attr(strip_attr) -> tuple:
