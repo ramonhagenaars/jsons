@@ -86,11 +86,13 @@ list_of_tuples = jsons.load(some_dict, List[Tuple[AClass, AnotherClass]])
 
 ### 1.1.0
 
-  - Feature: When using ``dump(obj, cls=x)``, ``x`` can now be any class (previously, only a class with ``__slots__``).
-  - Feature: Primitives are now cast if possible when dumping (e.g. ``dump(5, str)``).
   - Feature: Added ``strict`` parameter to ``dump`` to indicate that dumping a certain ``cls`` will ignore any extra data.
+  - Feature: When using ``dump(obj, cls=x)``, ``x`` can now be any class (previously, only a class with ``__slots__``).
+  - Feature: Support for dumping ``Decimal`` (thanks to herdigiorgi).
+  - Feature: Primitives are now cast if possible when dumping (e.g. ``dump(5, str)``).
   - Feature: Dumping iterables with generic types (e.g. ``dump(obj, List[str])``) will now dump with respect to that types (if ``strict``)
   - Feature: The ``default_dict`` serializer now optionally accepts types: ``Optional[Dict[str, type]]``.
+  - Change: Improved performance when dumping (using ``strict=True``).
   - Bugfix: ``set_validator`` with multiple types did not work.
 
 ### 1.0.0
@@ -132,3 +134,4 @@ suggestions:
   - [ahmetkucuk](https://github.com/ahmetkucuk)
   - [robinklaassen](https://github.com/robinklaassen)
   - [jochembroekhoff](https://github.com/jochembroekhoff)
+  - [herdigiorgi](https://github.com/herdigiorgi)
