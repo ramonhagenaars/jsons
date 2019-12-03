@@ -1,3 +1,4 @@
+[![PyPI version](https://img.shields.io/pypi/pyversions/jsons.svg)](https://img.shields.io/pypi/pyversions/jsons.svg)
 [![PyPI version](https://badge.fury.io/py/jsons.svg)](https://badge.fury.io/py/jsons)
 [![Docs](https://readthedocs.org/projects/jsons/badge/?version=latest)](https://jsons.readthedocs.io/en/latest/?badge=latest)
 [![Build Status](https://api.travis-ci.org/ramonhagenaars/jsons.svg?branch=master)](https://travis-ci.org/ramonhagenaars/jsons)
