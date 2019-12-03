@@ -187,23 +187,6 @@ class TestObject(TestCase):
                               'parent_name': 'William'}, dumped1)
         self.assertDictEqual({'parent_name': 'William'}, dumped2)
 
-    def test_dump_as_parent_type_without_slots(self):
-        class Parent:
-            pass
-
-            def __init__(self, pname):
-                self.parent_name = pname
-
-        class Child(Parent):
-            def __init__(self, cname, pname):
-                Parent.__init__(self, pname)
-                self.child_name = cname
-
-        c = Child('John', 'William')
-
-        with self.assertRaises(SerializationError):
-            jsons.dump(c, Parent)
-
     def test_dump_with_error(self):
         class C:
             @property
@@ -492,7 +475,6 @@ class TestObject(TestCase):
 
             # Note: in Python3.5 we cannot be sure that dumped1 contains x,
             # because of the unpredictable order of dicts.
-            # self.assertDictEqual({'x': 42}, dumped1)
 
             self.assertTrue('y' not in dumped1)
             warn_msg = w[0].message.args[0]

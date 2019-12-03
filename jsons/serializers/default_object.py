@@ -6,6 +6,7 @@ from typish import get_type
 
 from jsons._cache import cached
 from jsons._common_impl import get_class_name, META_ATTR, StateHolder
+from jsons._compatibility_impl import get_type_hints
 from jsons._datetime_impl import to_str
 from jsons._dump_impl import dump
 from jsons.classes import JsonSerializable
@@ -57,16 +58,15 @@ def default_object_serializer(
     """
     if obj is None:
         return obj
-    _check_slots(cls, fork_inst)
     strip_attr = _normalize_strip_attr(strip_attr)
-    if strict and cls:
+    if cls:
         attributes = _get_attributes_from_class(
             cls, strip_privates, strip_properties, strip_class_variables,
-            strip_attr)
+            strip_attr, strict)
     else:
         attributes = _get_attributes_from_object(
             obj, strip_privates, strip_properties, strip_class_variables,
-            strip_attr)
+            strip_attr, strict)
         cls = obj.__class__
     verbose = Verbosity.from_value(verbose)
     kwargs_ = {
@@ -146,17 +146,6 @@ def _do_serialize(
     return result
 
 
-def _check_slots(cls: type, fork_inst: Optional[type]):
-    # Check for __slots__ or __dataclass_fields__.
-    if (cls and not hasattr(cls, '__slots__')
-            and not hasattr(cls, '__annotations__')
-            and not hasattr(cls, '__dataclass_fields__')):
-        raise SerializationError('Invalid type: "{}". Only dataclasses or '
-                                 'types that have a __slots__ defined are '
-                                 'allowed when providing "cls".'
-                                 .format(get_class_name(cls, fork_inst=fork_inst, fully_qualified=True)))
-
-
 def _normalize_strip_attr(strip_attr) -> tuple:
     # Make sure that strip_attr is always a tuple.
     strip_attr = strip_attr or tuple()
@@ -172,9 +161,10 @@ def _get_attributes_from_class(
         strip_privates: bool,
         strip_properties: bool,
         strip_class_variables: bool,
-        strip_attr: tuple) -> Dict[str, Optional[type]]:
+        strip_attr: tuple,
+        strict: bool) -> Dict[str, Optional[type]]:
     # Get the attributes that are known in the class.
-    attributes_and_types = _get_attributes_and_types(cls)
+    attributes_and_types = _get_attributes_and_types(cls, strict)
     return _filter_attributes(cls, attributes_and_types, strip_privates,
                               strip_properties, strip_class_variables,
                               strip_attr)
@@ -185,10 +175,11 @@ def _get_attributes_from_object(
         strip_privates: bool,
         strip_properties: bool,
         strip_class_variables: bool,
-        strip_attr: tuple) -> Dict[str, Optional[type]]:
+        strip_attr: tuple,
+        strict: bool) -> Dict[str, Optional[type]]:
     # Get the attributes that are known in the object.
     cls = obj.__class__
-    attributes_and_types = _get_attributes_and_types(cls)
+    attributes_and_types = _get_attributes_and_types(cls, strict)
     attributes = {attr: attributes_and_types.get(attr, None)
                   for attr in dir(obj)}
     return _filter_attributes(cls, attributes, strip_privates,
@@ -197,13 +188,23 @@ def _get_attributes_from_object(
 
 
 @cached
-def _get_attributes_and_types(cls) -> Dict[str, Optional[type]]:
+def _get_attributes_and_types(cls: type,
+                              strict: bool) -> Dict[str, Optional[type]]:
     if '__slots__' in cls.__dict__:
         attributes = {attr: None for attr in cls.__slots__}
     elif hasattr(cls, '__annotations__'):
         attributes = cls.__annotations__
+    elif strict:
+        hints = get_type_hints(cls.__init__)
+        attributes = {k: hints[k] for k in hints if k != 'self'}
     else:
         attributes = {}
+
+    # Add properties and class variables.
+    props, class_vars = _get_class_props(cls)
+    for elem in props + class_vars:
+        attributes[elem] = None
+
     return attributes
 
 
