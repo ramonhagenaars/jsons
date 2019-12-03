@@ -20,6 +20,8 @@
   - *Easily customizable and extendable\!*
   - *Type hints for the win\!*
 
+💗 this lib? Leave a ★ and tell your colleagues!
+
 Example of a model to serialize:
 
 ```python
