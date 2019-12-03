@@ -42,10 +42,10 @@ class TestPerformance(TestCase):
         return C3(list_of_c2)
 
     def test_dump(self):
-        self._do_test_dump(12)
+        self._do_test_dump(16)
 
     def test_dump_strict(self):
-        self._do_test_dump(6, strict=True)
+        self._do_test_dump(8, strict=True)
 
     def _do_test_dump(self, time_limit: int, **kwargs):
         d1 = datetime.now()
