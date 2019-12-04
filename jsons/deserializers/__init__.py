@@ -28,6 +28,7 @@ from jsons.deserializers.default_tuple import (
     default_tuple_deserializer,
     default_namedtuple_deserializer
 )
+from jsons.deserializers.default_decimal import default_decimal_deserializer
 
 
 KEY_TRANSFORMER_SNAKECASE = snakecase

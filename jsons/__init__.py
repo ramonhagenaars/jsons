@@ -90,6 +90,7 @@ from datetime import datetime, date, time, timezone, timedelta
 from enum import Enum
 from typing import Union, List, Tuple, Iterable
 from uuid import UUID
+from decimal import Decimal
 from jsons._common_impl import NoneType
 from jsons._key_transformers import snakecase, camelcase, pascalcase, lispcase
 from jsons import (
@@ -150,6 +151,7 @@ default_timezone_serializer = serializers.default_timezone_serializer
 default_timedelta_serializer = serializers.default_timedelta_serializer
 default_primitive_serializer = serializers.default_primitive_serializer
 default_object_serializer = serializers.default_object_serializer
+default_decimal_serializer = serializers.default_decimal_serializer
 default_uuid_serializer = serializers.default_uuid_serializer
 
 default_list_deserializer = deserializers.default_list_deserializer
@@ -169,6 +171,7 @@ default_mapping_deserializer = deserializers.default_mapping_deserializer
 default_iterable_deserializer = deserializers.default_iterable_deserializer
 default_object_deserializer = deserializers.default_object_deserializer
 default_uuid_deserializer = deserializers.default_uuid_deserializer
+default_decimal_deserializer = deserializers.default_decimal_deserializer
 default_complex_serializer = deserializers.default_complex_deserializer
 
 # Set the serializers:
@@ -184,6 +187,7 @@ set_serializer(default_dict_serializer, Mapping, False)
 set_serializer(default_iterable_serializer, Iterable, False)
 set_serializer(default_object_serializer, object, False)
 set_serializer(default_uuid_serializer, UUID)
+set_serializer(default_decimal_serializer, Decimal)
 
 # Set the deserializers:
 set_deserializer(default_list_deserializer, (list, List))
@@ -202,4 +206,5 @@ set_deserializer(default_mapping_deserializer, Mapping, False)
 set_deserializer(default_iterable_deserializer, Iterable, False)
 set_deserializer(default_object_deserializer, object, False)
 set_deserializer(default_uuid_deserializer, UUID)
+set_deserializer(default_decimal_deserializer, Decimal)
 set_deserializer(default_complex_serializer, complex)
