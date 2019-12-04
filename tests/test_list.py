@@ -37,6 +37,17 @@ class TestList(TestCase):
         loaded = jsons.load(dumped)
         self.assertEqual(Child, type(loaded.c2s[0]))
 
+    def test_dump_list_strict_no_cls(self):
+        class C:
+            def __init__(self, x: int, y: str):
+                self.x = x
+                self.y = y
+
+        l = [C(1, '2')] * 5
+        expected = [{'x': 1, 'y': '2'}] * 5
+        dumped = jsons.dump(l, strict=True)
+        self.assertListEqual(expected, dumped)
+
     # Note: mock.patch won't work because of a subclass check.
     def test_dump_list_multiprocess(self):
 
