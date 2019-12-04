@@ -12,7 +12,7 @@ setup(
     author_email='ramon.hagenaars@gmail.com',
     description='For serializing Python objects to JSON (dicts) and back',
     long_description=long_description,
-    long_description_content_type='text/x-rst',
+    long_description_content_type='text/markdown',
     url='https://github.com/ramonhagenaars/jsons',
     packages=[
         'jsons',
