@@ -1,8 +1,8 @@
 from collections.abc import Iterable
 from multiprocessing import Process
-from typing import Tuple
+from typing import Tuple, Optional
 
-from typish import get_args
+from typish import get_args, get_type
 
 from jsons._dump_impl import dump
 from jsons._multitasking import multi_task
@@ -34,7 +34,9 @@ def default_iterable_serializer(
     kwargs_ = {**kwargs, 'strict': strict}
     kwargs_.pop('_store_cls', None)
     if strict:
-        subclasses = _get_subclasses(obj, cls)
+        cls_ = determine_cls(obj, cls)
+        # cls_ = cls or get_type(obj)  # Get the List[T] type from the instance.
+        subclasses = _get_subclasses(obj, cls_)
     else:
         subclasses = _get_subclasses(obj, None)
 
@@ -43,7 +45,7 @@ def default_iterable_serializer(
                   for i, elem in enumerate(obj)]
     else:
         zipped_objs = list(zip(obj, subclasses))
-        result = multi_task(f, zipped_objs, tasks, task_type, **kwargs_)
+        result = multi_task(do_dump, zipped_objs, tasks, task_type, **kwargs_)
 
     return result
 
@@ -66,7 +68,15 @@ def _get_subclasses(obj: Iterable, cls: type = None) -> Tuple[type, ...]:
     return subclasses
 
 
-def f(obj_cls_tuple: Tuple[object, type], *args, **kwargs):
+def do_dump(obj_cls_tuple: Tuple[object, type], *args, **kwargs):
     kwargs_ = {**kwargs}
     kwargs_['tasks'] = 1
     return dump(*obj_cls_tuple, *args, **kwargs_)
+
+
+def determine_cls(obj: Iterable, cls: Optional[type]) -> Optional[type]:
+    cls_ = cls
+    if not cls and hasattr(obj, '__getitem__') and len(obj) > 0:
+        obj_with_only_one_elem = obj.__getitem__(slice(0, 1))
+        cls_ = get_type(obj_with_only_one_elem)
+    return cls_
