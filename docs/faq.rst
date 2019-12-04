@@ -38,6 +38,18 @@ deserialization to work.
 
 So in short: only for custom classes and only for deserialization.
 
+How can I improve the performance of jsons?
+-------------------------------------------
+With large data sets, it may take some time for jsons to dump or load. This is caused
+by several checks and scans that jsons does. You can increase the speed significantly
+by using "strict mode": ``jsons.dump(some_obj, strict=True)``. Also make sure to
+provide type hints for your classes' attributes. This will allow jsons to scan your
+class only once and use that to get the attributes of every object of that class it
+encounters.
+
+On top of that, you could see if parallelization gains you anything:
+``jsons.dump(some_obj, strict=True, tasks=4``). By default a ``Process`` is spawned
+per task, but you can also choose to use ``Thread`` by providing ``task_type=Thread``.
 
 Is it possible to discard private attributes?
 ---------------------------------------------

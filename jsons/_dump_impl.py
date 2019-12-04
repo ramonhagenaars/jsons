@@ -5,6 +5,8 @@ This module contains functionality for dumping stuff to json.
 """
 import json
 from typing import Optional, Dict
+
+from jsons._cache import clear
 from jsons._common_impl import StateHolder, get_class_name
 from jsons._extra_impl import announce_class
 from jsons._lizers_impl import get_serializer
@@ -13,6 +15,8 @@ from jsons.exceptions import SerializationError, RecursionDetectedError
 
 def dump(obj: object,
          cls: Optional[type] = None,
+         *,
+         strict: bool = False,
          fork_inst: Optional[type] = StateHolder,
          **kwargs) -> object:
     """
@@ -29,30 +33,38 @@ def dump(obj: object,
     ``obj``.
     :param obj: a Python instance of any sort.
     :param cls: if given, ``obj`` will be dumped as if it is of type ``type``.
+    :param strict: a bool to determine if the serializer should be strict
+    (i.e. only dumping stuff that is known to ``cls``).
     :param fork_inst: if given, it uses this fork of ``JsonSerializable``.
     :param kwargs: the keyword args are passed on to the serializer function.
     :return: the serialized obj as a JSON type.
     """
-    kwargs = _check_for_recursion(obj, **kwargs)
-    if cls and not hasattr(cls, '__slots__'):
-        raise SerializationError('Invalid type: "{}". Only types that have a '
-                                 '__slots__ defined are allowed when '
-                                 'providing "cls".'
-                         .format(get_class_name(cls, fork_inst=fork_inst,
-                                                fully_qualified=True)))
+    kwargs = _check_for_recursion(obj, kwargs)
     cls_ = cls or obj.__class__
     serializer = get_serializer(cls_, fork_inst)
+
+    # Is this the initial call or a nested?
+    initial = kwargs.get('_initial', True)
+
     kwargs_ = {
         'fork_inst': fork_inst,
+        '_initial': False,
+        'strict': strict,
         **kwargs
     }
-
     announce_class(cls_, fork_inst=fork_inst)
+    kwargs['_objects'].remove(id(obj))
+    return _do_dump(obj, serializer, cls, initial, kwargs_)
+
+
+def _do_dump(obj, serializer, cls, initial, kwargs):
     try:
-        result = serializer(obj, cls=cls, **kwargs_)
-        kwargs['_objects'].remove(id(obj))
+        result = serializer(obj, cls=cls, **kwargs)
+        if initial:
+            clear()
         return result
     except Exception as err:
+        clear()
         raise SerializationError(str(err))
 
 
@@ -103,7 +115,7 @@ def dumpb(obj: object,
     return dumped_str.encode(encoding=encoding)
 
 
-def _check_for_recursion(obj: object, **kwargs) -> dict:
+def _check_for_recursion(obj: object, kwargs) -> dict:
     kwargs['_objects'] = kwargs.get('_objects', set())
     if id(obj) in kwargs['_objects']:
         raise RecursionDetectedError('Endless recursion detected')

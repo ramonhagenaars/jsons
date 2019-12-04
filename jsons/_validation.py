@@ -11,8 +11,9 @@ from jsons._lizers_impl import _get_lizer
 
 
 def set_validator(
-        func: Callable[[type], bool],
+        func: Callable[[object], bool],
         cls: Union[type, Sequence[type]],
+        *,
         fork_inst: type = StateHolder) -> None:
     """
     Set a validator function for the given ``cls``. The function should accept
@@ -26,11 +27,12 @@ def set_validator(
     """
     if isinstance(cls, Sequence):
         for cls_ in cls:
-            set_validator(func, cls_, fork_inst)
-    cls_name = get_class_name(cls, fork_inst=fork_inst,
-                              fully_qualified=True)
-    fork_inst._validators[cls_name.lower()] = func
-    fork_inst._classes_validators.append(cls)
+            set_validator(func, cls=cls_, fork_inst=fork_inst)
+    else:
+        cls_name = get_class_name(cls, fork_inst=fork_inst,
+                                  fully_qualified=True)
+        fork_inst._validators[cls_name.lower()] = func
+        fork_inst._classes_validators.append(cls)
 
 
 @cached

@@ -1,8 +1,22 @@
-def default_primitive_serializer(obj: object, **_) -> object:
+from typing import Optional
+
+from jsons.exceptions import SerializationError
+
+
+def default_primitive_serializer(obj: object,
+                                 cls: Optional[type] = None,
+                                 **kwargs) -> object:
     """
     Serialize a primitive; simply return the given ``obj``.
     :param obj: the primitive.
     :param _: not used.
     :return: ``obj``.
     """
-    return obj
+    result = obj
+    if cls and obj is not None and not isinstance(obj, cls):
+        try:
+            result = cls(obj)
+        except ValueError:
+            raise SerializationError('Could not cast {} into {}'
+                                     .format(obj, cls.__name__))
+    return result

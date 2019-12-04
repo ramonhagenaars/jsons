@@ -182,27 +182,10 @@ class TestObject(TestCase):
 
         c = Child('John', 'William')
         dumped1 = jsons.dump(c)
-        dumped2 = jsons.dump(c, Parent)
-        self.assertDictEqual(dumped1, {'child_name': 'John',
-                                       'parent_name': 'William'})
-        self.assertDictEqual(dumped2, {'parent_name': 'William'})
-
-    def test_dump_as_parent_type_without_slots(self):
-        class Parent:
-            pass
-
-            def __init__(self, pname):
-                self.parent_name = pname
-
-        class Child(Parent):
-            def __init__(self, cname, pname):
-                Parent.__init__(self, pname)
-                self.child_name = cname
-
-        c = Child('John', 'William')
-
-        with self.assertRaises(SerializationError):
-            jsons.dump(c, Parent)
+        dumped2 = jsons.dump(c, cls=Parent, strict=True)
+        self.assertDictEqual({'child_name': 'John',
+                              'parent_name': 'William'}, dumped1)
+        self.assertDictEqual({'parent_name': 'William'}, dumped2)
 
     def test_dump_with_error(self):
         class C:
@@ -492,7 +475,6 @@ class TestObject(TestCase):
 
             # Note: in Python3.5 we cannot be sure that dumped1 contains x,
             # because of the unpredictable order of dicts.
-            # self.assertDictEqual({'x': 42}, dumped1)
 
             self.assertTrue('y' not in dumped1)
             warn_msg = w[0].message.args[0]

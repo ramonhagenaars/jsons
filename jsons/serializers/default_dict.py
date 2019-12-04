@@ -1,8 +1,6 @@
-from typing import Optional, Callable
-from typish import get_type
-from jsons._common_impl import get_class_name
+from typing import Optional, Callable, Dict
+
 from jsons._dump_impl import dump
-from jsons.exceptions import RecursionDetectedError, SerializationError
 
 
 def default_dict_serializer(
@@ -12,58 +10,39 @@ def default_dict_serializer(
         strict: bool = False,
         strip_nulls: bool = False,
         key_transformer: Optional[Callable[[str], str]] = None,
+        types: Optional[Dict[str, type]] = None,
         **kwargs) -> dict:
     """
     Serialize the given ``obj`` to a dict of serialized objects.
     :param obj: the dict that is to be serialized.
-    :param cls: the type of ``obj``; ``obj`` is dumped as if of that type.
+    :param cls: not used.
     :param strict: if ``True`` the serialization will raise upon any the
     failure of any attribute. Otherwise it continues with a warning.
+    :param strict: a bool to determine if the serializer should be strict
+    (i.e. only dumping stuff that is known to ``cls``).
     :param strip_nulls: if ``True`` the resulting dict will not contain null
     values.
     :param key_transformer: a function that will be applied to all keys in the
     resulting dict.
+    :param types: a ``dict`` with attribute names (keys) and their types
+    (values).
     :param kwargs: any keyword arguments that may be given to the serialization
     process.
     :return: a dict of which all elements are serialized.
     """
     result = dict()
-    fork_inst = kwargs['fork_inst']
+    types = types or dict()
     for key in obj:
-        dumped_elem = None
-        try:
-            dumped_elem = dump(obj[key],
-                               key_transformer=key_transformer,
-                               strip_nulls=strip_nulls, **kwargs)
-
-            _store_cls_info(dumped_elem, key, obj, **kwargs)
-
-        except RecursionDetectedError:
-            fork_inst._warn('Recursive structure detected in attribute "{}" '
-                            'of object of type "{}", ignoring the attribute.'
-                            .format(key, get_class_name(cls)))
-        except SerializationError as err:
-            if strict:
-                raise
-            else:
-                fork_inst._warn('Failed to dump attribute "{}" of object of '
-                                'type "{}". Reason: {}. Ignoring the '
-                                'attribute.'
-                                .format(key, get_class_name(cls), err.message))
-                break
+        obj_ = obj[key]
+        cls_ = types.get(key, None)
+        dumped_elem = dump(obj_,
+                           cls=cls_,
+                           key_transformer=key_transformer,
+                           strip_nulls=strip_nulls,
+                           strict=strict,
+                           **kwargs)
         if not (strip_nulls and dumped_elem is None):
             if key_transformer:
                 key = key_transformer(key)
             result[key] = dumped_elem
     return result
-
-
-def _store_cls_info(result: object, attr: str, original_obj: dict, **kwargs):
-    if isinstance(result, dict) and kwargs.get('_store_cls'):
-        cls = get_type(original_obj[attr])
-        if cls.__module__ == 'typing':
-            cls_name = repr(cls)
-        else:
-            cls_name = get_class_name(cls, fully_qualified=True,
-                                      fork_inst=kwargs['fork_inst'])
-        result['-cls'] = cls_name

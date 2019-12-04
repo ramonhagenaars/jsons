@@ -3,7 +3,9 @@ from multiprocessing import Process
 from threading import Thread
 from typing import List
 from unittest import TestCase
+
 import jsons
+from jsons import _multitasking
 from jsons.exceptions import JsonsError
 
 
@@ -34,6 +36,42 @@ class TestList(TestCase):
         dumped = jsons.dump(s, verbose=True)
         loaded = jsons.load(dumped)
         self.assertEqual(Child, type(loaded.c2s[0]))
+
+    def test_dump_list_strict_no_cls(self):
+        class C:
+            def __init__(self, x: int, y: str):
+                self.x = x
+                self.y = y
+
+        l = [C(1, '2')] * 5
+        expected = [{'x': 1, 'y': '2'}] * 5
+        dumped = jsons.dump(l, strict=True)
+        self.assertListEqual(expected, dumped)
+
+    # Note: mock.patch won't work because of a subclass check.
+    def test_dump_list_multiprocess(self):
+
+        class ProcessMock(Process):
+            def __init__(self, target, args, *_, **__):
+                # Make no super call.
+                self.target = target
+                self.args = args
+
+            def start(self):
+                return self.target(*self.args)
+
+            def join(self, *_, **__) -> None:
+                pass
+
+        class ManagerMock:
+            def list(self, l, *_, **__):
+                return l
+
+        jsons._multitasking.Manager = ManagerMock
+
+        dumped = jsons.dump(['1', '1', '1', '1'], List[int], strict=True,
+                            tasks=2, task_type=ProcessMock)
+        self.assertEqual([1, 1, 1, 1], dumped)
 
     def test_load_list(self):
         dat = datetime.datetime(year=2018, month=7, day=8, hour=21, minute=34,
@@ -99,7 +137,7 @@ class TestList(TestCase):
             def list(self, l, *_, **__):
                 return l
 
-        jsons.deserializers.default_list.Manager = ManagerMock
+        jsons._multitasking.Manager = ManagerMock
 
         self.assertEqual([1, 1, 1, 1], jsons.load(['1', '1', '1', '1'],
                                                   List[int], tasks=2,

@@ -97,3 +97,14 @@ class TestSpecificVersions(TestCase):
         self.assertEqual(user.user_uuid, loaded.user_uuid)
 
         self.assertEqual('name', loaded.name)
+
+    @only_version_3(6, and_above=True)
+    def test_dump_parent_dataclass(self):
+        from version_with_dataclasses import Parent, Child
+
+        c = Child(a=1, b=2)
+
+        dumped = jsons.dump(c, cls=Parent, strict=True)
+        expected = {'a': 1}
+
+        self.assertDictEqual(expected, dumped)

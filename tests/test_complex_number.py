@@ -1,4 +1,5 @@
 from unittest import TestCase
+
 import jsons
 from jsons import DeserializationError
 
@@ -7,14 +8,14 @@ class TestComplexNumber(TestCase):
     def test_dump_complex_number(self):
         a = 5 + 3j
         dumped = jsons.dump(a)
-        self.assertDictEqual(dumped, {'real': 5.0, 'imag': 3.0})
+        self.assertDictEqual({'real': 5.0, 'imag': 3.0}, dumped)
 
     def test_dump_complex_number_property(self):
         class A:
             b = 2 + 4j
 
         dumped = jsons.dump(A())
-        self.assertDictEqual(dumped, {'b': {'real': 2.0, 'imag': 4.0}})
+        self.assertDictEqual({'b': {'real': 2.0, 'imag': 4.0}}, dumped)
 
     def test_load_complex_number(self):
         dumped = {'real': 1.0, 'imag': 2.0}

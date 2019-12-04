@@ -1,3 +1,4 @@
+[![PyPI version](https://img.shields.io/pypi/pyversions/jsons.svg)](https://img.shields.io/pypi/pyversions/jsons.svg)
 [![PyPI version](https://badge.fury.io/py/jsons.svg)](https://badge.fury.io/py/jsons)
 [![Docs](https://readthedocs.org/projects/jsons/badge/?version=latest)](https://jsons.readthedocs.io/en/latest/?badge=latest)
 [![Build Status](https://api.travis-ci.org/ramonhagenaars/jsons.svg?branch=master)](https://travis-ci.org/ramonhagenaars/jsons)
@@ -86,6 +87,17 @@ list_of_tuples = jsons.load(some_dict, List[Tuple[AClass, AnotherClass]])
 
 ## Recent updates
 
+### 1.1.0
+
+  - Feature: Added ``strict`` parameter to ``dump`` to indicate that dumping a certain ``cls`` will ignore any extra data.
+  - Feature: When using ``dump(obj, cls=x)``, ``x`` can now be any class (previously, only a class with ``__slots__``).
+  - Feature: Support for dumping ``Decimal`` (thanks to herdigiorgi).
+  - Feature: Primitives are now cast if possible when dumping (e.g. ``dump(5, str)``).
+  - Feature: Dumping iterables with generic types (e.g. ``dump(obj, List[str])``) will now dump with respect to that types (if ``strict``)
+  - Feature: The ``default_dict`` serializer now optionally accepts types: ``Optional[Dict[str, type]]``.
+  - Change: Improved performance when dumping using ``strict=True`` (up to 4 times faster!).
+  - Bugfix: ``set_validator`` with multiple types did not work.
+
 ### 1.0.0
 
   - Feature: Added a serializer/deserializer for `time`.
@@ -111,18 +123,6 @@ list_of_tuples = jsons.load(some_dict, List[Tuple[AClass, AnotherClass]])
   - Feature: Added a deserializer for complex numbers.
 
 
-### 0.9.0
-
-  - Feature: Added the ability to validate instances right after
-    loading.
-  - Feature: Enhanced typing for the loader functions.
-  - Feature: Added the ability to use multiple processes or threads with
-    deserializing lists.
-  - Feature: Added the `jsons.fork()` function.
-  - Change: `None` can now be loaded with the right type hints, even in
-    strict-mode.
-  - Bugfix: A fork from `JsonSerializable` did not copy its settings.
-
 ## Contributors
 
 Special thanks to the following contributors of code, discussions or
@@ -137,3 +137,4 @@ suggestions:
   - [ahmetkucuk](https://github.com/ahmetkucuk)
   - [robinklaassen](https://github.com/robinklaassen)
   - [jochembroekhoff](https://github.com/jochembroekhoff)
+  - [herdigiorgi](https://github.com/herdigiorgi)

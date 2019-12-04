@@ -6,6 +6,7 @@ serialization process of a particular type as follows:
 """
 from jsons._key_transformers import snakecase, camelcase, pascalcase, lispcase
 from jsons.serializers.default_datetime import default_datetime_serializer
+from jsons.serializers.default_complex import default_complex_serializer
 from jsons.serializers.default_date import default_date_serializer
 from jsons.serializers.default_time import default_time_serializer
 from jsons.serializers.default_timezone import default_timezone_serializer

@@ -5,6 +5,8 @@ This module contains implementations that do not directly touch the core of
 jsons.
 """
 from typing import Optional
+
+from jsons._cache import cached
 from jsons._common_impl import StateHolder, get_class_name
 
 
@@ -20,6 +22,7 @@ def suppress_warnings(
     fork_inst._suppress_warnings = do_suppress
 
 
+@cached
 def announce_class(
         cls: type,
         cls_name: Optional[str] = None,

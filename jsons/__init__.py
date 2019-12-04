@@ -144,6 +144,7 @@ default_tuple_serializer = serializers.default_tuple_serializer
 default_dict_serializer = serializers.default_dict_serializer
 default_iterable_serializer = serializers.default_iterable_serializer
 default_enum_serializer = serializers.default_enum_serializer
+default_complex_serializer = serializers.default_complex_serializer
 default_datetime_serializer = serializers.default_datetime_serializer
 default_date_serializer = serializers.default_date_serializer
 default_time_serializer = serializers.default_time_serializer
@@ -159,6 +160,7 @@ default_tuple_deserializer = deserializers.default_tuple_deserializer
 default_union_deserializer = deserializers.default_union_deserializer
 default_dict_deserializer = deserializers.default_dict_deserializer
 default_enum_deserializer = deserializers.default_enum_deserializer
+default_complex_deserializer = deserializers.default_complex_deserializer
 default_datetime_deserializer = deserializers.default_datetime_deserializer
 default_date_deserializer = deserializers.default_date_deserializer
 default_time_deserializer = deserializers.default_time_deserializer
@@ -172,11 +174,11 @@ default_iterable_deserializer = deserializers.default_iterable_deserializer
 default_object_deserializer = deserializers.default_object_deserializer
 default_uuid_deserializer = deserializers.default_uuid_deserializer
 default_decimal_deserializer = deserializers.default_decimal_deserializer
-default_complex_serializer = deserializers.default_complex_deserializer
 
 # Set the serializers:
 set_serializer(default_tuple_serializer, (tuple, Tuple))
 set_serializer(default_enum_serializer, Enum)
+set_serializer(default_complex_serializer, complex)
 set_serializer(default_datetime_serializer, datetime)
 set_serializer(default_date_serializer, date)
 set_serializer(default_time_serializer, time)
@@ -206,5 +208,5 @@ set_deserializer(default_mapping_deserializer, Mapping, False)
 set_deserializer(default_iterable_deserializer, Iterable, False)
 set_deserializer(default_object_deserializer, object, False)
 set_deserializer(default_uuid_deserializer, UUID)
+set_deserializer(default_complex_deserializer, complex)
 set_deserializer(default_decimal_deserializer, Decimal)
-set_deserializer(default_complex_serializer, complex)

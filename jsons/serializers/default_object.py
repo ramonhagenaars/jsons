@@ -1,10 +1,17 @@
 from datetime import datetime, timezone
-from typing import Optional, Callable, Union, MutableSequence, Tuple
-from jsons._common_impl import get_class_name, META_ATTR
+from inspect import isfunction
+from typing import Optional, Callable, Union, MutableSequence, Tuple, Dict
+
+from typish import get_type
+
+from jsons._cache import cached
+from jsons._common_impl import get_class_name, META_ATTR, StateHolder
+from jsons._compatibility_impl import get_type_hints
 from jsons._datetime_impl import to_str
+from jsons._dump_impl import dump
 from jsons.classes import JsonSerializable
 from jsons.classes.verbosity import Verbosity
-from jsons.serializers.default_dict import default_dict_serializer
+from jsons.exceptions import SerializationError, RecursionDetectedError
 
 
 def default_object_serializer(
@@ -18,7 +25,9 @@ def default_object_serializer(
         strip_class_variables: bool = False,
         strip_attr: Union[str, MutableSequence[str], Tuple[str]] = None,
         verbose: Union[Verbosity, bool] = False,
-        **kwargs) -> dict:
+        strict: bool = False,
+        fork_inst: Optional[type] = StateHolder,
+        **kwargs) -> Optional[dict]:
     """
     Serialize the given ``obj`` to a dict. All values within ``obj`` are also
     serialized. If ``key_transformer`` is given, it will be used to transform
@@ -40,69 +49,189 @@ def default_object_serializer(
     dict will not contain attributes with
     :param verbose: if ``True`` the resulting dict will contain meta
     information (e.g. on how to deserialize).
+    :param strict: a bool to determine if the serializer should be strict
+    (i.e. only dumping stuff that is known to ``cls``).
+    :param fork_inst: if given, it uses this fork of ``JsonSerializable``.
     :param kwargs: any keyword arguments that are to be passed to the
     serializer functions.
     :return: a Python dict holding the values of ``obj``.
     """
     if obj is None:
         return obj
-    strip_attr = strip_attr or []
-    if (not isinstance(strip_attr, MutableSequence)
-            and not isinstance(strip_attr, tuple)):
-        strip_attr = (strip_attr,)
-    cls = cls or obj.__class__
-    obj_dict = _get_dict_from_obj(obj, cls, strip_privates, strip_properties,
-                                  strip_class_variables, strip_attr, **kwargs)
-    kwargs_ = {**kwargs, 'verbose': verbose}
+    strip_attr = _normalize_strip_attr(strip_attr)
+    if cls:
+        attributes = _get_attributes_from_class(
+            cls, strip_privates, strip_properties, strip_class_variables,
+            strip_attr, strict)
+    else:
+        attributes = _get_attributes_from_object(
+            obj, strip_privates, strip_properties, strip_class_variables,
+            strip_attr, strict)
+        cls = obj.__class__
     verbose = Verbosity.from_value(verbose)
-    if Verbosity.WITH_CLASS_INFO in verbose:
-        # Set a flag in kwargs to temporarily store -cls.
-        kwargs_['_store_cls'] = True
-    result = default_dict_serializer(
-        obj_dict,
-        cls,
-        key_transformer=key_transformer,
-        strip_nulls=strip_nulls,
-        strip_privates=strip_privates,
-        strip_properties=strip_properties,
-        strip_class_variables=strip_class_variables,
-        strip_attr=strip_attr,
-        **kwargs_)
-    cls_name = get_class_name(cls, fully_qualified=True,
-                              fork_inst=kwargs['fork_inst'])
+    kwargs_ = {
+        **kwargs,
+        'fork_inst': fork_inst,
+        'verbose': verbose,
+        'strict': strict,
+        # Set a flag in kwargs to temporarily store -cls:
+        '_store_cls': Verbosity.WITH_CLASS_INFO in verbose
+    }
+
+    result = _do_serialize(obj=obj,
+                           cls=cls,
+                           attributes=attributes,
+                           kwargs=kwargs_,
+                           key_transformer=key_transformer,
+                           strip_nulls=strip_nulls,
+                           strip_privates=strip_privates,
+                           strip_properties=strip_properties,
+                           strip_class_variables=strip_class_variables,
+                           strip_attr=strip_attr,
+                           strict=strict,
+                           fork_inst=fork_inst)
+
+    cls_name = get_class_name(cls, fully_qualified=True, fork_inst=fork_inst)
     if not kwargs.get('_store_cls'):
-        result = _get_dict_with_meta(result, cls_name, verbose,
-                                     kwargs['fork_inst'])
+        result = _get_dict_with_meta(result, cls_name, verbose, fork_inst)
     return result
 
 
-def _get_dict_from_obj(
-        obj,
-        cls=None,
-        strip_privates=False,
-        strip_properties=False,
-        strip_class_variables=False,
-        strip_attr=False,
-        *_,
-        **__) -> dict:
-    strip_attr = tuple(strip_attr) + _ABC_ATTRS
+def _do_serialize(
+        obj: object,
+        cls: type,
+        attributes: Dict[str, Optional[type]],
+        kwargs: dict,
+        key_transformer: Optional[Callable[[str], str]] = None,
+        strip_nulls: bool = False,
+        strip_privates: bool = False,
+        strip_properties: bool = False,
+        strip_class_variables: bool = False,
+        strip_attr: Union[str, MutableSequence[str], Tuple[str]] = None,
+        strict: bool = False,
+        fork_inst: Optional[type] = StateHolder) -> Dict[str, object]:
+    result = dict()
+    for attr_name, cls_ in attributes.items():
+        attr = obj.__getattribute__(attr_name)
+        dumped_elem = None
+        try:
+            dumped_elem = dump(attr,
+                               cls=cls_,
+                               key_transformer=key_transformer,
+                               strip_nulls=strip_nulls,
+                               strip_privates=strip_privates,
+                               strip_properties=strip_properties,
+                               strip_class_variables=strip_class_variables,
+                               strip_attr=strip_attr,
+                               **kwargs)
+
+            _store_cls_info(dumped_elem, attr, kwargs)
+        except RecursionDetectedError:
+            fork_inst._warn('Recursive structure detected in attribute "{}" '
+                            'of object of type "{}", ignoring the attribute.'
+                            .format(attr_name, get_class_name(cls)))
+        except SerializationError as err:
+            if strict:
+                raise
+            else:
+                fork_inst._warn('Failed to dump attribute "{}" of object of '
+                                'type "{}". Reason: {}. Ignoring the '
+                                'attribute.'
+                                .format(attr, get_class_name(cls), err.message))
+                break
+        if not (strip_nulls and dumped_elem is None):
+            if key_transformer:
+                attr_name = key_transformer(attr_name)
+            result[attr_name] = dumped_elem
+    return result
+
+
+def _normalize_strip_attr(strip_attr) -> tuple:
+    # Make sure that strip_attr is always a tuple.
+    strip_attr = strip_attr or tuple()
+    if (not isinstance(strip_attr, MutableSequence)
+            and not isinstance(strip_attr, tuple)):
+        strip_attr = (strip_attr,)
+    return strip_attr
+
+
+@cached
+def _get_attributes_from_class(
+        cls: type,
+        strip_privates: bool,
+        strip_properties: bool,
+        strip_class_variables: bool,
+        strip_attr: tuple,
+        strict: bool) -> Dict[str, Optional[type]]:
+    # Get the attributes that are known in the class.
+    attributes_and_types = _get_attributes_and_types(cls, strict)
+    return _filter_attributes(cls, attributes_and_types, strip_privates,
+                              strip_properties, strip_class_variables,
+                              strip_attr)
+
+
+def _get_attributes_from_object(
+        obj: object,
+        strip_privates: bool,
+        strip_properties: bool,
+        strip_class_variables: bool,
+        strip_attr: tuple,
+        strict: bool) -> Dict[str, Optional[type]]:
+    # Get the attributes that are known in the object.
+    cls = obj.__class__
+    attributes_and_types = _get_attributes_and_types(cls, strict)
+    attributes = {attr: attributes_and_types.get(attr, None)
+                  for attr in dir(obj)}
+    return _filter_attributes(cls, attributes, strip_privates,
+                              strip_properties, strip_class_variables,
+                              strip_attr)
+
+
+@cached
+def _get_attributes_and_types(cls: type,
+                              strict: bool) -> Dict[str, Optional[type]]:
+    if '__slots__' in cls.__dict__:
+        attributes = {attr: None for attr in cls.__slots__}
+    elif hasattr(cls, '__annotations__'):
+        attributes = cls.__annotations__
+    elif strict:
+        hints = get_type_hints(cls.__init__)
+        attributes = {k: hints[k] for k in hints if k != 'self'}
+    else:
+        attributes = {}
+
+    # Add properties and class variables.
+    props, class_vars = _get_class_props(cls)
+    for elem in props + class_vars:
+        attributes[elem] = None
+
+    return attributes
+
+
+def _filter_attributes(
+        cls: type,
+        attributes: Dict[str, Optional[type]],
+        strip_privates: bool,
+        strip_properties: bool,
+        strip_class_variables: bool,
+        strip_attr: tuple) -> Dict[str, Optional[type]]:
+    # Filter the given attributes with the given preferences.
+    strip_attr = strip_attr + _ABC_ATTRS
     excluded_elems = dir(JsonSerializable)
-    props, other_cls_vars = _get_class_props(obj.__class__)
-    # Make sure to get the slots of cls, not of any parent:
-    slots = cls.__slots__ if '__slots__' in cls.__dict__ else {}
-    return {attr: obj.__getattribute__(attr) for attr in dir(obj)
+    props, other_cls_vars = _get_class_props(cls)
+
+    return {attr: type_ for attr, type_ in attributes.items()
             if not attr.startswith('__')
             and not (strip_privates and attr.startswith('_'))
             and not (strip_properties and attr in props)
             and not (strip_class_variables and attr in other_cls_vars)
             and attr not in strip_attr
             and attr != 'json'
-            and not isinstance(obj.__getattribute__(attr), Callable)
-            and (not slots or attr in slots)
+            and not isfunction(getattr(cls, attr, None))
             and attr not in excluded_elems}
 
 
-def _get_class_props(cls):
+def _get_class_props(cls: type) -> Tuple[list, list]:
     props = []
     other_cls_vars = []
     for n, v in _get_complete_class_dict(cls).items():
@@ -111,7 +240,7 @@ def _get_class_props(cls):
     return props, other_cls_vars
 
 
-def _get_complete_class_dict(cls):
+def _get_complete_class_dict(cls: type) -> dict:
     cls_dict = {}
     # Loop reversed so values of sub-classes override those of super-classes.
     for cls_or_elder in reversed(cls.mro()):
@@ -166,6 +295,17 @@ def _get_class_name_and_strip_cls(cls_name: Optional[str], obj: dict) -> str:
     if '-cls' in obj:
         del obj['-cls']
     return result
+
+
+def _store_cls_info(result: object, original_obj: dict, kwargs):
+    if kwargs.get('_store_cls', None) and isinstance(result, dict):
+        cls = get_type(original_obj)
+        if cls.__module__ == 'typing':
+            cls_name = repr(cls)
+        else:
+            cls_name = get_class_name(cls, fully_qualified=True,
+                                      fork_inst=kwargs['fork_inst'])
+        result['-cls'] = cls_name
 
 
 _ABC_ATTRS = ('_abc_registry', '_abc_cache', '_abc_negative_cache',
