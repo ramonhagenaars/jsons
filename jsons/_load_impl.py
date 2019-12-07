@@ -103,6 +103,8 @@ def _do_load(json_obj: object,
              cls: type,
              initial: bool,
              **kwargs):
+    if deserializer is None:
+        raise DeserializationError('No deserializer for type {}'.format(get_class_name(cls)), json_obj, cls)
     try:
         result = deserializer(json_obj, cls, **kwargs)
         validate(result, cls, kwargs['fork_inst'])
