@@ -14,6 +14,11 @@ class User:
     name: str
 
 
+@dataclass
+class DataclassWithOptional:
+    x: Optional[int]
+
+
 class NamedTupleWithOptional(NamedTuple):
     arg: Optional[str]
 

@@ -1,4 +1,5 @@
 import datetime
+from dataclasses import dataclass
 from typing import Optional, Union
 from unittest import TestCase
 import jsons
@@ -6,6 +7,17 @@ from jsons import DeserializationError, UnfulfilledArgumentError
 
 
 class TestUnion(TestCase):
+    def test_dump_optional(self):
+
+        class C:
+            def __init__(self, x: Optional[str]):
+                self.x = x
+
+        expected = {'x': '42'}
+        dumped = jsons.dump(C('42'))
+
+        self.assertDictEqual(expected, dumped)
+
     def test_load_union(self):
         class A:
             def __init__(self, x):

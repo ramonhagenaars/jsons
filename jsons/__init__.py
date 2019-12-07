@@ -154,6 +154,7 @@ default_primitive_serializer = serializers.default_primitive_serializer
 default_object_serializer = serializers.default_object_serializer
 default_decimal_serializer = serializers.default_decimal_serializer
 default_uuid_serializer = serializers.default_uuid_serializer
+default_union_serializer = serializers.default_union_serializer
 
 default_list_deserializer = deserializers.default_list_deserializer
 default_tuple_deserializer = deserializers.default_tuple_deserializer
@@ -190,6 +191,7 @@ set_serializer(default_iterable_serializer, Iterable, False)
 set_serializer(default_object_serializer, object, False)
 set_serializer(default_uuid_serializer, UUID)
 set_serializer(default_decimal_serializer, Decimal)
+set_serializer(default_union_serializer, Union)
 
 # Set the deserializers:
 set_deserializer(default_list_deserializer, (list, List))

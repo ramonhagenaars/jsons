@@ -76,6 +76,14 @@ class TestSpecificVersions(TestCase):
         self.assertEqual(NamedTupleWithAny(123),
                          jsons.load({'arg': 123}, NamedTupleWithAny))
 
+    @only_version_3(6, and_above=True)
+    def test_dump_dataclass_with_optional(self):
+        from version_with_dataclasses import DataclassWithOptional
+
+        expected = {'x': 42}
+        dumped = jsons.dump(DataclassWithOptional(42))
+        self.assertDictEqual(expected, dumped)
+
     @only_version_3(5, and_above=True)
     def test_simple_dump_and_load_dataclass(self):
 
