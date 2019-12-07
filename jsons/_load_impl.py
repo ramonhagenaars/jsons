@@ -112,7 +112,8 @@ def _do_load(json_obj: object,
         clear()
         if isinstance(err, JsonsError):
             raise
-        raise DeserializationError(str(err), json_obj, cls)
+        message = 'Could not deserialize value {} into {}. {}'.format(json_obj, get_class_name(cls), err)
+        raise DeserializationError(message, json_obj, cls)
     else:
         if initial:
             # Clear all lru caches right before returning the initial call.
