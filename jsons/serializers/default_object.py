@@ -124,7 +124,6 @@ def _do_serialize(
                                strip_class_variables=strip_class_variables,
                                strip_attr=strip_attr,
                                **kwargs)
-
             _store_cls_info(dumped_elem, attr, kwargs)
         except RecursionDetectedError:
             fork_inst._warn('Recursive structure detected in attribute "{}" '
@@ -139,11 +138,21 @@ def _do_serialize(
                                 'attribute.'
                                 .format(attr, get_class_name(cls), err.message))
                 break
-        if not (strip_nulls and dumped_elem is None):
-            if key_transformer:
-                attr_name = key_transformer(attr_name)
-            result[attr_name] = dumped_elem
+        _add_dumped_elem(result, attr_name, dumped_elem,
+                         strip_nulls, key_transformer)
     return result
+
+
+def _add_dumped_elem(
+        result: dict,
+        attr_name: str,
+        dumped_elem: object,
+        strip_nulls: bool,
+        key_transformer: Optional[Callable[[str], str]]):
+    if not (strip_nulls and dumped_elem is None):
+        if key_transformer:
+            attr_name = key_transformer(attr_name)
+        result[attr_name] = dumped_elem
 
 
 def _normalize_strip_attr(strip_attr) -> tuple:
