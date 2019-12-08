@@ -23,7 +23,7 @@ class TestTypeError(TestCase):
         with self.assertRaises(DeserializationError) as errorContext:
             jsons.load(dumped, WrongUser)
         error: DeserializationError = errorContext.exception
-        self.assertEqual('No deserializer for type datetime', error.message)
+        self.assertEqual('No deserializer for type "datetime"', error.message)
         self.assertEqual(datetime, error.target)
 
     def test_wrong_primitive_type(self):
@@ -31,7 +31,7 @@ class TestTypeError(TestCase):
         with self.assertRaises(DeserializationError) as errorContext:
             jsons.load(dumped, WrongUser)
         error: DeserializationError = errorContext.exception
-        self.assertEqual('Could not cast Albert into int', error.message)
+        self.assertEqual('Could not cast "Albert" into "int"', error.message)
         self.assertEqual(int, error.target)
 
     def test_wrong_type(self):
@@ -39,5 +39,5 @@ class TestTypeError(TestCase):
         with self.assertRaises(DeserializationError) as errorContext:
             jsons.load(dumped, CorrectUser)
         error: DeserializationError = errorContext.exception
-        self.assertTrue(error.message.startswith('Could not deserialize value every day into datetime.'))
+        self.assertTrue(error.message.startswith('Could not deserialize value "every day" into "datetime.datetime".'))
         self.assertEqual(datetime.datetime, error.target)
