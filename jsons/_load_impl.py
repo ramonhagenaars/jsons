@@ -103,8 +103,9 @@ def _do_load(json_obj: object,
              cls: type,
              initial: bool,
              **kwargs):
+    cls_name = get_class_name(cls, fully_qualified=True)
     if deserializer is None:
-        raise DeserializationError('No deserializer for type "{}"'.format(get_class_name(cls)), json_obj, cls)
+        raise DeserializationError('No deserializer for type "{}"'.format(cls_name), json_obj, cls)
     try:
         result = deserializer(json_obj, cls, **kwargs)
         validate(result, cls, kwargs['fork_inst'])
@@ -112,7 +113,7 @@ def _do_load(json_obj: object,
         clear()
         if isinstance(err, JsonsError):
             raise
-        message = 'Could not deserialize value "{}" into "{}". {}'.format(json_obj, get_class_name(cls), err)
+        message = 'Could not deserialize value "{}" into "{}". {}'.format(json_obj, cls_name, err)
         raise DeserializationError(message, json_obj, cls)
     else:
         if initial:
