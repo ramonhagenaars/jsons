@@ -59,7 +59,7 @@ def default_object_serializer(
     if obj is None:
         return obj
     strip_attr = _normalize_strip_attr(strip_attr)
-    if cls:
+    if cls and strict:
         attributes = _get_attributes_from_class(
             cls, strip_privates, strip_properties, strip_class_variables,
             strip_attr, strict)

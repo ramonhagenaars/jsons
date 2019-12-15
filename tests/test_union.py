@@ -1,7 +1,7 @@
 import datetime
-from dataclasses import dataclass
 from typing import Optional, Union
 from unittest import TestCase
+
 import jsons
 from jsons import DeserializationError, UnfulfilledArgumentError
 
