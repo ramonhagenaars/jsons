@@ -80,8 +80,8 @@ class TestSpecificVersions(TestCase):
     def test_dump_dataclass_with_optional(self):
         from version_with_dataclasses import DataclassWithOptional
 
-        expected = {'x': 42}
-        dumped = jsons.dump(DataclassWithOptional(42))
+        expected = {'x': [42, None, 123]}
+        dumped = jsons.dump(DataclassWithOptional([42, None, 123]))
         self.assertDictEqual(expected, dumped)
 
     @only_version_3(5, and_above=True)
