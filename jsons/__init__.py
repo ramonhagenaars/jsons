@@ -107,6 +107,7 @@ from jsons import (
 from jsons.exceptions import (
     JsonsError,
     ValidationError,
+    SerializationError,
     DeserializationError,
     DecodeError,
     UnfulfilledArgumentError,

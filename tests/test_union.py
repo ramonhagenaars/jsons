@@ -3,7 +3,11 @@ from typing import Optional, Union
 from unittest import TestCase
 
 import jsons
-from jsons import DeserializationError, UnfulfilledArgumentError
+from jsons import (
+    SerializationError,
+    DeserializationError,
+    UnfulfilledArgumentError,
+)
 
 
 class TestUnion(TestCase):
@@ -35,6 +39,9 @@ class TestUnion(TestCase):
         dumped2 = jsons.dump(A(1), Union[B, A], strict=True)
         expected2 = {'x': 1}
         self.assertDictEqual(expected2, dumped2)
+
+        with self.assertRaises(SerializationError):
+            jsons.dump(A(1), Union[B], strict=True)
 
     def test_load_union(self):
         class A:
