@@ -18,6 +18,24 @@ class TestUnion(TestCase):
 
         self.assertDictEqual(expected, dumped)
 
+    def test_dump_union(self):
+
+        class A:
+            def __init__(self, x: int):
+                self.x = x
+
+        class B:
+            def __init__(self, y: int):
+                self.y = y
+
+        dumped = jsons.dump(A(1), Union[B, A])
+        expected = {'x': 1}
+        self.assertDictEqual(expected, dumped)
+
+        dumped2 = jsons.dump(A(1), Union[B, A], strict=True)
+        expected2 = {'x': 1}
+        self.assertDictEqual(expected2, dumped2)
+
     def test_load_union(self):
         class A:
             def __init__(self, x):
