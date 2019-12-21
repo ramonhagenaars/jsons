@@ -39,8 +39,7 @@ def set_serializer(
     elif cls:
         index = 0 if high_prio else len(fork_inst._classes_serializers)
         fork_inst._classes_serializers.insert(index, cls)
-        cls_name = get_class_name(cls, fork_inst=fork_inst,
-                                  fully_qualified=True)
+        cls_name = get_class_name(cls, fully_qualified=True)
         fork_inst._serializers[cls_name.lower()] = func
     else:
         fork_inst._serializers['nonetype'] = func
@@ -76,8 +75,7 @@ def set_deserializer(
     elif cls:
         index = 0 if high_prio else len(fork_inst._classes_deserializers)
         fork_inst._classes_deserializers.insert(index, cls)
-        cls_name = get_class_name(cls, fork_inst=fork_inst,
-                                  fully_qualified=True)
+        cls_name = get_class_name(cls, fully_qualified=True)
         fork_inst._deserializers[cls_name.lower()] = func
     else:
         fork_inst._deserializers['nonetype'] = func
@@ -119,8 +117,7 @@ def _get_lizer(
         classes_lizers: list,
         fork_inst: type,
         recursive: bool = False) -> callable:
-    cls_name = get_class_name(cls, str.lower, fork_inst=fork_inst,
-                              fully_qualified=True)
+    cls_name = get_class_name(cls, str.lower, fully_qualified=True)
     lizer = (lizers.get(cls_name, None)
              or _get_lizer_by_parents(cls, lizers, classes_lizers, fork_inst))
     if not lizer and not recursive and hasattr(cls, '__supertype__'):
@@ -137,8 +134,7 @@ def _get_lizer_by_parents(
     result = None
     parents = _get_parents(cls, classes_lizers)
     if parents:
-        pname = get_class_name(parents[0], str.lower, fork_inst=fork_inst,
-                               fully_qualified=True)
+        pname = get_class_name(parents[0], str.lower, fully_qualified=True)
         result = lizers[pname]
     return result
 

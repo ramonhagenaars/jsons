@@ -91,7 +91,7 @@ def default_object_serializer(
                            strict=strict,
                            fork_inst=fork_inst)
 
-    cls_name = get_class_name(cls, fully_qualified=True, fork_inst=fork_inst)
+    cls_name = get_class_name(cls, fully_qualified=True)
     if not kwargs.get('_store_cls'):
         result = _get_dict_with_meta(result, cls_name, verbose, fork_inst)
     return result
@@ -312,8 +312,7 @@ def _store_cls_info(result: object, original_obj: dict, kwargs):
         if cls.__module__ == 'typing':
             cls_name = repr(cls)
         else:
-            cls_name = get_class_name(cls, fully_qualified=True,
-                                      fork_inst=kwargs['fork_inst'])
+            cls_name = get_class_name(cls, fully_qualified=True)
         result['-cls'] = cls_name
 
 

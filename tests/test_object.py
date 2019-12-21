@@ -45,29 +45,16 @@ class TestObject(TestCase):
 
         self.assertDictEqual(expectation, dumped['-meta'])
 
-        # Now customize the name of the B class.
-        jsons.announce_class(B, 'custom_name')
-        expectation2 = {
-            'classes': {
-                '/': '{}.C'.format(__name__),
-                '/b': 'custom_name',
-                '/b/a': '{}.A'.format(__name__)
-            }
-        }
+        dumped2 = jsons.dump(c, verbose=jsons.Verbosity.WITH_NOTHING)
+        self.assertDictEqual({'b': {'a': {'x': 42}}}, dumped2)
 
-        dumped2 = jsons.dump(c, verbose=jsons.Verbosity.WITH_CLASS_INFO)
-        self.assertDictEqual(expectation2, dumped2['-meta'])
+        dumped3 = jsons.dump(c, verbose=jsons.Verbosity.WITH_DUMP_TIME)
+        self.assertTrue('dump_time' in dumped3['-meta'])
+        self.assertTrue('classes' not in dumped3['-meta'])
 
-        dumped3 = jsons.dump(c, verbose=jsons.Verbosity.WITH_NOTHING)
-        self.assertDictEqual({'b': {'a': {'x': 42}}}, dumped3)
-
-        dumped4 = jsons.dump(c, verbose=jsons.Verbosity.WITH_DUMP_TIME)
+        dumped4 = jsons.dump(c, verbose=jsons.Verbosity.WITH_EVERYTHING)
         self.assertTrue('dump_time' in dumped4['-meta'])
-        self.assertTrue('classes' not in dumped4['-meta'])
-
-        dumped5 = jsons.dump(c, verbose=jsons.Verbosity.WITH_EVERYTHING)
-        self.assertTrue('dump_time' in dumped5['-meta'])
-        self.assertTrue('classes' in dumped5['-meta'])
+        self.assertTrue('classes' in dumped4['-meta'])
 
     def test_dump_object_verbose_with_dict(self):
 

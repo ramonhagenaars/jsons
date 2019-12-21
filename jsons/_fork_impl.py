@@ -23,7 +23,7 @@ def fork(
         class_name = name
     else:
         class_name = '{}_fork{}'.format(
-            get_class_name(fork_inst, fork_inst=fork_inst),
+            get_class_name(fork_inst),
             fork_inst._fork_counter
         )
     result = type(class_name, (fork_inst,), {})

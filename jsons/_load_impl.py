@@ -185,10 +185,8 @@ def _check_and_get_cls_and_meta_hints(
         inferred_cls: bool) -> Tuple[type, Optional[dict]]:
     # Check if json_obj is of a valid type and return the cls.
     if type(json_obj) not in VALID_TYPES:
-        invalid_type = get_class_name(type(json_obj), fork_inst=fork_inst,
-                                      fully_qualified=True)
-        valid_types = [get_class_name(typ, fork_inst=fork_inst,
-                                      fully_qualified=True)
+        invalid_type = get_class_name(type(json_obj), fully_qualified=True)
+        valid_types = [get_class_name(typ, fully_qualified=True)
                        for typ in VALID_TYPES]
         msg = ('Invalid type: "{}", only arguments of the following types are '
                'allowed: {}'.format(invalid_type, ", ".join(valid_types)))
