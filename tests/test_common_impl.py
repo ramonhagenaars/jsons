@@ -23,10 +23,3 @@ class TestCommonImpl(TestCase):
         self.assertEqual(str, get_cls_from_str('str', {}, None))
         self.assertEqual(int, get_cls_from_str('int', {}, None))
         self.assertEqual(list, get_cls_from_str('list', {}, None))
-
-        class C:
-            pass
-
-        jsons.announce_class(C, 'NonExisting')
-
-        self.assertEqual(C, get_cls_from_str('NonExisting', {}, StateHolder))

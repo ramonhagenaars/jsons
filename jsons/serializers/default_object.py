@@ -59,7 +59,7 @@ def default_object_serializer(
     if obj is None:
         return obj
     strip_attr = _normalize_strip_attr(strip_attr)
-    if cls:
+    if cls and strict:
         attributes = _get_attributes_from_class(
             cls, strip_privates, strip_properties, strip_class_variables,
             strip_attr, strict)
@@ -91,7 +91,7 @@ def default_object_serializer(
                            strict=strict,
                            fork_inst=fork_inst)
 
-    cls_name = get_class_name(cls, fully_qualified=True, fork_inst=fork_inst)
+    cls_name = get_class_name(cls, fully_qualified=True)
     if not kwargs.get('_store_cls'):
         result = _get_dict_with_meta(result, cls_name, verbose, fork_inst)
     return result
@@ -124,7 +124,6 @@ def _do_serialize(
                                strip_class_variables=strip_class_variables,
                                strip_attr=strip_attr,
                                **kwargs)
-
             _store_cls_info(dumped_elem, attr, kwargs)
         except RecursionDetectedError:
             fork_inst._warn('Recursive structure detected in attribute "{}" '
@@ -139,11 +138,21 @@ def _do_serialize(
                                 'attribute.'
                                 .format(attr, get_class_name(cls), err.message))
                 break
-        if not (strip_nulls and dumped_elem is None):
-            if key_transformer:
-                attr_name = key_transformer(attr_name)
-            result[attr_name] = dumped_elem
+        _add_dumped_elem(result, attr_name, dumped_elem,
+                         strip_nulls, key_transformer)
     return result
+
+
+def _add_dumped_elem(
+        result: dict,
+        attr_name: str,
+        dumped_elem: object,
+        strip_nulls: bool,
+        key_transformer: Optional[Callable[[str], str]]):
+    if not (strip_nulls and dumped_elem is None):
+        if key_transformer:
+            attr_name = key_transformer(attr_name)
+        result[attr_name] = dumped_elem
 
 
 def _normalize_strip_attr(strip_attr) -> tuple:
@@ -303,8 +312,7 @@ def _store_cls_info(result: object, original_obj: dict, kwargs):
         if cls.__module__ == 'typing':
             cls_name = repr(cls)
         else:
-            cls_name = get_class_name(cls, fully_qualified=True,
-                                      fork_inst=kwargs['fork_inst'])
+            cls_name = get_class_name(cls, fully_qualified=True)
         result['-cls'] = cls_name
 
 

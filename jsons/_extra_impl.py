@@ -35,7 +35,6 @@ def announce_class(
     :param fork_inst: if given, it uses this fork of ``JsonSerializable``.
     :return: None.
     """
-    cls_name = cls_name or get_class_name(cls, fully_qualified=True,
-                                          fork_inst=fork_inst)
+    cls_name = cls_name or get_class_name(cls, fully_qualified=True)
     fork_inst._announced_classes[cls] = cls_name
     fork_inst._announced_classes[cls_name] = cls

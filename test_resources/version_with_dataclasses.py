@@ -1,6 +1,8 @@
 import uuid
 from dataclasses import dataclass
-from typing import NamedTuple, Optional, Union, Any
+from typing import NamedTuple, Optional, Union, Any, List
+
+from jsons import JsonSerializable
 
 
 @dataclass
@@ -12,6 +14,16 @@ class Person:
 class User:
     user_uuid: uuid.UUID
     name: str
+
+
+@dataclass
+class DataclassWithOptional:
+    x: Optional[List[Optional[int]]]
+
+
+@dataclass
+class HolderWithJsonSerializable(JsonSerializable):
+    x: JsonSerializable
 
 
 class NamedTupleWithOptional(NamedTuple):

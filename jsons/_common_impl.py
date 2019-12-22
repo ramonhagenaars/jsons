@@ -45,24 +45,19 @@ class StateHolder:
 @cached
 def get_class_name(cls: type,
                    transformer: Optional[Callable[[str], str]] = None,
-                   fully_qualified: bool = False,
-                   fork_inst: Optional[type] = StateHolder) -> Optional[str]:
+                   fully_qualified: bool = False) -> Optional[str]:
     """
     Return the name of a class.
     :param cls: the class of which the name if to be returned.
     :param transformer: any string transformer, e.g. ``str.lower``.
     :param fully_qualified: if ``True`` return the fully qualified name (i.e.
     complete with module name).
-    :param fork_inst if given, it uses this fork of ``JsonSerializable`` for
-    finding the class name.
     :return: the name of ``cls``, transformed if a transformer is given.
     """
     transformer = transformer or (lambda x: x)
     cls_name = _get_special_cases(cls)
     if cls_name:
         return transformer(cls_name)
-    if cls in fork_inst._announced_classes:
-        return transformer(fork_inst._announced_classes[cls])
     cls_name = _get_simple_name(cls)
     if fully_qualified:
         module = _get_module(cls)
@@ -136,7 +131,7 @@ def can_match_with_none(cls: type):
     result = cls in (Any, object, None, NoneType)
     if not result:
         cls_name = get_class_name(cls).lower()
-        result = cls_name == 'union' and NoneType in get_union_params(cls)
+        result = 'union' in cls_name and NoneType in get_union_params(cls)
     return result
 
 

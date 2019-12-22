@@ -29,8 +29,7 @@ def set_validator(
         for cls_ in cls:
             set_validator(func, cls=cls_, fork_inst=fork_inst)
     else:
-        cls_name = get_class_name(cls, fork_inst=fork_inst,
-                                  fully_qualified=True)
+        cls_name = get_class_name(cls, fully_qualified=True)
         fork_inst._validators[cls_name.lower()] = func
         fork_inst._classes_validators.append(cls)
 

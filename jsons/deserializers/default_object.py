@@ -177,7 +177,6 @@ def _get_remaining_args(obj: dict,
     if strict and remaining_attrs:
         unexpected_arg = list(remaining_attrs.keys())[0]
         err_msg = ('Type "{}" does not expect "{}"'
-                   .format(get_class_name(cls, fork_inst=fork_inst),
-                           unexpected_arg))
+                   .format(get_class_name(cls), unexpected_arg))
         raise SignatureMismatchError(err_msg, unexpected_arg, obj, cls)
     return remaining_attrs

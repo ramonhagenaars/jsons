@@ -87,6 +87,14 @@ list_of_tuples = jsons.load(some_dict, List[Tuple[AClass, AnotherClass]])
 
 ## Recent updates
 
+### 1.1.1
+
+  - Feature: Added a serializer for ``Union`` types.
+  - Change: Exceptions are more clear upon deserialization failure (thanks to haluzpav).
+  - Change: You can no longer announce a class with a custom name.
+  - Bugfix: Fixed dumping optional attributes.
+  - Bugfix: Dataclasses inheriting from ``JsonSerializable`` always dumped their attributes as if in strict mode. 
+
 ### 1.1.0
 
   - Feature: Added ``strict`` parameter to ``dump`` to indicate that dumping a certain ``cls`` will ignore any extra data.
@@ -117,10 +125,6 @@ list_of_tuples = jsons.load(some_dict, List[Tuple[AClass, AnotherClass]])
 ### 0.10.1
 
   - Change: Correction of the type hints of `load`, `loads`, `loadb`.
-
-### 0.10.0
-
-  - Feature: Added a deserializer for complex numbers.
 
 
 ## Contributors

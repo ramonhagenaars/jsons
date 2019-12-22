@@ -7,7 +7,7 @@ import json
 from typing import Optional, Dict
 
 from jsons._cache import clear
-from jsons._common_impl import StateHolder, get_class_name
+from jsons._common_impl import StateHolder
 from jsons._extra_impl import announce_class
 from jsons._lizers_impl import get_serializer
 from jsons.exceptions import SerializationError, RecursionDetectedError
