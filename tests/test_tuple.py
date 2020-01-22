@@ -22,9 +22,12 @@ class TestTuple(TestCase):
         expected = {
             'x': ['abc', 'def']
         }
-        dumped = jsons.dump(A(('abc', 'def')), strict=True)
 
-        self.assertDictEqual(expected, dumped)
+        dumped1 = jsons.dump(A(('abc', 'def')), strict=True)
+        dumped2 = jsons.dump(A(('abc', 'def')), strict=False)
+
+        self.assertDictEqual(expected, dumped1)
+        self.assertDictEqual(expected, dumped2)
 
     def test_dump_namedtuple(self):
         T = namedtuple('T', ['x', 'y'])
