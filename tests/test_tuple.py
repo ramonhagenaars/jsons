@@ -14,6 +14,18 @@ class TestTuple(TestCase):
         self.assertEqual([1, 2, 3, [4, 5, ['2018-07-08T21:34:00Z']]],
                          jsons.dump(tup))
 
+    def test_dump_tuple_with_ellipsis(self):
+        class A:
+            def __init__(self, x: Tuple[str, ...]):
+                self.x = x
+
+        expected = {
+            'x': ['abc', 'def']
+        }
+        dumped = jsons.dump(A(('abc', 'def')), strict=True)
+
+        self.assertDictEqual(expected, dumped)
+
     def test_dump_namedtuple(self):
         T = namedtuple('T', ['x', 'y'])
         t = T(1, 2)

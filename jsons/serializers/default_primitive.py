@@ -9,7 +9,7 @@ def default_primitive_serializer(obj: object,
     """
     Serialize a primitive; simply return the given ``obj``.
     :param obj: the primitive.
-    :param _: not used.
+    :param cls: the type of ``obj``.
     :return: ``obj``.
     """
     result = obj
