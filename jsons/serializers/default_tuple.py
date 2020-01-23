@@ -1,4 +1,4 @@
-from typing import Union, Optional
+from typing import Union, Optional, Tuple
 
 from typish import get_args
 
@@ -23,7 +23,7 @@ def default_tuple_serializer(obj: tuple,
 
     cls_ = cls
     if cls and tuple_with_ellipsis(cls):
-        cls_ = (get_args(cls)[0],) * len(obj)
+        cls_ = Tuple[(get_args(cls)[0],) * len(obj)]
 
     return default_iterable_serializer(obj, cls_, **kwargs)
 
