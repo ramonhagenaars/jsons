@@ -1,11 +1,8 @@
-[![PyPI version](https://img.shields.io/pypi/pyversions/jsons.svg)](https://img.shields.io/pypi/pyversions/jsons.svg)
+[![Python versions](https://img.shields.io/pypi/pyversions/jsons.svg)](https://img.shields.io/pypi/pyversions/jsons.svg)
+[![Downloads](https://pepy.tech/badge/jsons)](https://pepy.tech/project/jsons)
 [![PyPI version](https://badge.fury.io/py/jsons.svg)](https://badge.fury.io/py/jsons)
-[![Docs](https://readthedocs.org/projects/jsons/badge/?version=latest)](https://jsons.readthedocs.io/en/latest/?badge=latest)
-[![Build Status](https://api.travis-ci.org/ramonhagenaars/jsons.svg?branch=master)](https://travis-ci.org/ramonhagenaars/jsons)
 [![Code Coverage](https://codecov.io/gh/ramonhagenaars/jsons/branch/master/graph/badge.svg)](https://codecov.io/gh/ramonhagenaars/jsons)
 [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/ramonhagenaars/jsons/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/ramonhagenaars/jsons/?branch=master)
-[![Maintainability](https://api.codeclimate.com/v1/badges/17d997068b3387c2f2c3/maintainability)](https://codeclimate.com/github/ramonhagenaars/jsons/maintainability)
-[![Downloads](https://img.shields.io/pypi/dm/jsons.svg)](https://pypistats.org/packages/jsons)
 
 
 <p align='center'>
