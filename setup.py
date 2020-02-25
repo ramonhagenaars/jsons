@@ -1,19 +1,25 @@
+import os
 from setuptools import setup
 
 
-with open('README.md', 'r') as fh:
-    long_description = fh.read()
+here = os.path.abspath(os.path.dirname(__file__))
+meta_info = {}
+with open(os.path.join(here, 'jsons', '_meta.py'), 'r') as f:
+    exec(f.read(), meta_info)
 
+with open('README.md', 'r') as f:
+    long_description = f.read()
 
 setup(
-    name='jsons',
-    version='1.1.1',
-    author='Ramon Hagenaars',
-    author_email='ramon.hagenaars@gmail.com',
-    description='For serializing Python objects to JSON (dicts) and back',
+    name=meta_info['__title__'],
+    version=meta_info['__version__'],
+    author=meta_info['__author__'],
+    author_email=meta_info['__author_email__'],
+    description=meta_info['__description__'],
+    url=meta_info['__url__'],
     long_description=long_description,
     long_description_content_type='text/markdown',
-    url='https://github.com/ramonhagenaars/jsons',
+    license=meta_info['__license__'],
     packages=[
         'jsons',
         'jsons.classes',
@@ -23,6 +29,7 @@ setup(
     install_requires=[
         'typish>=1.3.1'
     ],
+    python_requires='>=3.5',
     test_suite='tests',
     tests_require=[
         'dataclasses;python_version=="3.6"'

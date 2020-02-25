@@ -89,6 +89,7 @@ list_of_tuples = jsons.load(some_dict, List[Tuple[AClass, AnotherClass]])
 
 ### 1.1.2
 
+- Feature: Added `__version__` which can be imported from `jsons`
 - Bugfix: Dumping a tuple with ellipsis failed in strict mode.
 
 ### 1.1.1

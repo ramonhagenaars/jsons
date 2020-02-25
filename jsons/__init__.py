@@ -94,6 +94,7 @@ from decimal import Decimal
 from jsons._common_impl import NoneType
 from jsons._key_transformers import snakecase, camelcase, pascalcase, lispcase
 from jsons import (
+    _meta,
     _dump_impl,
     _load_impl,
     _fork_impl,
@@ -114,6 +115,7 @@ from jsons.exceptions import (
     InvalidDecorationError
 )
 
+__version__ = _meta.__version__
 
 dump = _dump_impl.dump
 dumps = _dump_impl.dumps
