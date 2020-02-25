@@ -35,7 +35,6 @@ def default_iterable_serializer(
     kwargs_.pop('_store_cls', None)
     if strict:
         cls_ = determine_cls(obj, cls)
-        # cls_ = cls or get_type(obj)  # Get the List[T] type from the instance.
         subclasses = _get_subclasses(obj, cls_)
     else:
         subclasses = _get_subclasses(obj, None)

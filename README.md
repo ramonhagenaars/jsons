@@ -87,6 +87,10 @@ list_of_tuples = jsons.load(some_dict, List[Tuple[AClass, AnotherClass]])
 
 ## Recent updates
 
+### 1.1.2
+
+- Bugfix: Dumping a tuple with ellipsis failed in strict mode.
+
 ### 1.1.1
 
   - Feature: Added a serializer for ``Union`` types.
@@ -120,11 +124,7 @@ list_of_tuples = jsons.load(some_dict, List[Tuple[AClass, AnotherClass]])
 
 ### 0.10.2
 
-  - Bugfix: Loading `Dict[K, V]` did not parse `K`.
-
-### 0.10.1
-
-  - Change: Correction of the type hints of `load`, `loads`, `loadb`.
+  - Bugfix: Loading `Dict[K, V]` did not parse `K
 
 
 ## Contributors
