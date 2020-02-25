@@ -57,7 +57,7 @@ And to deserialize, just do:
 
 .. code:: python
 
-   instance = jsons.load(loaded, Car)
+   instance = jsons.load(dumped, Car)
 
 Type hints for the win!
 
