@@ -20,13 +20,14 @@ def default_dict_deserializer(
     """
     key_tfr = key_transformer or (lambda key: key)
     cls_args = get_args(cls)
+    kwargs_ = {**kwargs, 'key_transformer': key_transformer}
     if len(cls_args) == 2:
         cls_k, cls_v = cls_args
-        kwargs_k = {**kwargs, 'cls': cls_k}
-        kwargs_v = {**kwargs, 'cls': cls_v}
+        kwargs_k = {**kwargs_, 'cls': cls_k}
+        kwargs_v = {**kwargs_, 'cls': cls_v}
         res = {load(key_tfr(k), **kwargs_k): load(obj[k], **kwargs_v)
                for k in obj}
     else:
-        res = {key_tfr(key): load(obj[key], **kwargs)
+        res = {key_tfr(key): load(obj[key], **kwargs_)
                for key in obj}
     return res

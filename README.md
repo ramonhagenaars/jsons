@@ -87,6 +87,7 @@ list_of_tuples = jsons.load(some_dict, List[Tuple[AClass, AnotherClass]])
 ### 1.2.0
 
 - Bugfix: Loading an invalid value targeting an optional did not raise.
+- Bugfix: Loading a dict did not properly pass key_transformers.
 
 ### 1.1.2
 
