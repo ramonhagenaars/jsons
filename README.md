@@ -84,6 +84,10 @@ list_of_tuples = jsons.load(some_dict, List[Tuple[AClass, AnotherClass]])
 
 ## Recent updates
 
+### 1.2.0
+
+- Bugfix: Loading an invalid value targeting an optional did not raise.
+
 ### 1.1.2
 
 - Feature: Added `__version__` which can be imported from `jsons`
@@ -119,11 +123,7 @@ list_of_tuples = jsons.load(some_dict, List[Tuple[AClass, AnotherClass]])
   - Bugfix: Loading with `List` (no generic type) failed.
   - Bugfix: Loading with `Dict` (no generic type) failed.
   - Bugfix: Loading with `Tuple` (no generic type) failed.
-
-### 0.10.2
-
-  - Bugfix: Loading `Dict[K, V]` did not parse `K
-
+  
 
 ## Contributors
 
