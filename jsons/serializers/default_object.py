@@ -202,7 +202,9 @@ def _get_attributes_and_types(cls: type,
     if '__slots__' in cls.__dict__:
         attributes = {attr: None for attr in cls.__slots__}
     elif hasattr(cls, '__annotations__'):
-        attributes = cls.__annotations__
+        # Fixme: remove code below if tests succeed on all platforms.
+        # attributes = cls.__annotations__
+        attributes = get_type_hints(cls)
     elif strict:
         hints = get_type_hints(cls.__init__)
         attributes = {k: hints[k] for k in hints if k != 'self'}

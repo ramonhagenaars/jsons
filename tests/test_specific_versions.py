@@ -36,17 +36,20 @@ def only_version_3(minor_version: int, and_above: bool = False):
 
 class TestSpecificVersions(TestCase):
 
-    @only_version_3(7)
+    @only_version_3(7, and_above=True)
     def test_simple_dump_and_load_dataclass_with_future_import(self):
         import version_37
-        from version_with_dataclasses import Person
-        p = Person('John')
-        dumped = jsons.dump(p)
-        loaded = jsons.load(dumped, Person)
-        self.assertEqual(p.name, loaded.name)
 
-        with self.assertRaises(SignatureMismatchError):
-            jsons.load({'name': 'John', 'age': 88}, Person, strict=True)
+        dumped = jsons.dump(version_37.B(version_37.A(42), [1, 2, 3]))
+
+        expected = {
+            'a': {
+                'x': 42
+            },
+            'x': [1, 2, 3]
+        }
+
+        self.assertDictEqual(expected, dumped)
 
     @only_version_3(6, and_above=True)
     def test_simple_dump_and_load_dataclass(self):
