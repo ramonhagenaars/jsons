@@ -111,6 +111,10 @@ def _get_value_for_attr(
             'No value found for "{}"'.format(sig_key), sig_key, obj, orig_cls)
     return result
 
+def _remove_prefix(prefix, s):
+    if s.startswith(prefix):
+        return s[len(prefix):] or '/'  # Special case: map the empty string to '/'
+    return s
 
 def _get_value_from_obj(obj, cls, sig, sig_key, meta_hints, **kwargs):
     # Obtain the value for the attribute with the given signature from the
@@ -125,7 +129,7 @@ def _get_value_from_obj(obj, cls, sig, sig_key, meta_hints, **kwargs):
             cls_str_from_meta, obj, kwargs['fork_inst'])
         # Rebuild the class hints: cls_key becomes the new root.
         new_hints = {
-            key.replace(cls_key, '/'): meta_hints[key]
+            _remove_prefix(cls_key, key): meta_hints[key]
             for key in meta_hints
             if key != '/'
         }

@@ -477,6 +477,19 @@ class TestObject(TestCase):
             self.assertTrue('y' in err.message)
             self.assertTrue('Told you so' in err.message)
 
+    def test_dump_nested_object_roundtrip(self):
+        class A:
+            def __init__(self, inner):
+                self.inner = inner
+        class B:
+            pass
+
+        obj = A(A(B()))
+        obj_roundtrip = jsons.load(jsons.dump(obj, verbose=True))
+        self.assertTrue(isinstance(obj_roundtrip, A))
+        self.assertTrue(isinstance(obj_roundtrip.inner, A))
+        self.assertTrue(isinstance(obj_roundtrip.inner.inner, B))
+
 
 class ParentDumpable:
     _par_c = 10
