@@ -91,6 +91,7 @@ from enum import Enum
 from typing import Union, List, Tuple, Iterable
 from uuid import UUID
 from decimal import Decimal
+from pathlib import PurePath
 from jsons._common_impl import NoneType
 from jsons._key_transformers import snakecase, camelcase, pascalcase, lispcase
 from jsons import (
@@ -158,6 +159,7 @@ default_object_serializer = serializers.default_object_serializer
 default_decimal_serializer = serializers.default_decimal_serializer
 default_uuid_serializer = serializers.default_uuid_serializer
 default_union_serializer = serializers.default_union_serializer
+default_path_serializer = serializers.default_path_serializer
 
 default_list_deserializer = deserializers.default_list_deserializer
 default_tuple_deserializer = deserializers.default_tuple_deserializer
@@ -178,6 +180,7 @@ default_iterable_deserializer = deserializers.default_iterable_deserializer
 default_object_deserializer = deserializers.default_object_deserializer
 default_uuid_deserializer = deserializers.default_uuid_deserializer
 default_decimal_deserializer = deserializers.default_decimal_deserializer
+default_path_deserializer = deserializers.default_path_deserializer
 
 # Set the serializers:
 set_serializer(default_tuple_serializer, (tuple, Tuple))
@@ -195,6 +198,7 @@ set_serializer(default_object_serializer, object, False)
 set_serializer(default_uuid_serializer, UUID)
 set_serializer(default_decimal_serializer, Decimal)
 set_serializer(default_union_serializer, Union)
+set_serializer(default_path_serializer, PurePath)
 
 # Set the deserializers:
 set_deserializer(default_list_deserializer, (list, List))
@@ -215,3 +219,4 @@ set_deserializer(default_object_deserializer, object, False)
 set_deserializer(default_uuid_deserializer, UUID)
 set_deserializer(default_complex_deserializer, complex)
 set_deserializer(default_decimal_deserializer, Decimal)
+set_deserializer(default_path_deserializer, PurePath)
