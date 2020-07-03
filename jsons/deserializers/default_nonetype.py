@@ -1,5 +1,7 @@
 from typing import Optional
 
+from jsons.exceptions import DeserializationError
+
 
 def default_nonetype_deserializer(obj: object,
                                   cls: Optional[type] = None,
@@ -11,4 +13,7 @@ def default_nonetype_deserializer(obj: object,
     :param kwargs: not used.
     :return: ``obj``.
     """
+    if obj is not None:
+        raise DeserializationError('Cannot deserialize {} as NoneType'
+                                   .format(obj), source=obj, target=cls)
     return obj

@@ -477,6 +477,15 @@ class TestObject(TestCase):
             self.assertTrue('y' in err.message)
             self.assertTrue('Told you so' in err.message)
 
+    def test_dump_object_with_str_hint(self):
+        class C:
+            def __init__(self, x: 'str'):
+                self.x = x
+
+        dumped = jsons.dump(C('test'), cls=C)
+
+        self.assertDictEqual({'x': 'test'}, dumped)
+
 
 class ParentDumpable:
     _par_c = 10

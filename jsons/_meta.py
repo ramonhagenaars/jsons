@@ -1,5 +1,5 @@
 __title__ = 'jsons'
-__version__ = '1.1.2'
+__version__ = '1.2.0'
 __author__ = 'Ramon Hagenaars'
 __author_email__ = 'ramon.hagenaars@gmail.com'
 __description__ = 'For serializing Python objects to JSON (dicts) and back'

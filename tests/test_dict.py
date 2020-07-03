@@ -44,6 +44,31 @@ class TestDict(TestCase):
         loaded2 = jsons.load(source2, Dict[Color, int], key_transformer=lambda x: x.upper())
         self.assertDictEqual(expected, loaded2)
 
+    def test_load_dict_with_key_transformers(self):
+
+        class A_:
+            def __init__(self, b_: int):
+                self.b_ = b_
+
+        class C:
+            def __init__(self, a_: A_):
+                self.a_ = a_
+
+        src = {
+            'a': {
+                'b': 42
+            }
+        }
+        loaded = jsons.load(src, key_transformer=lambda x: x + '_')
+
+        expected = {
+            'a_': {
+                'b_': 42
+            }
+        }
+
+        self.assertDictEqual(expected, loaded)
+
     def test_load_dict_with_generic(self):
         class A:
             def __init__(self):

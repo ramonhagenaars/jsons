@@ -84,6 +84,14 @@ list_of_tuples = jsons.load(some_dict, List[Tuple[AClass, AnotherClass]])
 
 ## Recent updates
 
+### 1.2.0
+
+- Bugfix: Fixed bug with postponed typehints (PEP-563).
+- Bugfix: Loading an invalid value targeting an optional did not raise.
+- Bugfix: Loading a dict did not properly pass key_transformers.
+- Bugfix: Loading a namedtuple did not properly use key_transformers.
+- Bugfix: Utilized `__annotations__` in favor `_field_types` because of deprecation as of 3.8.
+
 ### 1.1.2
 
 - Feature: Added `__version__` which can be imported from `jsons`
@@ -119,24 +127,22 @@ list_of_tuples = jsons.load(some_dict, List[Tuple[AClass, AnotherClass]])
   - Bugfix: Loading with `List` (no generic type) failed.
   - Bugfix: Loading with `Dict` (no generic type) failed.
   - Bugfix: Loading with `Tuple` (no generic type) failed.
-
-### 0.10.2
-
-  - Bugfix: Loading `Dict[K, V]` did not parse `K
-
+  
 
 ## Contributors
 
 Special thanks to the following contributors of code, discussions or
 suggestions:
 
-  - [finetuned89](https://github.com/finetuned89)
-  - [haluzpav](https://github.com/haluzpav)
-  - [jmolinski](https://github.com/jmolinski)
-  - [gastlich](https://github.com/gastlich)
-  - [cypreess](https://github.com/cypreess)
-  - [casparjespersen](https://github.com/casparjespersen)
-  - [ahmetkucuk](https://github.com/ahmetkucuk)
-  - [robinklaassen](https://github.com/robinklaassen)
-  - [jochembroekhoff](https://github.com/jochembroekhoff)
-  - [herdigiorgi](https://github.com/herdigiorgi)
+[tirkarthi](https://github.com/tirkarthi), 
+[marksomething](https://github.com/marksomething), 
+[herdigiorgi](https://github.com/herdigiorgi), 
+[jochembroekhoff](https://github.com/jochembroekhoff), 
+[robinklaassen](https://github.com/robinklaassen), 
+[ahmetkucuk](https://github.com/ahmetkucuk), 
+[casparjespersen](https://github.com/casparjespersen), 
+[cypreess](https://github.com/cypreess), 
+[gastlich](https://github.com/gastlich), 
+[jmolinski](https://github.com/jmolinski), 
+[haluzpav](https://github.com/haluzpav), 
+[finetuned89](https://github.com/finetuned89),
