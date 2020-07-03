@@ -119,6 +119,22 @@ class TestTuple(TestCase):
         self.assertEqual('100', loaded_from_dict.x)
         self.assertEqual(200, loaded_from_dict.y)
 
+    def test_load_namedtuple_with_key_transformer(self):
+        T = namedtuple('T', ['x', 'y_z'])
+        NT = NamedTuple('NT', [('x', int), ('y_z', T)])
+        kt = jsons.KEY_TRANSFORMER_SNAKECASE
+        unnested_dict = {'x': '100', 'YZ': 200}
+        nested_dict = {'x': 100, 'YZ': {'x': 200, 'YZ': '300'}}
+
+        loaded_from_unnested = jsons.load(unnested_dict, T, key_transformer=kt)
+        loaded_from_nested = jsons.load(nested_dict, NT, key_transformer=kt)
+
+        self.assertEqual('100', loaded_from_unnested.x)
+        self.assertEqual(200, loaded_from_unnested.y_z)
+        self.assertEqual(100, loaded_from_nested.x)
+        self.assertEqual(200, loaded_from_nested.y_z.x)
+        self.assertEqual('300', loaded_from_nested.y_z.y_z)
+
     def test_load_namedtuple_with_empty(self):
         T = namedtuple('T', ['x', 'y'])
 
