@@ -52,14 +52,19 @@ def default_namedtuple_deserializer(
         else:
             field = cls._field_defaults.get(field_name, None)
 
+        # _field_types has been deprecated in favor of __annotations__ in Python 3.8
+        if hasattr(cls, '__annotations__'):
+            field_types = getattr(cls, '__annotations__', {})
+        else:
+            field_types = getattr(cls, '_field_types', {})
+
         if field is None:
-            hint = getattr(cls, '_field_types', {}).get(field_name)
+            hint = field_types.get(field_name)
             if NoneType not in (get_union_params(hint) or []):
                 # The value 'None' is not permitted here.
                 msg = ('No value present in {} for argument "{}"'
                        .format(obj, field_name))
                 raise UnfulfilledArgumentError(msg, field_name, obj, cls)
-        field_types = getattr(cls, '_field_types', None)
         cls_ = field_types.get(field_name) if field_types else None
         loaded_field = load(field, cls_, **kwargs)
         args.append(loaded_field)
