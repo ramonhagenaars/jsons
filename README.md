@@ -89,6 +89,8 @@ list_of_tuples = jsons.load(some_dict, List[Tuple[AClass, AnotherClass]])
 - Bugfix: Fixed bug with postponed typehints (PEP-563).
 - Bugfix: Loading an invalid value targeting an optional did not raise.
 - Bugfix: Loading a dict did not properly pass key_transformers.
+- Bugfix: Loading a namedtuple did not properly use key_transformers.
+- Bugfix: Utilized `__annotations__` in favor `_field_types` because of deprecation as of 3.8.
 
 ### 1.1.2
 
