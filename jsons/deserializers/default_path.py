@@ -9,5 +9,4 @@ def default_path_deserializer(obj: str, cls: type = PurePath, **kwargs) -> PureP
     :param kwargs: not used.
     :return: a ``str``.
     """
-    path: PurePath = cls(obj)
-    return path
+    return cls(obj)
