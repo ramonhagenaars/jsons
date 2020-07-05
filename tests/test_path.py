@@ -10,12 +10,6 @@ class TestPath(TestCase):
     def test_dump_singlepart_relative_path(self):
         self.assertEqual('abc', jsons.dump(Path('abc')))
 
-    def test_dump_singlepart_absolute_path(self):
-        self.assertEqual(
-            os.path.abspath('abc'),
-            jsons.dump(Path('abc').resolve())
-        )
-
     def test_dump_singlepart_pure_windows_path(self):
         self.assertEqual('abc', jsons.dump(PureWindowsPath('abc')))
 
@@ -30,16 +24,6 @@ class TestPath(TestCase):
         self.assertEqual(
             'abc/def/ghi',
             jsons.dump(Path('abc/def/ghi'))
-        )
-
-    def test_dump_multipart_absolute_path(self):
-        self.assertEqual(
-            os.path.abspath('abc/def/ghi'),
-            jsons.dump(Path('abc', 'def', 'ghi').resolve())
-        )
-        self.assertEqual(
-            os.path.abspath('abc/def/ghi'),
-            jsons.dump(Path('abc/def/ghi').resolve())
         )
 
     def test_dump_multipart_pure_windows_path(self):
