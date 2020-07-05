@@ -1,9 +1,8 @@
-from unittest import TestCase
-import jsons
-from jsons import DeserializationError
-from jsons.exceptions import SerializationError
-from pathlib import Path, PureWindowsPath, PurePosixPath
 import os.path
+from pathlib import Path, PureWindowsPath, PurePosixPath
+from unittest import TestCase
+
+import jsons
 
 
 class TestPath(TestCase):
