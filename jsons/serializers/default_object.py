@@ -1,8 +1,9 @@
+import inspect
 from datetime import datetime, timezone
 from inspect import isfunction
 from typing import Optional, Callable, Union, MutableSequence, Tuple, Dict
 
-from typish import get_type
+from typish import get_type, get_mro
 
 from jsons._cache import cached
 from jsons._common_impl import get_class_name, META_ATTR, StateHolder
@@ -202,8 +203,6 @@ def _get_attributes_and_types(cls: type,
     if '__slots__' in cls.__dict__:
         attributes = {attr: None for attr in cls.__slots__}
     elif hasattr(cls, '__annotations__'):
-        # Fixme: remove code below if tests succeed on all platforms.
-        # attributes = cls.__annotations__
         attributes = get_type_hints(cls)
     elif strict:
         hints = get_type_hints(cls.__init__)
@@ -239,7 +238,8 @@ def _filter_attributes(
             and attr not in strip_attr
             and attr != 'json'
             and not isfunction(getattr(cls, attr, None))
-            and attr not in excluded_elems}
+            and attr not in excluded_elems
+            and not _is_innerclass(attr, cls)}
 
 
 def _get_class_props(cls: type) -> Tuple[list, list]:
@@ -254,7 +254,7 @@ def _get_class_props(cls: type) -> Tuple[list, list]:
 def _get_complete_class_dict(cls: type) -> dict:
     cls_dict = {}
     # Loop reversed so values of sub-classes override those of super-classes.
-    for cls_or_elder in reversed(cls.mro()):
+    for cls_or_elder in reversed(get_mro(cls)):
         cls_dict.update(cls_or_elder.__dict__)
     return cls_dict
 
@@ -316,6 +316,12 @@ def _store_cls_info(result: object, original_obj: dict, kwargs):
         else:
             cls_name = get_class_name(cls, fully_qualified=True)
         result['-cls'] = cls_name
+
+
+def _is_innerclass(attr: str, cls: type) -> bool:
+    attr_obj = getattr(cls, attr, None)
+    return (isinstance(attr_obj, type)
+            and inspect.getsource(attr_obj) in inspect.getsource(cls))
 
 
 _ABC_ATTRS = ('_abc_registry', '_abc_cache', '_abc_negative_cache',
