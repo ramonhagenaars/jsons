@@ -84,6 +84,10 @@ list_of_tuples = jsons.load(some_dict, List[Tuple[AClass, AnotherClass]])
 
 ## Recent updates
 
+### 1.3.0
+
+- Change: When loading a list fails, the error message now points to the failing index.
+
 ### 1.2.0
 
 - Bugfix: Fixed bug with postponed typehints (PEP-563).

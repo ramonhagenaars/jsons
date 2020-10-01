@@ -4,7 +4,7 @@ from typish import get_args
 
 from jsons._load_impl import load
 from jsons._multitasking import multi_task
-from jsons.exceptions import JsonsError
+from jsons.exceptions import JsonsError, DeserializationError
 
 
 def default_list_deserializer(
@@ -33,6 +33,16 @@ def default_list_deserializer(
         kwargs_['_inferred_cls'] = True
 
     if tasks == 1:
+        result = []
+        for index, elem in enumerate(obj):
+            try:
+                result.append(load(elem, cls=cls_, tasks=1, **kwargs_))
+            except DeserializationError as err:
+                new_msg = ('Could not deserialize element at index %s. %s' %
+                           (index, err.message))
+                new_err = DeserializationError(new_msg, err.source, err.target)
+                raise new_err from err
+
         result = [load(elem, cls=cls_, tasks=1, **kwargs_) for elem in obj]
     elif tasks > 1:
         result = multi_task(load, obj, tasks, task_type, cls_, **kwargs_)

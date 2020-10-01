@@ -46,7 +46,6 @@ def default_object_serializer(
     contain values from class variables.
     :param strip_attr: can be a name or a collection of names of attributes
     that are not to be included in the dump.
-    dict will not contain attributes with
     :param verbose: if ``True`` the resulting dict will contain meta
     information (e.g. on how to deserialize).
     :param strict: a bool to determine if the serializer should be strict
@@ -54,7 +53,8 @@ def default_object_serializer(
     :param fork_inst: if given, it uses this fork of ``JsonSerializable``.
     :param kwargs: any keyword arguments that are to be passed to the
     serializer functions.
-    :return: a Python dict holding the values of ``obj``.
+    :return: a Python dict holding the values
+    of ``obj``.
     """
     if obj is None:
         return obj
