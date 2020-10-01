@@ -87,6 +87,7 @@ list_of_tuples = jsons.load(some_dict, List[Tuple[AClass, AnotherClass]])
 ### 1.3.0
 
 - Change: When loading a list fails, the error message now points to the failing index.
+- Feature: Added ``warn_on_fail`` parameter to ``default_list_deserializer`` that allows to continue deserialization upon errors.
 
 ### 1.2.0
 
