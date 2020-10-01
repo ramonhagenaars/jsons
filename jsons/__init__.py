@@ -97,6 +97,7 @@ from jsons import (
     _meta,
     _dump_impl,
     _load_impl,
+    _transform_impl,
     _fork_impl,
     _lizers_impl,
     _validation,
@@ -123,6 +124,7 @@ dumpb = _dump_impl.dumpb
 load = _load_impl.load
 loads = _load_impl.loads
 loadb = _load_impl.loadb
+transform = _transform_impl
 fork = _fork_impl.fork
 JsonSerializable = classes.JsonSerializable
 set_serializer = _lizers_impl.set_serializer
