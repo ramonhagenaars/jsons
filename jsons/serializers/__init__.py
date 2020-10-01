@@ -20,6 +20,7 @@ from jsons.serializers.default_tuple import default_tuple_serializer
 from jsons.serializers.default_uuid import default_uuid_serializer
 from jsons.serializers.default_decimal import default_decimal_serializer
 from jsons.serializers.default_union import default_union_serializer
+from jsons.serializers.default_path import default_path_serializer
 
 
 KEY_TRANSFORMER_SNAKECASE = snakecase
