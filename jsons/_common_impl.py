@@ -131,7 +131,8 @@ def can_match_with_none(cls: type):
     result = cls in (Any, object, None, NoneType)
     if not result:
         cls_name = get_class_name(cls).lower()
-        result = 'union' in cls_name and NoneType in get_union_params(cls)
+        result = (('union' in cls_name or 'optional' in cls_name)
+                  and NoneType in get_union_params(cls))
     return result
 
 

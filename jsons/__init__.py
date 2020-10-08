@@ -88,7 +88,7 @@ Alternatively, you can make use of the `JsonSerializable` class.
 from collections.abc import Mapping
 from datetime import datetime, date, time, timezone, timedelta
 from enum import Enum
-from typing import Union, List, Tuple, Iterable
+from typing import Union, List, Tuple, Iterable, Optional
 from uuid import UUID
 from decimal import Decimal
 from pathlib import PurePath
@@ -199,13 +199,13 @@ set_serializer(default_iterable_serializer, Iterable, False)
 set_serializer(default_object_serializer, object, False)
 set_serializer(default_uuid_serializer, UUID)
 set_serializer(default_decimal_serializer, Decimal)
-set_serializer(default_union_serializer, Union)
+set_serializer(default_union_serializer, (Union, Optional))
 set_serializer(default_path_serializer, PurePath)
 
 # Set the deserializers:
 set_deserializer(default_list_deserializer, (list, List))
 set_deserializer(default_tuple_deserializer, (tuple, Tuple))
-set_deserializer(default_union_deserializer, Union)
+set_deserializer(default_union_deserializer, (Union, Optional))
 set_deserializer(default_enum_deserializer, Enum)
 set_deserializer(default_datetime_deserializer, datetime)
 set_deserializer(default_date_deserializer, date)
