@@ -1,12 +1,14 @@
 import datetime
 import warnings
 from abc import ABC
+from enum import Enum
 from typing import List, Dict
 from unittest import TestCase
+
+import jsons
 from jsons._common_impl import StateHolder
 from jsons.exceptions import SignatureMismatchError, UnknownClassError, \
     SerializationError
-import jsons
 
 
 class TestObject(TestCase):
@@ -345,7 +347,7 @@ class TestObject(TestCase):
 
     def test_load_object_with_default_value(self):
         class A:
-            def __init__(self, x, y = 2):
+            def __init__(self, x, y=2):
                 self.x = x
                 self.y = y
 
@@ -405,6 +407,7 @@ class TestObject(TestCase):
         class WithSetter:
             def __init__(self):
                 self.__x = 123
+
             @property
             def x(self):
                 return self.__x
@@ -485,6 +488,32 @@ class TestObject(TestCase):
         dumped = jsons.dump(C('test'), cls=C)
 
         self.assertDictEqual({'x': 'test'}, dumped)
+
+    def test_dump_and_load_with_innerclass(self):
+
+        class Outer:
+            class Inner:
+                class InnerInner(Enum):
+                    A = 1
+                    B = 2
+                    C = 3
+
+                def __init__(self, inner_inner: InnerInner):
+                    self.inner_inner = inner_inner
+
+            attr1 = Inner
+
+            def __init__(self, inner: Inner):
+                self.inner = inner
+
+        outer = Outer(Outer.Inner(Outer.Inner.InnerInner.B))
+
+        dumped = jsons.dump(outer, strict=True)
+        self.assertEqual('B', dumped['inner']['inner_inner'])
+
+        loaded = jsons.load(dumped, Outer)
+        self.assertEqual(Outer.Inner.InnerInner.B, loaded.inner.inner_inner)
+        self.assertEqual(Outer.Inner, loaded.attr1)
 
 
 class ParentDumpable:

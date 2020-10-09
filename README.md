@@ -84,6 +84,14 @@ list_of_tuples = jsons.load(some_dict, List[Tuple[AClass, AnotherClass]])
 
 ## Recent updates
 
+### 1.3.0
+
+- Feature: Added `warn_on_fail` parameter to `default_list_deserializer` that allows to continue deserialization upon errors.
+- Feature: Added `transform` that can transform an object to an object of another type.
+- Feature: Added serializer and deserializer for `pathlib.Path` (thanks to alexmirrington).
+- Change: When loading a list fails, the error message now points to the failing index.
+- Bugfix: Fixed bug when dumping an object with an innerclass. 
+
 ### 1.2.0
 
 - Bugfix: Fixed bug with postponed typehints (PEP-563).
@@ -134,6 +142,7 @@ list_of_tuples = jsons.load(some_dict, List[Tuple[AClass, AnotherClass]])
 Special thanks to the following contributors of code, discussions or
 suggestions:
 
+[alexmirrington](https://github.com/alexmirrington)
 [tirkarthi](https://github.com/tirkarthi), 
 [marksomething](https://github.com/marksomething), 
 [herdigiorgi](https://github.com/herdigiorgi), 
