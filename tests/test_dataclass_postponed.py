@@ -4,6 +4,8 @@ from dataclasses import dataclass
 from typing import List, Dict, Optional
 from unittest import TestCase
 
+from jsons._compatibility_impl import Flag
+
 import jsons
 
 class TestObject(TestCase):
