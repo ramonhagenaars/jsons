@@ -1,4 +1,6 @@
+import dataclasses
 import datetime
+import uuid
 from typing import Optional, Union
 from unittest import TestCase
 
@@ -11,7 +13,7 @@ from jsons import (
 
 
 class TestUnion(TestCase):
-    def test_dump_optional(self):
+    def test_dump_optional_primitive(self):
 
         class C:
             def __init__(self, x: Optional[str]):
@@ -21,6 +23,50 @@ class TestUnion(TestCase):
         dumped = jsons.dump(C('42'))
 
         self.assertDictEqual(expected, dumped)
+
+    def test_dump_optional_uuid(self):
+        class C:
+            def __init__(self, x: Optional[uuid.UUID]):
+                self.x = x
+
+        expected = {'x': '00000000-0000-0000-0000-000000000000'}
+        dumped = jsons.dump(C(uuid.UUID(int=0)))
+
+        self.assertDictEqual(expected, dumped)
+
+    def test_dump_optional_class_primitive(self):
+        class C:
+            x: Optional[int]
+
+            def __init__(self, x):
+                self.x = x
+
+        expected = {'x': 42}
+        dumped = jsons.dump(C(42))
+
+        self.assertDictEqual(expected, dumped)
+
+        expected2 = {'x': None}
+        dumped2 = jsons.dump(C(None))
+
+        self.assertDictEqual(expected2, dumped2)
+
+    def test_dump_optional_class_uuid(self):
+        class C:
+            x: Optional[uuid.UUID]
+
+            def __init__(self, x):
+                self.x = x
+
+        expected = {'x': '00000000-0000-0000-0000-000000000000'}
+        dumped = jsons.dump(C(uuid.UUID(int=0)))
+
+        self.assertDictEqual(expected, dumped)
+
+        expected2 = {'x': None}
+        dumped2 = jsons.dump(C(None))
+
+        self.assertDictEqual(expected2, dumped2)
 
     def test_dump_union(self):
 
