@@ -84,6 +84,10 @@ list_of_tuples = jsons.load(some_dict, List[Tuple[AClass, AnotherClass]])
 
 ## Recent updates
 
+### 1.3.1
+
+- Bugfix: Fixed bug where classmethods were included in the serialized result.
+
 ### 1.3.0
 
 - Feature: Added `warn_on_fail` parameter to `default_list_deserializer` that allows to continue deserialization upon errors.
