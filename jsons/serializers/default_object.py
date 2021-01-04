@@ -237,6 +237,7 @@ def _filter_attributes(
             and not (strip_class_variables and attr in other_cls_vars)
             and attr not in strip_attr
             and attr != 'json'
+            and not inspect.ismethod(getattr(cls, attr, None))
             and not isfunction(getattr(cls, attr, None))
             and attr not in excluded_elems
             and not _is_innerclass(attr, cls)}
