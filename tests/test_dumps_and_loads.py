@@ -18,6 +18,19 @@ class TestDumpsAndLoads(TestCase):
         s = json.dumps({'a': {'name': 'A'}, 'name': 'B'})
         self.assertDictEqual(eval(s), eval(sdumped))
 
+    def test_dumps_with_class_method(self):
+        class A:
+            def __init__(self):
+                self.name = 'A'
+
+            @classmethod
+            def my_method(cls):
+                pass
+
+        sdumped = jsons.dumps(A())
+        s = json.dumps({'name': 'A'})
+        self.assertEqual(eval(s), eval(sdumped))
+
     def test_loads(self):
         class A:
             def __init__(self):

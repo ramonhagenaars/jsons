@@ -84,6 +84,10 @@ list_of_tuples = jsons.load(some_dict, List[Tuple[AClass, AnotherClass]])
 
 ## Recent updates
 
+### 1.3.1
+
+- Bugfix: Fixed bug where classmethods were included in the serialized result.
+
 ### 1.3.0
 
 - Feature: Added `warn_on_fail` parameter to `default_list_deserializer` that allows to continue deserialization upon errors.
@@ -142,7 +146,8 @@ list_of_tuples = jsons.load(some_dict, List[Tuple[AClass, AnotherClass]])
 Special thanks to the following contributors of code, discussions or
 suggestions:
 
-[alexmirrington](https://github.com/alexmirrington)
+[thijss](https://github.com/Thijss),
+[alexmirrington](https://github.com/alexmirrington),
 [tirkarthi](https://github.com/tirkarthi), 
 [marksomething](https://github.com/marksomething), 
 [herdigiorgi](https://github.com/herdigiorgi), 
@@ -154,4 +159,4 @@ suggestions:
 [gastlich](https://github.com/gastlich), 
 [jmolinski](https://github.com/jmolinski), 
 [haluzpav](https://github.com/haluzpav), 
-[finetuned89](https://github.com/finetuned89),
+[finetuned89](https://github.com/finetuned89)
