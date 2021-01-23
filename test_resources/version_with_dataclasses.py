@@ -46,3 +46,11 @@ class Parent:
 @dataclass
 class Child(Parent):
     b: int
+
+
+@dataclass
+class Wrap:
+    a: A
+
+    def __init__(self, a : Optional[A] = None):
+        self.a = a if a is not None else A()
