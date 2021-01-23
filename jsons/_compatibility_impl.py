@@ -68,10 +68,17 @@ def get_naked_class(cls: type) -> type:
 
 
 @cached
-def get_type_hints(func: callable):
+def get_type_hints(func: callable, fallback_ns = None):
     # Python3.5: get_type_hints raises on classes without explicit constructor
     try:
         result = typing.get_type_hints(func)
     except AttributeError:
         result = {}
+    except NameError:
+        # attempt to resolve in global namespace - this works around an
+        # issue in 3.7 whereby __init__ created by dataclasses fails
+        # to find it's context
+        if fallback_ns is not None:
+            context_dict = sys.modules[fallback_ns].__dict__
+            result = typing.get_type_hints(func, globalns = context_dict)
     return result
