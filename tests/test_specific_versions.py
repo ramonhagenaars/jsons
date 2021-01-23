@@ -53,7 +53,7 @@ class TestSpecificVersions(TestCase):
 
     @only_version_3(7, and_above=False)
     def test_postponed_annoation_dataclass(self):
-        from postposned_dataclass import A
+        from postponed_dataclass import A
 
         @dataclass
         class Wrap:
@@ -66,7 +66,7 @@ class TestSpecificVersions(TestCase):
         exp = {'a' : {'a': 42} }
         dump = jsons.dump(obj)
         self.assertDictEqual(exp, dump)
-        
+
         undump = jsons.load(dump, cls = Wrap)
         self.assertEqual(undump, obj)
 
