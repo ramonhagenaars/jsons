@@ -51,7 +51,7 @@ class TestSpecificVersions(TestCase):
 
         self.assertDictEqual(expected, dumped)
 
-    @only_version_3(7, and_above=False)
+    @only_version_3(7, and_above=True)
     def test_postponed_annoation_dataclass(self):
         from postponed_dataclass import A
 
