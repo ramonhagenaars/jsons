@@ -53,8 +53,7 @@ class TestSpecificVersions(TestCase):
 
     @only_version_3(7, and_above=True)
     def test_postponed_annoation_dataclass(self):
-        from postponed_dataclass import A
-        from version_with_dataclasses import Wrap
+        from postponed_dataclass import Wrap
 
         obj = Wrap()
         exp = {'a' : {'a': 42} }

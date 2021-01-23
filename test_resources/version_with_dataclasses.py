@@ -49,8 +49,5 @@ class Child(Parent):
 
 
 @dataclass
-class Wrap:
-    a: A
-
-    def __init__(self, a : Optional[A] = None):
-        self.a = a if a is not None else A()
+class A:
+    a: Optional[int] = 42
