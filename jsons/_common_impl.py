@@ -15,6 +15,7 @@ from jsons.exceptions import UnknownClassError
 
 
 NoneType = type(None)
+JSON_KEYS = (str, int, float, bool, NoneType)
 VALID_TYPES = (str, int, float, bool, list, tuple, set, dict, NoneType)
 META_ATTR = '-meta'  # The name of the attribute holding meta info.
 T = TypeVar('T')

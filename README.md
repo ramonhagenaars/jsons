@@ -84,6 +84,10 @@ list_of_tuples = jsons.load(some_dict, List[Tuple[AClass, AnotherClass]])
 
 ## Recent updates
 
+### 1.4.0
+
+- Feature: Dicts with any (hashable) key can now be dumped and loaded.
+
 ### 1.3.1
 
 - Bugfix: Fixed bug where classmethods were included in the serialized result.
