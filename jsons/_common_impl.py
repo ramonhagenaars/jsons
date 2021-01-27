@@ -15,6 +15,7 @@ from jsons.exceptions import UnknownClassError
 
 
 NoneType = type(None)
+JSON_KEYS = (str, int, float, bool, NoneType)
 VALID_TYPES = (str, int, float, bool, list, tuple, set, dict, NoneType)
 META_ATTR = '-meta'  # The name of the attribute holding meta info.
 T = TypeVar('T')
@@ -131,7 +132,8 @@ def can_match_with_none(cls: type):
     result = cls in (Any, object, None, NoneType)
     if not result:
         cls_name = get_class_name(cls).lower()
-        result = 'union' in cls_name and NoneType in get_union_params(cls)
+        result = (('union' in cls_name or 'optional' in cls_name)
+                  and NoneType in get_union_params(cls))
     return result
 
 

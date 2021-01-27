@@ -25,5 +25,5 @@ def default_union_deserializer(obj: object, cls: Union, **kwargs) -> object:
         args_msg = ', '.join([get_class_name(cls_)
                               for cls_ in get_union_params(cls)])
         err_msg = ('Could not match the object of type "{}" to any type of '
-                   'the Union: {}'.format(str(cls), args_msg))
+                   'the Union: {}'.format(type(obj).__name__, args_msg))
         raise DeserializationError(err_msg, obj, cls)

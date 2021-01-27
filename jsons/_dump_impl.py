@@ -65,7 +65,7 @@ def _do_dump(obj, serializer, cls, initial, kwargs):
         return result
     except Exception as err:
         clear()
-        raise SerializationError(str(err))
+        raise SerializationError(str(err)) from err
 
 
 def dumps(obj: object,

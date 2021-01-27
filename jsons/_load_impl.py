@@ -114,7 +114,7 @@ def _do_load(json_obj: object,
         if isinstance(err, JsonsError):
             raise
         message = 'Could not deserialize value "{}" into "{}". {}'.format(json_obj, cls_name, err)
-        raise DeserializationError(message, json_obj, cls)
+        raise DeserializationError(message, json_obj, cls) from err
     else:
         if initial:
             # Clear all lru caches right before returning the initial call.
@@ -147,7 +147,7 @@ def loads(
         obj = json.loads(str_, **jdkwargs)
     except JSONDecodeError as err:
         raise DecodeError('Could not load a dict; the given string is not '
-                          'valid JSON.', str_, cls, err)
+                          'valid JSON.', str_, cls, err) from err
     else:
         return load(obj, cls, *args, **kwargs)
 
@@ -209,7 +209,7 @@ def _should_skip(json_obj: object, cls: type, strict: bool):
 def _check_for_none(json_obj: object, cls: type):
     # Check if the json_obj is None and whether or not that is fine.
     if json_obj is None and not can_match_with_none(cls):
-        cls_name = get_class_name(cls).lower()
+        cls_name = get_class_name(cls)
         raise DeserializationError(
             message='NoneType cannot be deserialized into {}'.format(cls_name),
             source=json_obj,

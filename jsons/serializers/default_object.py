@@ -1,8 +1,9 @@
+import inspect
 from datetime import datetime, timezone
 from inspect import isfunction
 from typing import Optional, Callable, Union, MutableSequence, Tuple, Dict
 
-from typish import get_type
+from typish import get_type, get_mro
 
 from jsons._cache import cached
 from jsons._common_impl import get_class_name, META_ATTR, StateHolder
@@ -46,7 +47,6 @@ def default_object_serializer(
     contain values from class variables.
     :param strip_attr: can be a name or a collection of names of attributes
     that are not to be included in the dump.
-    dict will not contain attributes with
     :param verbose: if ``True`` the resulting dict will contain meta
     information (e.g. on how to deserialize).
     :param strict: a bool to determine if the serializer should be strict
@@ -54,7 +54,8 @@ def default_object_serializer(
     :param fork_inst: if given, it uses this fork of ``JsonSerializable``.
     :param kwargs: any keyword arguments that are to be passed to the
     serializer functions.
-    :return: a Python dict holding the values of ``obj``.
+    :return: a Python dict holding the values
+    of ``obj``.
     """
     if obj is None:
         return obj
@@ -202,7 +203,7 @@ def _get_attributes_and_types(cls: type,
     if '__slots__' in cls.__dict__:
         attributes = {attr: None for attr in cls.__slots__}
     elif hasattr(cls, '__annotations__'):
-        attributes = cls.__annotations__
+        attributes = get_type_hints(cls)
     elif strict:
         hints = get_type_hints(cls.__init__)
         attributes = {k: hints[k] for k in hints if k != 'self'}
@@ -236,8 +237,10 @@ def _filter_attributes(
             and not (strip_class_variables and attr in other_cls_vars)
             and attr not in strip_attr
             and attr != 'json'
+            and not inspect.ismethod(getattr(cls, attr, None))
             and not isfunction(getattr(cls, attr, None))
-            and attr not in excluded_elems}
+            and attr not in excluded_elems
+            and not _is_innerclass(attr, cls)}
 
 
 def _get_class_props(cls: type) -> Tuple[list, list]:
@@ -252,7 +255,7 @@ def _get_class_props(cls: type) -> Tuple[list, list]:
 def _get_complete_class_dict(cls: type) -> dict:
     cls_dict = {}
     # Loop reversed so values of sub-classes override those of super-classes.
-    for cls_or_elder in reversed(cls.mro()):
+    for cls_or_elder in reversed(get_mro(cls)):
         cls_dict.update(cls_or_elder.__dict__)
     return cls_dict
 
@@ -314,6 +317,12 @@ def _store_cls_info(result: object, original_obj: dict, kwargs):
         else:
             cls_name = get_class_name(cls, fully_qualified=True)
         result['-cls'] = cls_name
+
+
+def _is_innerclass(attr: str, cls: type) -> bool:
+    attr_obj = getattr(cls, attr, None)
+    return (isinstance(attr_obj, type)
+            and inspect.getsource(attr_obj) in inspect.getsource(cls))
 
 
 _ABC_ATTRS = ('_abc_registry', '_abc_cache', '_abc_negative_cache',

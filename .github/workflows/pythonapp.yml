@@ -1,14 +1,14 @@
 name: jsons
 
-on: [push]
+on: [push, pull_request]
 
 jobs:
   build:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        python-version: [ '3.5', '3.6', '3.7', '3.8' ]
-        os: [ ubuntu-latest, macOS-latest ]
+        python-version: [ '3.5', '3.6', '3.7', '3.8', '3.9' ]
+        os: [ ubuntu-latest, macOS-latest, windows-latest ]
     name: Python ${{ matrix.python-version }} on ${{ matrix.os }}
     steps:
       - uses: actions/checkout@master

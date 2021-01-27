@@ -1,11 +1,12 @@
 import datetime
+import warnings
 from multiprocessing import Process
 from threading import Thread
 from typing import List
 from unittest import TestCase
 
 import jsons
-from jsons import _multitasking
+from jsons import _multitasking, DeserializationError
 from jsons.exceptions import JsonsError
 
 
@@ -155,3 +156,35 @@ class TestList(TestCase):
         self.assertEqual(expectation[0].y, loaded[0].y)
         self.assertEqual(expectation[1].x, loaded[1].x)
         self.assertEqual(expectation[1].y, loaded[1].y)
+
+    def test_load_error_points_at_index(self):
+
+        class C:
+            def __init__(self, x: str, y: int):
+                self.x = x
+                self.y = y
+
+        c_objs_dict = [{'x': str(i), 'y': i} for i in range(1000)]
+        c_objs_dict[500] = {'not_x': '42', 'y': 42}
+
+        with self.assertRaises(DeserializationError) as err:
+            jsons.load(c_objs_dict, List[C])
+
+        self.assertIn('500', str(err.exception))
+
+    def test_warn_on_fail(self):
+
+        class C:
+            def __init__(self, x: str, y: int):
+                self.x = x
+                self.y = y
+
+        c_objs_dict = [{'x': str(i), 'y': i} for i in range(1000)]
+        c_objs_dict[500] = {'not_x': '42', 'y': 42}
+
+        with warnings.catch_warnings(record=True) as w:
+            loaded = jsons.load(c_objs_dict, List[C], warn_on_fail=True)
+            warn_msg = w[0].message.args[0]
+
+            self.assertIn('500', warn_msg)
+            self.assertEqual(999, len(loaded))

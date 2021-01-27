@@ -88,15 +88,17 @@ Alternatively, you can make use of the `JsonSerializable` class.
 from collections.abc import Mapping
 from datetime import datetime, date, time, timezone, timedelta
 from enum import Enum
-from typing import Union, List, Tuple, Iterable
+from typing import Union, List, Tuple, Iterable, Optional
 from uuid import UUID
 from decimal import Decimal
+from pathlib import PurePath
 from jsons._common_impl import NoneType
 from jsons._key_transformers import snakecase, camelcase, pascalcase, lispcase
 from jsons import (
     _meta,
     _dump_impl,
     _load_impl,
+    _transform_impl,
     _fork_impl,
     _lizers_impl,
     _validation,
@@ -123,6 +125,7 @@ dumpb = _dump_impl.dumpb
 load = _load_impl.load
 loads = _load_impl.loads
 loadb = _load_impl.loadb
+transform = _transform_impl
 fork = _fork_impl.fork
 JsonSerializable = classes.JsonSerializable
 set_serializer = _lizers_impl.set_serializer
@@ -158,6 +161,7 @@ default_object_serializer = serializers.default_object_serializer
 default_decimal_serializer = serializers.default_decimal_serializer
 default_uuid_serializer = serializers.default_uuid_serializer
 default_union_serializer = serializers.default_union_serializer
+default_path_serializer = serializers.default_path_serializer
 
 default_list_deserializer = deserializers.default_list_deserializer
 default_tuple_deserializer = deserializers.default_tuple_deserializer
@@ -178,6 +182,7 @@ default_iterable_deserializer = deserializers.default_iterable_deserializer
 default_object_deserializer = deserializers.default_object_deserializer
 default_uuid_deserializer = deserializers.default_uuid_deserializer
 default_decimal_deserializer = deserializers.default_decimal_deserializer
+default_path_deserializer = deserializers.default_path_deserializer
 
 # Set the serializers:
 set_serializer(default_tuple_serializer, (tuple, Tuple))
@@ -194,12 +199,13 @@ set_serializer(default_iterable_serializer, Iterable, False)
 set_serializer(default_object_serializer, object, False)
 set_serializer(default_uuid_serializer, UUID)
 set_serializer(default_decimal_serializer, Decimal)
-set_serializer(default_union_serializer, Union)
+set_serializer(default_union_serializer, (Union, Optional))
+set_serializer(default_path_serializer, PurePath)
 
 # Set the deserializers:
 set_deserializer(default_list_deserializer, (list, List))
 set_deserializer(default_tuple_deserializer, (tuple, Tuple))
-set_deserializer(default_union_deserializer, Union)
+set_deserializer(default_union_deserializer, (Union, Optional))
 set_deserializer(default_enum_deserializer, Enum)
 set_deserializer(default_datetime_deserializer, datetime)
 set_deserializer(default_date_deserializer, date)
@@ -215,3 +221,4 @@ set_deserializer(default_object_deserializer, object, False)
 set_deserializer(default_uuid_deserializer, UUID)
 set_deserializer(default_complex_deserializer, complex)
 set_deserializer(default_decimal_deserializer, Decimal)
+set_deserializer(default_path_deserializer, PurePath)

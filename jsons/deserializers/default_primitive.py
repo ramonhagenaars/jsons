@@ -16,7 +16,8 @@ def default_primitive_deserializer(obj: object,
     if obj is not None and not isinstance(obj, cls):
         try:
             result = cls(obj)
-        except ValueError:
-            raise DeserializationError('Could not cast "{}" into "{}"'
-                                       .format(obj, cls.__name__), obj, cls)
+        except ValueError as err:
+            raise DeserializationError(
+                'Could not cast "{}" into "{}"'.format(obj, cls.__name__),
+                obj, cls) from err
     return result
