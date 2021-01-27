@@ -112,10 +112,12 @@ def _get_value_for_attr(
             'No value found for "{}".'.format(sig_key), sig_key, obj, orig_cls)
     return result
 
-def _remove_prefix(prefix, s):
+
+def _remove_prefix(prefix: str, s: str) -> str:
     if s.startswith(prefix):
         return s[len(prefix):] or '/'  # Special case: map the empty string to '/'
     return s
+
 
 def _get_value_from_obj(obj, cls, sig, sig_key, meta_hints, **kwargs):
     # Obtain the value for the attribute with the given signature from the

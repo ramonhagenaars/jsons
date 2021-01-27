@@ -53,9 +53,7 @@ class TestUnion(TestCase):
 
     def test_dump_optional_class_uuid(self):
         class C:
-            x: Optional[uuid.UUID]
-
-            def __init__(self, x):
+            def __init__(self, x: Optional[uuid.UUID]):
                 self.x = x
 
         expected = {'x': '00000000-0000-0000-0000-000000000000'}
