@@ -77,7 +77,7 @@ def get_type_hints(func: callable, fallback_ns = None):
     except NameError:
         # attempt to resolve in global namespace - this works around an
         # issue in 3.7 whereby __init__ created by dataclasses fails
-        # to find it's context
+        # to find it's context. See https://bugs.python.org/issue34776
         if fallback_ns is not None:
             context_dict = sys.modules[fallback_ns].__dict__
             result = typing.get_type_hints(func, globalns = context_dict)
