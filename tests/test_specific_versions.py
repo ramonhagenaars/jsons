@@ -1,7 +1,7 @@
 import sys
 import uuid
 from pathlib import Path
-from typing import Any
+from typing import Any, Optional
 from unittest import TestCase, skipUnless
 import jsons
 from jsons._compatibility_impl import get_type_hints
@@ -50,6 +50,18 @@ class TestSpecificVersions(TestCase):
         }
 
         self.assertDictEqual(expected, dumped)
+
+    @only_version_3(7, and_above=True)
+    def test_postponed_annoation_dataclass(self):
+        from postponed_dataclass import Wrap
+
+        obj = Wrap()
+        exp = {'a' : {'a': 42} }
+        dump = jsons.dump(obj)
+        self.assertDictEqual(exp, dump)
+
+        undump = jsons.load(dump, cls = Wrap)
+        self.assertEqual(undump, obj)
 
     @only_version_3(6, and_above=True)
     def test_simple_dump_and_load_dataclass(self):
