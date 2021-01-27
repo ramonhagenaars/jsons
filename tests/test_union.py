@@ -36,9 +36,7 @@ class TestUnion(TestCase):
 
     def test_dump_optional_class_primitive(self):
         class C:
-            x: Optional[int]
-
-            def __init__(self, x):
+            def __init__(self, x: Optional[int]):
                 self.x = x
 
         expected = {'x': 42}
