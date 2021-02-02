@@ -4,6 +4,7 @@ PRIVATE MODULE: do not import (from) it directly.
 This module contains the implementation of ``fork()``.
 """
 from typing import Type, Optional
+
 from jsons._common_impl import StateHolder, get_class_name, T
 
 

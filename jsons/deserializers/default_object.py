@@ -55,7 +55,7 @@ def _get_constructor_args(
     # every required parameter, we try to get the corresponding value from
     # json_obj.
     signature_parameters = _get_signature(cls)
-    hints = get_type_hints(cls.__init__, fallback_ns = cls.__module__)
+    hints = get_type_hints(cls.__init__, fallback_ns=cls.__module__)
     attr_getters = dict(**(attr_getters or {}))
 
     result = {}

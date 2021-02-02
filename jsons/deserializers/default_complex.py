@@ -1,7 +1,7 @@
 from typing import Dict
 
-from jsons.exceptions import DeserializationError
 from jsons._load_impl import load
+from jsons.exceptions import DeserializationError
 
 
 def default_complex_deserializer(obj: Dict[str, float],

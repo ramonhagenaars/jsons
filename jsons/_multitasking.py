@@ -8,7 +8,6 @@ from typing import List, Callable, Union
 
 from typish import Something
 
-
 Subscriptable = Something['__getitem__': Callable[[int], object]]
 
 

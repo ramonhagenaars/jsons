@@ -1,4 +1,5 @@
 from typing import Union
+
 from jsons._common_impl import get_class_name, NoneType
 from jsons._compatibility_impl import get_union_params
 from jsons._dump_impl import dump

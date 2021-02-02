@@ -7,6 +7,7 @@ with multiple Python versions.
 import sys
 import typing
 from enum import Enum
+
 from jsons._cache import cached
 
 
@@ -68,7 +69,7 @@ def get_naked_class(cls: type) -> type:
 
 
 @cached
-def get_type_hints(func: callable, fallback_ns = None):
+def get_type_hints(func: callable, fallback_ns=None):
     # Python3.5: get_type_hints raises on classes without explicit constructor
     try:
         result = typing.get_type_hints(func)
@@ -80,5 +81,5 @@ def get_type_hints(func: callable, fallback_ns = None):
         # to find it's context. See https://bugs.python.org/issue34776
         if fallback_ns is not None:
             context_dict = sys.modules[fallback_ns].__dict__
-            result = typing.get_type_hints(func, globalns = context_dict)
+            result = typing.get_type_hints(func, globalns=context_dict)
     return result

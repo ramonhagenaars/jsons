@@ -1,4 +1,5 @@
 from typing import Optional
+
 from jsons.exceptions import DeserializationError
 
 

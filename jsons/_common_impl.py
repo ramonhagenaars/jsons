@@ -13,7 +13,6 @@ from jsons._cache import cached
 from jsons._compatibility_impl import get_union_params
 from jsons.exceptions import UnknownClassError
 
-
 NoneType = type(None)
 JSON_KEYS = (str, int, float, bool, NoneType)
 VALID_TYPES = (str, int, float, bool, list, tuple, set, dict, NoneType)

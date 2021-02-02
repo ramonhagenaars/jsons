@@ -1,4 +1,5 @@
 from datetime import timezone
+
 from jsons._dump_impl import dump
 
 

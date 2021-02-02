@@ -6,7 +6,6 @@ This module contains functionality for ``datetime`` related stuff.
 from datetime import datetime, timezone, timedelta, time, date
 from typing import Union
 
-
 RFC3339_DATE_PATTERN = '%Y-%m-%d'
 RFC3339_TIME_PATTERN = '%H:%M:%S'
 RFC3339_DATETIME_PATTERN = '{}T{}'.format(

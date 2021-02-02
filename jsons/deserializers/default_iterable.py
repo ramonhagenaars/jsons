@@ -1,5 +1,6 @@
 from collections.abc import Mapping, Iterable
 from typing import Iterable as IterableType
+
 from jsons._compatibility_impl import get_naked_class
 from jsons.deserializers.default_list import default_list_deserializer
 
