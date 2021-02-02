@@ -97,10 +97,12 @@ from jsons._common_impl import NoneType
 from jsons._dump_impl import (
     dump,
     dumps,
-    dumpb, )
+    dumpb,
+)
 from jsons._extra_impl import (
     announce_class,
     suppress_warnings,
+    suppress_warning,
 )
 from jsons._fork_impl import fork
 from jsons._key_transformers import (
@@ -199,6 +201,8 @@ __all__ = [
     set_validator.__name__,
     validate.__name__,
     'announce_class',
+    suppress_warnings.__name__,
+    suppress_warning.__name__,
 
     # Types:
     JsonSerializable.__name__,

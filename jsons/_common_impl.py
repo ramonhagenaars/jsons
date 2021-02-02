@@ -33,12 +33,13 @@ class StateHolder:
     _classes_validators = list()
     _announced_classes = dict()
     _suppress_warnings = False
+    _suppressed_warnings = set()
 
     @classmethod
-    def _warn(cls, msg, *args, **kwargs):
-        if not cls._suppress_warnings:
-            msg_ = ('{} You can suppress warnings like this using '
-                    'jsons.suppress_warnings().'.format(msg))
+    def _warn(cls, msg, code, *args, **kwargs):
+        if not cls._suppress_warnings and code not in cls._suppressed_warnings:
+            msg_ = ('{} Use suppress_warning({}) or suppress_warnings(True) to '
+                    'turn off this message.'.format(msg, code))
             warnings.warn(msg_, *args, **kwargs)
 
 

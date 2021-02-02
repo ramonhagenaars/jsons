@@ -33,4 +33,6 @@ def fork(
     result._serializers = fork_inst._serializers.copy()
     result._deserializers = fork_inst._deserializers.copy()
     result._fork_counter = 0
+    result._suppress_warnings = fork_inst._suppress_warnings
+    result._suppressed_warnings = fork_inst._suppressed_warnings.copy()
     return result

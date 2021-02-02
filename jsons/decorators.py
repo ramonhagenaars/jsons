@@ -181,7 +181,7 @@ def _validate_decoration(decorated, fork_inst):
                         'You can still obtain the desired behavior by '
                         'decorating your method first and then place '
                         '@staticmethod/@classmethod on top (switching the '
-                        'order).')
+                        'order).', 'decorated-static')
         raise InvalidDecorationError(
             'Cannot decorate a static- or classmethod.')
     if isinstance(decorated, type):

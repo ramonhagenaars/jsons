@@ -66,7 +66,8 @@ def _datetime_offset_str(obj: datetime, fork_inst: type) -> str:
     if not tzone:
         # datetimes without tzinfo are treated as local times.
         fork_inst._warn('The use of datetimes without timezone is dangerous '
-                        'and can lead to undesired results.')
+                        'and can lead to undesired results.',
+                        'datetime-without-tz')
         tzone = datetime.now(timezone.utc).astimezone().tzinfo
         if tzone is timezone.utc or tzone.utc is timezone.utc:
             return '+00:00'

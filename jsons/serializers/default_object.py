@@ -129,7 +129,8 @@ def _do_serialize(
         except RecursionDetectedError:
             fork_inst._warn('Recursive structure detected in attribute "{}" '
                             'of object of type "{}", ignoring the attribute.'
-                            .format(attr_name, get_class_name(cls)))
+                            .format(attr_name, get_class_name(cls)),
+                            'recursion-detected')
         except SerializationError as err:
             if strict:
                 raise
@@ -137,7 +138,8 @@ def _do_serialize(
                 fork_inst._warn('Failed to dump attribute "{}" of object of '
                                 'type "{}". Reason: {}. Ignoring the '
                                 'attribute.'
-                                .format(attr, get_class_name(cls), err.message))
+                                .format(attr, get_class_name(cls), err.message),
+                                'attribute-not-serialized')
                 break
         _add_dumped_elem(result, attr_name, dumped_elem,
                          strip_nulls, key_transformer)
