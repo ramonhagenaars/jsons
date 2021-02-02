@@ -1,4 +1,3 @@
-import os.path
 from pathlib import Path, PureWindowsPath, PurePosixPath
 from unittest import TestCase
 

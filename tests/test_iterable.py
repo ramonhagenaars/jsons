@@ -1,10 +1,9 @@
-import datetime
-from multiprocessing import Process
-from threading import Thread
+from typing import List, Tuple
 from typing import List, Tuple
 from unittest import TestCase
+
 import jsons
-from jsons.exceptions import JsonsError, SerializationError
+from jsons.exceptions import SerializationError
 
 
 class TestIterable(TestCase):

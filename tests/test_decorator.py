@@ -1,5 +1,6 @@
 import asyncio
 from unittest import TestCase
+
 import jsons
 from jsons import InvalidDecorationError
 from jsons.decorators import loaded, dumped

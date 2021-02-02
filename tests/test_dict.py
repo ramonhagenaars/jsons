@@ -2,6 +2,7 @@ import datetime
 from enum import Enum
 from typing import Dict, Union
 from unittest import TestCase
+
 import jsons
 from jsons import DeserializationError
 

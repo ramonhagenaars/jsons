@@ -1,8 +1,8 @@
 import sys
 import uuid
 from pathlib import Path
-from typing import Any, Optional
 from unittest import TestCase, skipUnless
+
 import jsons
 from jsons._compatibility_impl import get_type_hints
 from jsons.exceptions import SignatureMismatchError

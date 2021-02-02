@@ -1,6 +1,6 @@
 from unittest import TestCase
-import jsons
-from jsons._common_impl import get_class_name, get_cls_from_str, StateHolder
+
+from jsons._common_impl import get_class_name, get_cls_from_str
 
 
 class TestCommonImpl(TestCase):

@@ -1,5 +1,6 @@
 from decimal import Decimal
 from unittest import TestCase
+
 import jsons
 
 

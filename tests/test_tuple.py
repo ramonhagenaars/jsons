@@ -2,6 +2,7 @@ import datetime
 from collections import namedtuple
 from typing import NamedTuple, Tuple, List
 from unittest import TestCase
+
 import jsons
 from jsons import UnfulfilledArgumentError
 
