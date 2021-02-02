@@ -149,9 +149,9 @@ def _set_remaining_attrs(instance,
     # Set any remaining attributes on the newly created instance.
     attr_getters = attr_getters or {}
     for attr_name in remaining_attrs:
-        loaded_attr = load(remaining_attrs[attr_name],
-                           type(remaining_attrs[attr_name]),
-                           **kwargs)
+        annotations = getattr(instance, '__annotations__', {})
+        attr_type = annotations.get(attr_name, type(remaining_attrs[attr_name]))
+        loaded_attr = load(remaining_attrs[attr_name], attr_type, **kwargs)
         try:
             setattr(instance, attr_name, loaded_attr)
         except AttributeError:

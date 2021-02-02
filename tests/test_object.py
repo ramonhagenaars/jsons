@@ -243,6 +243,24 @@ class TestObject(TestCase):
         self.assertTrue(isinstance(loaded, Foo))
         self.assertTrue(isinstance(loaded.bar, BarA))
 
+    def test_load_other_attributes(self):
+        # Test that when loading attributes that have no constructor
+        # parameters, the annotations are used if possible.
+
+        class C:
+            __annotations__ = {'y': float}  # This is the same y: float (which is not allowed in Python 3.5
+
+            def __init__(self, x: int):
+                self.x = x
+                self.y = 0
+                self.z = 0
+
+        loaded = jsons.load({'x': '42', 'y': '42', 'z': '42'}, C)
+
+        self.assertEqual(42, loaded.x)
+        self.assertEqual(42.0, loaded.y)
+        self.assertEqual('42', loaded.z)  # z has no hint whatsoever.
+
     def test_load_object_without_type_hints_verbose(self):
         class A:
             def __init__(self, x):
