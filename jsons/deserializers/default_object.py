@@ -144,13 +144,25 @@ def _get_value_from_obj(obj, cls, sig, sig_key, meta_hints, **kwargs):
 
 def _set_remaining_attrs(instance,
                          remaining_attrs,
-                         attr_getters=None,
+                         attr_getters,
                          **kwargs):
     # Set any remaining attributes on the newly created instance.
     attr_getters = attr_getters or {}
     for attr_name in remaining_attrs:
         annotations = getattr(instance, '__annotations__', {})
-        attr_type = annotations.get(attr_name, type(remaining_attrs[attr_name]))
+        attr_type = annotations.get(attr_name)
+
+        if isinstance(remaining_attrs[attr_name], dict) \
+                and '-keys' in remaining_attrs[attr_name] \
+                and not attr_type:
+            fork_inst = kwargs['fork_inst']
+            fork_inst._warn('A dict with -keys was detected without a type '
+                            'hint for attribute `{}`. This probably means '
+                            'that you did not provide an annotation in your '
+                            'class (ending up in __annotations__).'
+                            .format(attr_name), 'hashed-keys-without-hint')
+        attr_type = attr_type or type(remaining_attrs[attr_name])
+
         loaded_attr = load(remaining_attrs[attr_name], attr_type, **kwargs)
         try:
             setattr(instance, attr_name, loaded_attr)

@@ -546,6 +546,19 @@ class TestObject(TestCase):
         self.assertTrue(isinstance(obj_roundtrip.inner, A))
         self.assertTrue(isinstance(obj_roundtrip.inner.inner, B))
 
+    def test_load_object_with_hashed_keys(self):
+        # Test that loading an object with -key triggers a warning if no
+        # __annotations__ are present.
+
+        class C:
+            ...
+
+        with warnings.catch_warnings(record=True) as w:
+            jsons.load({'additional_attr': {'-keys': {}}}, C)
+
+        self.assertEqual(1, len(w))
+        self.assertIn('additional_attr', str(w[-1].message))
+
 
 class ParentDumpable:
     _par_c = 10
