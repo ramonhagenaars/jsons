@@ -86,6 +86,7 @@ list_of_tuples = jsons.load(some_dict, List[Tuple[AClass, AnotherClass]])
 
 ### 1.4.0
 
+- Feature: DefaultDicts can now be deserialized.
 - Feature: Dicts with any (hashable) key can now be dumped and loaded.
 - Feature: Suppress specific warnings.
 - Bugfix: Loading a verbose-serialized object in a list could sometimes deserialize that object as a parent class.

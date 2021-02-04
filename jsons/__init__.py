@@ -90,7 +90,7 @@ from datetime import datetime, date, time, timezone, timedelta
 from decimal import Decimal
 from enum import Enum
 from pathlib import PurePath
-from typing import Union, List, Tuple, Iterable, Optional
+from typing import Union, List, Tuple, Iterable, Optional, DefaultDict
 from uuid import UUID
 
 from jsons._common_impl import NoneType
@@ -136,6 +136,7 @@ from jsons.deserializers.default_date import default_date_deserializer
 from jsons.deserializers.default_datetime import default_datetime_deserializer
 from jsons.deserializers.default_decimal import default_decimal_deserializer
 from jsons.deserializers.default_dict import default_dict_deserializer
+from jsons.deserializers.default_defaultdict import default_defaultdict_deserializer
 from jsons.deserializers.default_enum import default_enum_deserializer
 from jsons.deserializers.default_iterable import default_iterable_deserializer
 from jsons.deserializers.default_list import default_list_deserializer
@@ -250,6 +251,7 @@ __all__ = [
     default_tuple_deserializer.__name__,
     default_union_deserializer.__name__,
     default_dict_deserializer.__name__,
+    default_defaultdict_deserializer.__name__,
     default_enum_deserializer.__name__,
     default_complex_deserializer.__name__,
     default_datetime_deserializer.__name__,
@@ -288,6 +290,7 @@ set_serializer(default_path_serializer, PurePath)
 set_deserializer(default_list_deserializer, (list, List))
 set_deserializer(default_tuple_deserializer, (tuple, Tuple))
 set_deserializer(default_union_deserializer, (Union, Optional))
+set_deserializer(default_defaultdict_deserializer, DefaultDict)
 set_deserializer(default_enum_deserializer, Enum)
 set_deserializer(default_datetime_deserializer, datetime)
 set_deserializer(default_date_deserializer, date)
