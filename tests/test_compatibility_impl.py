@@ -1,3 +1,4 @@
+import sys
 import typing
 from unittest import TestCase
 from unittest.mock import MagicMock
@@ -42,7 +43,7 @@ class TestCompatibilityImpl(TestCase):
             typing.get_type_hints = get_type_hints_mock
             result = get_type_hints(lambda: 42, 'test_compatibility_impl')
 
-            self.assertEqual('test_compatibility_impl', get_type_hints_mock.globalns['__name__'])
+            self.assertDictEqual(sys.modules['test_compatibility_impl'].__dict__, get_type_hints_mock.globalns)
             self.assertEqual({}, result)
         finally:
             typing.get_type_hints = orig
