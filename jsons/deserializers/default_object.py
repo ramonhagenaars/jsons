@@ -134,7 +134,6 @@ def _get_value_from_obj(obj, cls, sig, sig_key, meta_hints, **kwargs):
         new_hints = {
             _remove_prefix(cls_key, key): meta_hints[key]
             for key in meta_hints
-            if key != '/'
         }
     cls_ = determine_precedence(cls=cls, cls_from_meta=cls_from_meta,
                                 cls_from_type=None, inferred_cls=True)

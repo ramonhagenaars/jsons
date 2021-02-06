@@ -1,6 +1,9 @@
 from unittest import TestCase
+from unittest.mock import MagicMock
 
-from jsons._compatibility_impl import Flag
+import typing
+
+from jsons._compatibility_impl import Flag, get_type_hints
 
 
 class TestCompatibilityImpl(TestCase):
@@ -21,3 +24,26 @@ class TestCompatibilityImpl(TestCase):
         self.assertTrue(F.D not in (F.B | F.C))
         self.assertTrue(F.C not in (F.B | F.D))
         self.assertTrue(F.E not in (F.B | F.D))
+
+    def test_get_type_hints(self):
+
+        def get_type_hints_mock(_, globalns=None):
+            if not globalns:
+                raise NameError()
+            get_type_hints_mock.globalns = globalns
+            return {}
+
+        orig = typing.get_type_hints
+
+        try:
+            typing.get_type_hints = MagicMock(side_effect=AttributeError)
+            result = get_type_hints(lambda: 42)
+            self.assertEqual({}, result)
+
+            typing.get_type_hints = get_type_hints_mock
+            result = get_type_hints(lambda: 42, 'test_compatibility_impl')
+
+            self.assertEqual('test_compatibility_impl', get_type_hints_mock.globalns['__name__'])
+            self.assertEqual({}, result)
+        finally:
+            typing.get_type_hints = orig

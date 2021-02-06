@@ -93,13 +93,6 @@ class SerializationError(JsonsError):
     """
 
 
-class RecursionDetectedError(SerializationError):
-    """
-    Raised when a recursive structure was detected and a stack overflow was
-    prevented during serialization.
-    """
-
-
 class DecodeError(DeserializationError, JSONDecodeError):
     """
     Raised when decoding a string or bytes to Python types failed. This error

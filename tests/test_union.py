@@ -63,6 +63,10 @@ class TestUnion(TestCase):
 
         self.assertDictEqual(expected2, dumped2)
 
+    def test_dump_optional(self):
+        dumped = jsons.dump(None, Optional[int])
+        self.assertEqual(None, dumped)
+
     def test_dump_union(self):
 
         class A:
@@ -83,6 +87,14 @@ class TestUnion(TestCase):
 
         with self.assertRaises(SerializationError):
             jsons.dump(A(1), Union[B], strict=True)
+
+    def test_fail(self):
+        with self.assertRaises(SerializationError) as err:
+            jsons.dump('nope', Union[int, float])
+
+        self.assertIn('str', str(err.exception))
+        self.assertIn('int', str(err.exception))
+        self.assertIn('float', str(err.exception))
 
     def test_load_union(self):
         class A:
