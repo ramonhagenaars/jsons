@@ -5,7 +5,6 @@ from jsons._common_impl import get_class_name, get_cls_from_str
 
 class TestCommonImpl(TestCase):
     def test_get_class_name_without__name__(self):
-
         class Meta(type):
             __name__ = None
 

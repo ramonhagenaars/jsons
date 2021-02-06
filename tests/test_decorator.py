@@ -189,6 +189,7 @@ class TestDecorator(TestCase):
         @loaded(returnvalue=False)
         def func(x):
             return x
+
         arg = '2018-10-07T19:45:00+02:00'
         res = func(arg)
         self.assertEqual(arg, res)

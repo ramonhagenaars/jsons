@@ -9,7 +9,7 @@ class WrongUser:
     def __init__(self,
                  id: int,
                  birthday: datetime,  # intentionally wrong
-    ):
+                 ):
         self.id = id
         self.birthday = birthday
 
@@ -18,7 +18,7 @@ class CorrectUser:
     def __init__(self,
                  id: int,
                  birthday: datetime.datetime,
-    ):
+                 ):
         self.id = id
         self.birthday = birthday
 

@@ -7,7 +7,6 @@ from jsons.exceptions import SerializationError
 
 class TestIterable(TestCase):
     def test_dump_list_with_cls(self):
-
         class A:
             __slots__ = ['a']
 

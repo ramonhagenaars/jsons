@@ -1,7 +1,6 @@
+import typing
 from unittest import TestCase
 from unittest.mock import MagicMock
-
-import typing
 
 from jsons._compatibility_impl import Flag, get_type_hints
 

@@ -135,8 +135,8 @@ from jsons.deserializers.default_complex import default_complex_deserializer
 from jsons.deserializers.default_date import default_date_deserializer
 from jsons.deserializers.default_datetime import default_datetime_deserializer
 from jsons.deserializers.default_decimal import default_decimal_deserializer
-from jsons.deserializers.default_dict import default_dict_deserializer
 from jsons.deserializers.default_defaultdict import default_defaultdict_deserializer
+from jsons.deserializers.default_dict import default_dict_deserializer
 from jsons.deserializers.default_enum import default_enum_deserializer
 from jsons.deserializers.default_iterable import default_iterable_deserializer
 from jsons.deserializers.default_list import default_list_deserializer

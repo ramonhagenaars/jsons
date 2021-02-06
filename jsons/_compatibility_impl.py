@@ -64,6 +64,7 @@ def get_naked_class(cls: type) -> type:
     # Return the non-generic class (e.g. dict) of a generic type (e.g. Dict).
     return getattr(cls, '__origin__', getattr(cls, '__extra__', cls))
 
+
 @cached
 def get_type_hints(func: callable, fallback_ns=None):
     # Python3.5: get_type_hints raises on classes without explicit constructor

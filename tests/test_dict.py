@@ -29,7 +29,6 @@ class TestDict(TestCase):
         self.assertEqual(loaded['a']['b']['c']['d'].second, 0)
 
     def test_load_dict_with_enum_keys(self):
-
         class Color(Enum):
             RED = 1
             GREEN = 2
@@ -46,7 +45,6 @@ class TestDict(TestCase):
         self.assertDictEqual(expected, loaded2)
 
     def test_load_dict_with_key_transformers(self):
-
         class A_:
             def __init__(self, b_: int):
                 self.b_ = b_

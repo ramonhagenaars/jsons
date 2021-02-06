@@ -12,7 +12,6 @@ try:
 except ImportError:
     dataclass = None
 
-
 # Load the test resources into the path, so they can be imported. They MUST
 # remain outside of the tests package to prevent the test discovery from
 # reading in them too soon.
@@ -31,6 +30,7 @@ def only_version_3(minor_version: int, and_above: bool = False):
             return decorated(*args, **kwargs)
 
         return _wrapper
+
     return _decorator
 
 
@@ -56,11 +56,11 @@ class TestSpecificVersions(TestCase):
         from postponed_dataclass import Wrap
 
         obj = Wrap()
-        exp = {'a' : {'a': 42} }
+        exp = {'a': {'a': 42}}
         dump = jsons.dump(obj)
         self.assertDictEqual(exp, dump)
 
-        undump = jsons.load(dump, cls = Wrap)
+        undump = jsons.load(dump, cls=Wrap)
         self.assertEqual(undump, obj)
 
     @only_version_3(6, and_above=True)
@@ -101,7 +101,6 @@ class TestSpecificVersions(TestCase):
 
     @only_version_3(5, and_above=True)
     def test_simple_dump_and_load_dataclass(self):
-
         class C:
             pass
 

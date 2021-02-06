@@ -51,7 +51,6 @@ class TestList(TestCase):
 
     # Note: mock.patch won't work because of a subclass check.
     def test_dump_list_multiprocess(self):
-
         class ProcessMock(Process):
             def __init__(self, target, args, *_, **__):
                 # Make no super call.
@@ -121,7 +120,6 @@ class TestList(TestCase):
 
     # Note: mock.patch won't work because of a subclass check.
     def test_load_list_multiprocess(self):
-
         class ProcessMock(Process):
             def __init__(self, target, args, *_, **__):
                 # Make no super call.
@@ -158,7 +156,6 @@ class TestList(TestCase):
         self.assertEqual(expectation[1].y, loaded[1].y)
 
     def test_load_error_points_at_index(self):
-
         class C:
             def __init__(self, x: str, y: int):
                 self.x = x
@@ -173,7 +170,6 @@ class TestList(TestCase):
         self.assertIn('500', str(err.exception))
 
     def test_warn_on_fail(self):
-
         class C:
             def __init__(self, x: str, y: int):
                 self.x = x

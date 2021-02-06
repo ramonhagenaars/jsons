@@ -537,6 +537,7 @@ class TestObject(TestCase):
         class A:
             def __init__(self, inner):
                 self.inner = inner
+
         class B:
             pass
 

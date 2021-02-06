@@ -13,7 +13,6 @@ from jsons import (
 
 class TestUnion(TestCase):
     def test_dump_optional_primitive(self):
-
         class C:
             def __init__(self, x: Optional[str]):
                 self.x = x
@@ -68,7 +67,6 @@ class TestUnion(TestCase):
         self.assertEqual(None, dumped)
 
     def test_dump_union(self):
-
         class A:
             def __init__(self, x: int):
                 self.x = x
@@ -129,7 +127,6 @@ class TestUnion(TestCase):
             jsons.load({'x': 'no match in the union'}, C).x
 
     def test_load_none(self):
-
         class C:
             def __init__(self, x: int, y: Optional[int]):
                 self.x = x
