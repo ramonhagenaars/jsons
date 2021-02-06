@@ -41,8 +41,9 @@ class TestCompatibilityImpl(TestCase):
             self.assertEqual({}, result)
 
             typing.get_type_hints = get_type_hints_mock
-            result = get_type_hints(lambda: 42, 'test_compatibility_impl')
+            result = get_type_hints(lambda: 42, 'builtins')
 
             self.assertEqual({}, result)
+            self.assertDictEqual(sys.modules['builtins'].__dict__, get_type_hints_mock.globalns)
         finally:
             typing.get_type_hints = orig
