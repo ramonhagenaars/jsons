@@ -81,6 +81,16 @@ list_of_tuples = jsons.load(some_dict, List[Tuple[AClass, AnotherClass]])
 
 ## Recent updates
 
+### 1.4.0
+
+- Feature: DefaultDicts can now be deserialized.
+- Feature: Dicts with any (hashable) key can now be dumped and loaded.
+- Feature: Suppress specific warnings.
+- Bugfix: Loading a verbose-serialized object in a list could sometimes deserialize that object as a parent class.
+- Bugfix: Unwanted stringification of NoneValues is now prevented in Optionals and Unions with NoneType.
+- Bugfix: Fixed a bug with postponed annotations and dataclasses. See also [Issue34776](https://bugs.python.org/issue34776).
+- Bugfix: Types of attributes that are not in the constructor are now looked for in __annotations__.
+
 ### 1.3.1
 
 - Bugfix: Fixed bug where classmethods were included in the serialized result.
@@ -143,6 +153,9 @@ list_of_tuples = jsons.load(some_dict, List[Tuple[AClass, AnotherClass]])
 Special thanks to the following contributors of code, discussions or
 suggestions:
 
+[georgeharker](https://github.com/georgeharker),
+[aecay](https://github.com/aecay),
+[bibz](https://github.com/bibz),
 [thijss](https://github.com/Thijss),
 [alexmirrington](https://github.com/alexmirrington),
 [tirkarthi](https://github.com/tirkarthi), 
