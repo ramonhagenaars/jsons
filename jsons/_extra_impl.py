@@ -14,12 +14,25 @@ def suppress_warnings(
         do_suppress: Optional[bool] = True,
         fork_inst: Optional[type] = StateHolder):
     """
-    Suppress (or stop suppressing) warnings.
+    Suppress (or stop suppressing) warnings altogether.
     :param do_suppress: if ``True``, warnings will be suppressed from now on.
     :param fork_inst: if given, it uses this fork of ``JsonSerializable``.
     :return: None.
     """
     fork_inst._suppress_warnings = do_suppress
+
+
+def suppress_warning(
+        code: str,
+        fork_inst: Optional[type] = StateHolder):
+    """
+    Suppress a specific warning that corresponds to the given code (see the
+    warning).
+    :param code: the code of the warning that is to be suppressed.
+    :param fork_inst: if given, it uses this fork of ``JsonSerializable``.
+    :return: None.
+    """
+    fork_inst._suppressed_warnings |= {code}
 
 
 @cached

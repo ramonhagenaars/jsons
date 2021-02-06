@@ -87,26 +87,71 @@ Alternatively, you can make use of the `JsonSerializable` class.
 """
 from collections.abc import Mapping
 from datetime import datetime, date, time, timezone, timedelta
-from enum import Enum
-from typing import Union, List, Tuple, Iterable, Optional
-from uuid import UUID
 from decimal import Decimal
+from enum import Enum
 from pathlib import PurePath
+from typing import Union, List, Tuple, Iterable, Optional, DefaultDict, Dict
+from uuid import UUID
+
 from jsons._common_impl import NoneType
-from jsons._key_transformers import snakecase, camelcase, pascalcase, lispcase
-from jsons import (
-    _meta,
-    _dump_impl,
-    _load_impl,
-    _transform_impl,
-    _fork_impl,
-    _lizers_impl,
-    _validation,
-    _extra_impl,
-    deserializers,
-    serializers,
-    classes
+from jsons._dump_impl import (
+    dump,
+    dumps,
+    dumpb,
 )
+from jsons._extra_impl import (
+    announce_class,
+    suppress_warnings,
+    suppress_warning,
+)
+from jsons._fork_impl import fork
+from jsons._key_transformers import (
+    camelcase,
+    snakecase,
+    pascalcase,
+    lispcase,
+)
+from jsons._lizers_impl import (
+    get_serializer,
+    get_deserializer,
+    set_serializer,
+    set_deserializer,
+)
+from jsons._load_impl import (
+    load,
+    loads,
+    loadb,
+)
+from jsons._meta import __version__
+from jsons._transform_impl import transform
+from jsons._validation import (
+    validate,
+    get_validator,
+    set_validator,
+)
+from jsons.classes.json_serializable import JsonSerializable
+from jsons.classes.verbosity import Verbosity
+from jsons.deserializers.default_complex import default_complex_deserializer
+from jsons.deserializers.default_date import default_date_deserializer
+from jsons.deserializers.default_datetime import default_datetime_deserializer
+from jsons.deserializers.default_decimal import default_decimal_deserializer
+from jsons.deserializers.default_defaultdict import default_defaultdict_deserializer
+from jsons.deserializers.default_dict import default_dict_deserializer
+from jsons.deserializers.default_enum import default_enum_deserializer
+from jsons.deserializers.default_iterable import default_iterable_deserializer
+from jsons.deserializers.default_list import default_list_deserializer
+from jsons.deserializers.default_mapping import default_mapping_deserializer
+from jsons.deserializers.default_nonetype import default_nonetype_deserializer
+from jsons.deserializers.default_object import default_object_deserializer
+from jsons.deserializers.default_path import default_path_deserializer
+from jsons.deserializers.default_primitive import default_primitive_deserializer
+from jsons.deserializers.default_string import default_string_deserializer
+from jsons.deserializers.default_time import default_time_deserializer
+from jsons.deserializers.default_timedelta import default_timedelta_deserializer
+from jsons.deserializers.default_timezone import default_timezone_deserializer
+from jsons.deserializers.default_tuple import default_tuple_deserializer
+from jsons.deserializers.default_union import default_union_deserializer
+from jsons.deserializers.default_uuid import default_uuid_deserializer
 from jsons.exceptions import (
     JsonsError,
     ValidationError,
@@ -116,75 +161,115 @@ from jsons.exceptions import (
     UnfulfilledArgumentError,
     InvalidDecorationError
 )
-
-__version__ = _meta.__version__
-
-dump = _dump_impl.dump
-dumps = _dump_impl.dumps
-dumpb = _dump_impl.dumpb
-load = _load_impl.load
-loads = _load_impl.loads
-loadb = _load_impl.loadb
-transform = _transform_impl
-fork = _fork_impl.fork
-JsonSerializable = classes.JsonSerializable
-set_serializer = _lizers_impl.set_serializer
-get_serializer = _lizers_impl.get_serializer
-set_deserializer = _lizers_impl.set_deserializer
-get_deserializer = _lizers_impl.get_deserializer
-get_validator = _validation.get_validator
-set_validator = _validation.set_validator
-validate = _validation.validate
-announce_class = _extra_impl.announce_class
-suppress_warnings = _extra_impl.suppress_warnings
+from jsons.serializers.default_complex import default_complex_serializer
+from jsons.serializers.default_date import default_date_serializer
+from jsons.serializers.default_datetime import default_datetime_serializer
+from jsons.serializers.default_decimal import default_decimal_serializer
+from jsons.serializers.default_dict import default_dict_serializer
+from jsons.serializers.default_enum import default_enum_serializer
+from jsons.serializers.default_iterable import default_iterable_serializer
+from jsons.serializers.default_object import default_object_serializer
+from jsons.serializers.default_path import default_path_serializer
+from jsons.serializers.default_primitive import default_primitive_serializer
+from jsons.serializers.default_time import default_time_serializer
+from jsons.serializers.default_timedelta import default_timedelta_serializer
+from jsons.serializers.default_timezone import default_timezone_serializer
+from jsons.serializers.default_tuple import default_tuple_serializer
+from jsons.serializers.default_union import default_union_serializer
+from jsons.serializers.default_uuid import default_uuid_serializer
 
 KEY_TRANSFORMER_SNAKECASE = snakecase
 KEY_TRANSFORMER_CAMELCASE = camelcase
 KEY_TRANSFORMER_PASCALCASE = pascalcase
 KEY_TRANSFORMER_LISPCASE = lispcase
 
-Verbosity = classes.verbosity.Verbosity
+__all__ = [
+    # Functions:
+    '__version__',
+    dump.__name__,
+    dumps.__name__,
+    dumpb.__name__,
+    load.__name__,
+    loads.__name__,
+    loadb.__name__,
+    transform.__name__,
+    fork.__name__,
+    set_serializer.__name__,
+    'get_serializer',
+    set_deserializer.__name__,
+    'get_deserializer',
+    'get_validator',
+    set_validator.__name__,
+    validate.__name__,
+    'announce_class',
+    suppress_warnings.__name__,
+    suppress_warning.__name__,
 
-# Redeclare the serializers and deserializers:
-default_tuple_serializer = serializers.default_tuple_serializer
-default_dict_serializer = serializers.default_dict_serializer
-default_iterable_serializer = serializers.default_iterable_serializer
-default_enum_serializer = serializers.default_enum_serializer
-default_complex_serializer = serializers.default_complex_serializer
-default_datetime_serializer = serializers.default_datetime_serializer
-default_date_serializer = serializers.default_date_serializer
-default_time_serializer = serializers.default_time_serializer
-default_timezone_serializer = serializers.default_timezone_serializer
-default_timedelta_serializer = serializers.default_timedelta_serializer
-default_primitive_serializer = serializers.default_primitive_serializer
-default_object_serializer = serializers.default_object_serializer
-default_decimal_serializer = serializers.default_decimal_serializer
-default_uuid_serializer = serializers.default_uuid_serializer
-default_union_serializer = serializers.default_union_serializer
-default_path_serializer = serializers.default_path_serializer
+    # Types:
+    JsonSerializable.__name__,
+    Verbosity.__name__,
 
-default_list_deserializer = deserializers.default_list_deserializer
-default_tuple_deserializer = deserializers.default_tuple_deserializer
-default_union_deserializer = deserializers.default_union_deserializer
-default_dict_deserializer = deserializers.default_dict_deserializer
-default_enum_deserializer = deserializers.default_enum_deserializer
-default_complex_deserializer = deserializers.default_complex_deserializer
-default_datetime_deserializer = deserializers.default_datetime_deserializer
-default_date_deserializer = deserializers.default_date_deserializer
-default_time_deserializer = deserializers.default_time_deserializer
-default_timezone_deserializer = deserializers.default_timezone_deserializer
-default_timedelta_deserializer = deserializers.default_timedelta_deserializer
-default_string_deserializer = deserializers.default_string_deserializer
-default_nonetype_deserializer = deserializers.default_nonetype_deserializer
-default_primitive_deserializer = deserializers.default_primitive_deserializer
-default_mapping_deserializer = deserializers.default_mapping_deserializer
-default_iterable_deserializer = deserializers.default_iterable_deserializer
-default_object_deserializer = deserializers.default_object_deserializer
-default_uuid_deserializer = deserializers.default_uuid_deserializer
-default_decimal_deserializer = deserializers.default_decimal_deserializer
-default_path_deserializer = deserializers.default_path_deserializer
+    # Key transformers:
+    snakecase.__name__,
+    camelcase.__name__,
+    pascalcase.__name__,
+    lispcase.__name__,
+    'KEY_TRANSFORMER_SNAKECASE',
+    'KEY_TRANSFORMER_CAMELCASE',
+    'KEY_TRANSFORMER_PASCALCASE',
+    'KEY_TRANSFORMER_LISPCASE',
 
-# Set the serializers:
+    # Errors:
+    JsonsError.__name__,
+    ValidationError.__name__,
+    SerializationError.__name__,
+    DeserializationError.__name__,
+    DecodeError.__name__,
+    UnfulfilledArgumentError.__name__,
+    InvalidDecorationError.__name__,
+
+    # Serializers:
+    default_tuple_serializer.__name__,
+    default_dict_serializer.__name__,
+    default_iterable_serializer.__name__,
+    default_enum_serializer.__name__,
+    default_complex_serializer.__name__,
+    default_datetime_serializer.__name__,
+    default_date_serializer.__name__,
+    default_time_serializer.__name__,
+    default_timezone_serializer.__name__,
+    default_timedelta_serializer.__name__,
+    default_primitive_serializer.__name__,
+    default_object_serializer.__name__,
+    default_decimal_serializer.__name__,
+    default_uuid_serializer.__name__,
+    default_union_serializer.__name__,
+    default_path_serializer.__name__,
+
+    # Deserializers:
+    default_list_deserializer.__name__,
+    default_tuple_deserializer.__name__,
+    default_union_deserializer.__name__,
+    default_dict_deserializer.__name__,
+    default_defaultdict_deserializer.__name__,
+    default_enum_deserializer.__name__,
+    default_complex_deserializer.__name__,
+    default_datetime_deserializer.__name__,
+    default_date_deserializer.__name__,
+    default_time_deserializer.__name__,
+    default_timezone_deserializer.__name__,
+    default_timedelta_deserializer.__name__,
+    default_string_deserializer.__name__,
+    default_nonetype_deserializer.__name__,
+    default_primitive_deserializer.__name__,
+    default_mapping_deserializer.__name__,
+    default_iterable_deserializer.__name__,
+    default_object_deserializer.__name__,
+    default_uuid_deserializer.__name__,
+    default_decimal_deserializer.__name__,
+    default_path_deserializer.__name__,
+]
+
 set_serializer(default_tuple_serializer, (tuple, Tuple))
 set_serializer(default_enum_serializer, Enum)
 set_serializer(default_complex_serializer, complex)
@@ -202,10 +287,10 @@ set_serializer(default_decimal_serializer, Decimal)
 set_serializer(default_union_serializer, (Union, Optional))
 set_serializer(default_path_serializer, PurePath)
 
-# Set the deserializers:
 set_deserializer(default_list_deserializer, (list, List))
 set_deserializer(default_tuple_deserializer, (tuple, Tuple))
 set_deserializer(default_union_deserializer, (Union, Optional))
+set_deserializer(default_defaultdict_deserializer, DefaultDict)
 set_deserializer(default_enum_deserializer, Enum)
 set_deserializer(default_datetime_deserializer, datetime)
 set_deserializer(default_date_deserializer, date)
@@ -215,7 +300,7 @@ set_deserializer(default_timedelta_deserializer, timedelta)
 set_deserializer(default_string_deserializer, str)
 set_deserializer(default_nonetype_deserializer, NoneType)
 set_deserializer(default_primitive_deserializer, (int, float, bool))
-set_deserializer(default_mapping_deserializer, Mapping, False)
+set_deserializer(default_mapping_deserializer, (Mapping, dict, Dict), False)
 set_deserializer(default_iterable_deserializer, Iterable, False)
 set_deserializer(default_object_deserializer, object, False)
 set_deserializer(default_uuid_deserializer, UUID)

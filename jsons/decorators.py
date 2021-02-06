@@ -3,6 +3,7 @@ This module contains decorators that facilitate the `jsons` functions in an
 alternative fashion.
 """
 from inspect import signature, Parameter, isawaitable, iscoroutinefunction
+
 from jsons import JsonSerializable, dump, load, loads, loadb, dumps, dumpb
 from jsons.exceptions import InvalidDecorationError
 
@@ -93,6 +94,7 @@ def _get_decorator(parameters, returnvalue, fork_inst, mapper, mapper_kwargs):
         wrapper = (_get_async_wrapper(*args) if iscoroutinefunction(decorated)
                    else _get_wrapper(*args))
         return wrapper
+
     return _decorator
 
 
@@ -121,7 +123,6 @@ def _get_async_wrapper(
         fork_inst,
         mapper,
         mapper_kwargs):
-
     async def _async_wrapper(*args, **kwargs):
         result = _run_decorated(decorated, mapper if parameters else None,
                                 fork_inst, args, kwargs, mapper_kwargs)
@@ -180,7 +181,7 @@ def _validate_decoration(decorated, fork_inst):
                         'You can still obtain the desired behavior by '
                         'decorating your method first and then place '
                         '@staticmethod/@classmethod on top (switching the '
-                        'order).')
+                        'order).', 'decorated-static')
         raise InvalidDecorationError(
             'Cannot decorate a static- or classmethod.')
     if isinstance(decorated, type):

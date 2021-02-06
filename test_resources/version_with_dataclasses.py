@@ -46,3 +46,8 @@ class Parent:
 @dataclass
 class Child(Parent):
     b: int
+
+
+@dataclass
+class A:
+    a: Optional[int] = 42

@@ -10,7 +10,7 @@ from jsons._cache import clear
 from jsons._common_impl import StateHolder
 from jsons._extra_impl import announce_class
 from jsons._lizers_impl import get_serializer
-from jsons.exceptions import SerializationError, RecursionDetectedError
+from jsons.exceptions import SerializationError
 
 
 def dump(obj: object,
@@ -39,7 +39,6 @@ def dump(obj: object,
     :param kwargs: the keyword args are passed on to the serializer function.
     :return: the serialized obj as a JSON type.
     """
-    kwargs = _check_for_recursion(obj, kwargs)
     cls_ = cls or obj.__class__
     serializer = get_serializer(cls_, fork_inst)
 
@@ -53,7 +52,7 @@ def dump(obj: object,
         **kwargs
     }
     announce_class(cls_, fork_inst=fork_inst)
-    kwargs['_objects'].remove(id(obj))
+    # kwargs['_objects'].remove(id(obj))
     return _do_dump(obj, serializer, cls, initial, kwargs_)
 
 
@@ -65,7 +64,7 @@ def _do_dump(obj, serializer, cls, initial, kwargs):
         return result
     except Exception as err:
         clear()
-        raise SerializationError(str(err))
+        raise SerializationError(str(err)) from err
 
 
 def dumps(obj: object,
@@ -113,11 +112,3 @@ def dumpb(obj: object,
     dumped_dict = dump(obj, *args, **kwargs)
     dumped_str = json.dumps(dumped_dict, **jdkwargs)
     return dumped_str.encode(encoding=encoding)
-
-
-def _check_for_recursion(obj: object, kwargs) -> dict:
-    kwargs['_objects'] = kwargs.get('_objects', set())
-    if id(obj) in kwargs['_objects']:
-        raise RecursionDetectedError('Endless recursion detected')
-    kwargs['_objects'].add(id(obj))
-    return kwargs

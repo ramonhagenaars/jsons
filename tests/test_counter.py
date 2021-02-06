@@ -1,5 +1,6 @@
 from collections import Counter
 from unittest import TestCase
+
 import jsons
 
 

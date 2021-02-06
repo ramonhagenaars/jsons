@@ -7,6 +7,7 @@ with multiple Python versions.
 import sys
 import typing
 from enum import Enum
+
 from jsons._cache import cached
 
 
@@ -61,17 +62,21 @@ def get_naked_class(cls: type) -> type:
     # Python3.6: typing classes have __extra__
     # Python3.7: typing classes have __origin__
     # Return the non-generic class (e.g. dict) of a generic type (e.g. Dict).
-    attr = '__origin__'
-    if sys.version_info[1] in (5, 6):
-        attr = '__extra__'
-    return getattr(cls, attr, cls)
+    return getattr(cls, '__extra__', getattr(cls, '__origin__', cls))
 
 
 @cached
-def get_type_hints(func: callable):
+def get_type_hints(func: callable, fallback_ns=None):
     # Python3.5: get_type_hints raises on classes without explicit constructor
     try:
         result = typing.get_type_hints(func)
     except AttributeError:
         result = {}
+    except NameError:
+        # attempt to resolve in global namespace - this works around an
+        # issue in 3.7 whereby __init__ created by dataclasses fails
+        # to find it's context. See https://bugs.python.org/issue34776
+        if fallback_ns is not None:
+            context_dict = sys.modules[fallback_ns].__dict__
+            result = typing.get_type_hints(func, globalns=context_dict)
     return result

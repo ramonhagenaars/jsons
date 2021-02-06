@@ -1,4 +1,5 @@
 from unittest import TestCase
+
 import jsons
 from jsons import ValidationError
 

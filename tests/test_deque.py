@@ -1,5 +1,6 @@
 from collections import deque
 from unittest import TestCase
+
 import jsons
 
 

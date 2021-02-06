@@ -4,6 +4,7 @@ PRIVATE MODULE: do not import (from) it directly.
 This module contains the implementation of ``fork()``.
 """
 from typing import Type, Optional
+
 from jsons._common_impl import StateHolder, get_class_name, T
 
 
@@ -32,4 +33,6 @@ def fork(
     result._serializers = fork_inst._serializers.copy()
     result._deserializers = fork_inst._deserializers.copy()
     result._fork_counter = 0
+    result._suppress_warnings = fork_inst._suppress_warnings
+    result._suppressed_warnings = fork_inst._suppressed_warnings.copy()
     return result

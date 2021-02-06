@@ -1,5 +1,6 @@
 from typing import Optional, NewType, Any
 from unittest import TestCase
+
 import jsons
 from jsons import NoneType
 

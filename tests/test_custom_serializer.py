@@ -1,4 +1,5 @@
 from unittest import TestCase
+
 import jsons
 from jsons import default_string_deserializer, default_primitive_serializer
 

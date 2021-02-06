@@ -1,7 +1,8 @@
 import datetime
 from enum import Enum
-from typing import Dict
+from typing import Dict, Union
 from unittest import TestCase
+
 import jsons
 from jsons import DeserializationError
 
@@ -28,7 +29,6 @@ class TestDict(TestCase):
         self.assertEqual(loaded['a']['b']['c']['d'].second, 0)
 
     def test_load_dict_with_enum_keys(self):
-
         class Color(Enum):
             RED = 1
             GREEN = 2
@@ -45,7 +45,6 @@ class TestDict(TestCase):
         self.assertDictEqual(expected, loaded2)
 
     def test_load_dict_with_key_transformers(self):
-
         class A_:
             def __init__(self, b_: int):
                 self.b_ = b_
@@ -114,3 +113,37 @@ class TestDict(TestCase):
         dict_ = {'a': {'b': {'c': {'d': d}}}}
         expectation = {'a': {'b': {'c': {'d': '2018-07-08T21:34:00Z'}}}}
         self.assertDictEqual(expectation, jsons.dump(dict_))
+
+    def test_dump_load_dict_special_keys(self):
+        # Test that dicts that hold non-json keys can still be dumped and
+        # loaded by hashing those keys.
+
+        dict_with_invalid_json_keys = {
+            (1, 2): {
+                (1, 2): 42,
+                3: 84
+            },
+            (3, 4): {
+                (1, 2): 42,
+                3: 84
+            }
+        }
+
+        dumped = jsons.dump(dict_with_invalid_json_keys)
+        loaded = jsons.load(dumped, Dict[tuple, Dict[Union[tuple, int], int]])
+
+        self.assertEqual(dict_with_invalid_json_keys, loaded)
+        self.assertNotEqual(dumped, loaded, 'The loading process should not alter the original dumped dict.')
+
+    def test_dump_load_dict_special_keys_without_hint(self):
+        # Test that an Exception is raised when loading a dict that has hashed
+        # keys.
+
+        dict_with_invalid_json_keys = {
+            (1, 2): 42
+        }
+
+        dumped = jsons.dump(dict_with_invalid_json_keys)
+
+        with self.assertRaises(DeserializationError):
+            jsons.load(dumped)  # No hint here, that's not good!

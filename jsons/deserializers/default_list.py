@@ -61,7 +61,7 @@ def _do_load(
             new_msg = ('Could not deserialize element at index %s. %s' %
                        (index, err.message))
             if warn_on_fail:
-                fork_inst._warn(new_msg)
+                fork_inst._warn(new_msg, 'element-not-deserialized')
             else:
                 new_err = DeserializationError(new_msg, err.source, err.target)
                 raise new_err from err

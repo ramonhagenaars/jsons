@@ -1,5 +1,6 @@
 from enum import Enum
 from unittest import TestCase
+
 import jsons
 from jsons import DeserializationError
 
@@ -9,6 +10,7 @@ class TestEnum(TestCase):
         class E(Enum):
             x = 1
             y = 2
+
         self.assertEqual('x', jsons.dump(E.x))
         self.assertEqual(2, jsons.dump(E.y, use_enum_name=False))
 

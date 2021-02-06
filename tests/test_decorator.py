@@ -1,5 +1,6 @@
 import asyncio
 from unittest import TestCase
+
 import jsons
 from jsons import InvalidDecorationError
 from jsons.decorators import loaded, dumped
@@ -188,6 +189,7 @@ class TestDecorator(TestCase):
         @loaded(returnvalue=False)
         def func(x):
             return x
+
         arg = '2018-10-07T19:45:00+02:00'
         res = func(arg)
         self.assertEqual(arg, res)

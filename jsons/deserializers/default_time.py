@@ -1,4 +1,5 @@
 from datetime import time
+
 from jsons._datetime_impl import get_datetime_inst, RFC3339_TIME_PATTERN
 
 

@@ -1,4 +1,5 @@
 import datetime
+import uuid
 from typing import Optional, Union
 from unittest import TestCase
 
@@ -11,8 +12,7 @@ from jsons import (
 
 
 class TestUnion(TestCase):
-    def test_dump_optional(self):
-
+    def test_dump_optional_primitive(self):
         class C:
             def __init__(self, x: Optional[str]):
                 self.x = x
@@ -22,8 +22,51 @@ class TestUnion(TestCase):
 
         self.assertDictEqual(expected, dumped)
 
-    def test_dump_union(self):
+    def test_dump_optional_uuid(self):
+        class C:
+            def __init__(self, x: Optional[uuid.UUID]):
+                self.x = x
 
+        expected = {'x': '00000000-0000-0000-0000-000000000000'}
+        dumped = jsons.dump(C(uuid.UUID(int=0)))
+
+        self.assertDictEqual(expected, dumped)
+
+    def test_dump_optional_class_primitive(self):
+        class C:
+            def __init__(self, x: Optional[int]):
+                self.x = x
+
+        expected = {'x': 42}
+        dumped = jsons.dump(C(42))
+
+        self.assertDictEqual(expected, dumped)
+
+        expected2 = {'x': None}
+        dumped2 = jsons.dump(C(None))
+
+        self.assertDictEqual(expected2, dumped2)
+
+    def test_dump_optional_class_uuid(self):
+        class C:
+            def __init__(self, x: Optional[uuid.UUID]):
+                self.x = x
+
+        expected = {'x': '00000000-0000-0000-0000-000000000000'}
+        dumped = jsons.dump(C(uuid.UUID(int=0)))
+
+        self.assertDictEqual(expected, dumped)
+
+        expected2 = {'x': None}
+        dumped2 = jsons.dump(C(None))
+
+        self.assertDictEqual(expected2, dumped2)
+
+    def test_dump_optional(self):
+        dumped = jsons.dump(None, Optional[int])
+        self.assertEqual(None, dumped)
+
+    def test_dump_union(self):
         class A:
             def __init__(self, x: int):
                 self.x = x
@@ -42,6 +85,14 @@ class TestUnion(TestCase):
 
         with self.assertRaises(SerializationError):
             jsons.dump(A(1), Union[B], strict=True)
+
+    def test_fail(self):
+        with self.assertRaises(SerializationError) as err:
+            jsons.dump('nope', Union[int, float])
+
+        self.assertIn('str', str(err.exception))
+        self.assertIn('int', str(err.exception))
+        self.assertIn('float', str(err.exception))
 
     def test_load_union(self):
         class A:
@@ -76,7 +127,6 @@ class TestUnion(TestCase):
             jsons.load({'x': 'no match in the union'}, C).x
 
     def test_load_none(self):
-
         class C:
             def __init__(self, x: int, y: Optional[int]):
                 self.x = x

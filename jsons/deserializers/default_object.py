@@ -55,7 +55,7 @@ def _get_constructor_args(
     # every required parameter, we try to get the corresponding value from
     # json_obj.
     signature_parameters = _get_signature(cls)
-    hints = get_type_hints(cls.__init__)
+    hints = get_type_hints(cls.__init__, fallback_ns=cls.__module__)
     attr_getters = dict(**(attr_getters or {}))
 
     result = {}
@@ -113,6 +113,12 @@ def _get_value_for_attr(
     return result
 
 
+def _remove_prefix(prefix: str, s: str) -> str:
+    if s.startswith(prefix):
+        return s[len(prefix):] or '/'  # Special case: map the empty string to '/'
+    return s
+
+
 def _get_value_from_obj(obj, cls, sig, sig_key, meta_hints, **kwargs):
     # Obtain the value for the attribute with the given signature from the
     # given obj. Try to obtain the class of this attribute from the meta info
@@ -126,9 +132,8 @@ def _get_value_from_obj(obj, cls, sig, sig_key, meta_hints, **kwargs):
             cls_str_from_meta, obj, kwargs['fork_inst'])
         # Rebuild the class hints: cls_key becomes the new root.
         new_hints = {
-            key.replace(cls_key, '/'): meta_hints[key]
+            _remove_prefix(cls_key, key): meta_hints[key]
             for key in meta_hints
-            if key != '/'
         }
     cls_ = determine_precedence(cls=cls, cls_from_meta=cls_from_meta,
                                 cls_from_type=None, inferred_cls=True)
@@ -138,14 +143,26 @@ def _get_value_from_obj(obj, cls, sig, sig_key, meta_hints, **kwargs):
 
 def _set_remaining_attrs(instance,
                          remaining_attrs,
-                         attr_getters=None,
+                         attr_getters,
                          **kwargs):
     # Set any remaining attributes on the newly created instance.
     attr_getters = attr_getters or {}
     for attr_name in remaining_attrs:
-        loaded_attr = load(remaining_attrs[attr_name],
-                           type(remaining_attrs[attr_name]),
-                           **kwargs)
+        annotations = getattr(instance, '__annotations__', {})
+        attr_type = annotations.get(attr_name)
+
+        if isinstance(remaining_attrs[attr_name], dict) \
+                and '-keys' in remaining_attrs[attr_name] \
+                and not attr_type:
+            fork_inst = kwargs['fork_inst']
+            fork_inst._warn('A dict with -keys was detected without a type '
+                            'hint for attribute `{}`. This probably means '
+                            'that you did not provide an annotation in your '
+                            'class (ending up in __annotations__).'
+                            .format(attr_name), 'hashed-keys-without-hint')
+        attr_type = attr_type or type(remaining_attrs[attr_name])
+
+        loaded_attr = load(remaining_attrs[attr_name], attr_type, **kwargs)
         try:
             setattr(instance, attr_name, loaded_attr)
         except AttributeError:

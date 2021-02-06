@@ -20,7 +20,7 @@ class TestComplexNumber(TestCase):
     def test_load_complex_number(self):
         dumped = {'real': 1.0, 'imag': 2.0}
         loaded = jsons.load(dumped, complex)
-        self.assertEqual(loaded, 1+2j)
+        self.assertEqual(loaded, 1 + 2j)
 
         bad_keys_dump = {'some_key': 3.0}
         with self.assertRaises(DeserializationError):

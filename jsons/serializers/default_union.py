@@ -1,5 +1,6 @@
 from typing import Union
-from jsons._common_impl import get_class_name
+
+from jsons._common_impl import get_class_name, NoneType
 from jsons._compatibility_impl import get_union_params
 from jsons._dump_impl import dump
 from jsons.exceptions import JsonsError, SerializationError
@@ -16,7 +17,14 @@ def default_union_serializer(obj: object, cls: Union, **kwargs) -> object:
     :return: An object of the first type of the Union that could be
     serialized successfully.
     """
-    for sub_type in get_union_params(cls):
+    sub_types = get_union_params(cls)
+
+    # Cater for Optional[...]/Union[None, ...] first to avoid blindly
+    # string-ifying None in later serializers.
+    if obj is None and NoneType in sub_types:
+        return obj
+
+    for sub_type in sub_types:
         try:
             return dump(obj, sub_type, **kwargs)
         except JsonsError:
@@ -25,5 +33,5 @@ def default_union_serializer(obj: object, cls: Union, **kwargs) -> object:
         args_msg = ', '.join([get_class_name(cls_)
                               for cls_ in get_union_params(cls)])
         err_msg = ('Could not match the object of type "{}" to any type of '
-                   'the Union: {}'.format(str(cls), args_msg))
+                   'the Union: {}'.format(type(obj), args_msg))
         raise SerializationError(err_msg)

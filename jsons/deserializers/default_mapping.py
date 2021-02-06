@@ -1,7 +1,9 @@
 from collections.abc import Mapping
 from typing import Mapping as MappingType
+
 from typish import get_args, get_origin
-from jsons.deserializers import default_dict_deserializer
+
+from jsons.deserializers.default_dict import default_dict_deserializer
 
 
 def default_mapping_deserializer(obj: dict, cls: type, **kwargs) -> Mapping:

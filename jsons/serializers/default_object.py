@@ -12,7 +12,7 @@ from jsons._datetime_impl import to_str
 from jsons._dump_impl import dump
 from jsons.classes import JsonSerializable
 from jsons.classes.verbosity import Verbosity
-from jsons.exceptions import SerializationError, RecursionDetectedError
+from jsons.exceptions import SerializationError
 
 
 def default_object_serializer(
@@ -57,8 +57,6 @@ def default_object_serializer(
     :return: a Python dict holding the values
     of ``obj``.
     """
-    if obj is None:
-        return obj
     strip_attr = _normalize_strip_attr(strip_attr)
     if cls and strict:
         attributes = _get_attributes_from_class(
@@ -114,7 +112,6 @@ def _do_serialize(
     result = dict()
     for attr_name, cls_ in attributes.items():
         attr = obj.__getattribute__(attr_name)
-        dumped_elem = None
         try:
             dumped_elem = dump(attr,
                                cls=cls_,
@@ -126,10 +123,6 @@ def _do_serialize(
                                strip_attr=strip_attr,
                                **kwargs)
             _store_cls_info(dumped_elem, attr, kwargs)
-        except RecursionDetectedError:
-            fork_inst._warn('Recursive structure detected in attribute "{}" '
-                            'of object of type "{}", ignoring the attribute.'
-                            .format(attr_name, get_class_name(cls)))
         except SerializationError as err:
             if strict:
                 raise
@@ -137,7 +130,8 @@ def _do_serialize(
                 fork_inst._warn('Failed to dump attribute "{}" of object of '
                                 'type "{}". Reason: {}. Ignoring the '
                                 'attribute.'
-                                .format(attr, get_class_name(cls), err.message))
+                                .format(attr, get_class_name(cls), err.message),
+                                'attribute-not-serialized')
                 break
         _add_dumped_elem(result, attr_name, dumped_elem,
                          strip_nulls, key_transformer)

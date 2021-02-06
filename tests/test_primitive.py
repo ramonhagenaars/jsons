@@ -1,5 +1,5 @@
-from datetime import datetime
 from unittest import TestCase
+
 import jsons
 from jsons import DeserializationError
 from jsons.exceptions import SerializationError

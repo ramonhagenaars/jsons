@@ -1,7 +1,7 @@
 from typing import Dict
 
-from jsons.exceptions import DeserializationError
 from jsons._load_impl import load
+from jsons.exceptions import DeserializationError
 
 
 def default_complex_deserializer(obj: Dict[str, float],
@@ -21,8 +21,8 @@ def default_complex_deserializer(obj: Dict[str, float],
     except KeyError as err:
         raise AttributeError("Cannot deserialize {} to a complex number, "
                              "does not contain key '{}'"
-                             .format(obj, err.args[0]))
+                             .format(obj, err.args[0])) from err
     except DeserializationError as err:
         raise AttributeError("Cannot deserialize {} to a complex number, "
                              "cannot cast value {} to float"
-                             .format(obj, err.source))
+                             .format(obj, err.source)) from err

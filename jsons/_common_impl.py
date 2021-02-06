@@ -13,8 +13,8 @@ from jsons._cache import cached
 from jsons._compatibility_impl import get_union_params
 from jsons.exceptions import UnknownClassError
 
-
 NoneType = type(None)
+JSON_KEYS = (str, int, float, bool, NoneType)
 VALID_TYPES = (str, int, float, bool, list, tuple, set, dict, NoneType)
 META_ATTR = '-meta'  # The name of the attribute holding meta info.
 T = TypeVar('T')
@@ -33,12 +33,13 @@ class StateHolder:
     _classes_validators = list()
     _announced_classes = dict()
     _suppress_warnings = False
+    _suppressed_warnings = set()
 
     @classmethod
-    def _warn(cls, msg, *args, **kwargs):
-        if not cls._suppress_warnings:
-            msg_ = ('{} You can suppress warnings like this using '
-                    'jsons.suppress_warnings().'.format(msg))
+    def _warn(cls, msg, code, *args, **kwargs):
+        if not cls._suppress_warnings and code not in cls._suppressed_warnings:
+            msg_ = ('{} Use suppress_warning({}) or suppress_warnings(True) to '
+                    'turn off this message.'.format(msg, code))
             warnings.warn(msg_, *args, **kwargs)
 
 

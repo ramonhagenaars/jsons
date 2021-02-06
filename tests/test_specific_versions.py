@@ -1,8 +1,8 @@
 import sys
 import uuid
 from pathlib import Path
-from typing import Any
 from unittest import TestCase, skipUnless
+
 import jsons
 from jsons._compatibility_impl import get_type_hints
 from jsons.exceptions import SignatureMismatchError
@@ -11,7 +11,6 @@ try:
     from dataclasses import dataclass
 except ImportError:
     dataclass = None
-
 
 # Load the test resources into the path, so they can be imported. They MUST
 # remain outside of the tests package to prevent the test discovery from
@@ -31,6 +30,7 @@ def only_version_3(minor_version: int, and_above: bool = False):
             return decorated(*args, **kwargs)
 
         return _wrapper
+
     return _decorator
 
 
@@ -50,6 +50,18 @@ class TestSpecificVersions(TestCase):
         }
 
         self.assertDictEqual(expected, dumped)
+
+    @only_version_3(7, and_above=True)
+    def test_postponed_annoation_dataclass(self):
+        from postponed_dataclass import Wrap
+
+        obj = Wrap()
+        exp = {'a': {'a': 42}}
+        dump = jsons.dump(obj)
+        self.assertDictEqual(exp, dump)
+
+        undump = jsons.load(dump, cls=Wrap)
+        self.assertEqual(undump, obj)
 
     @only_version_3(6, and_above=True)
     def test_simple_dump_and_load_dataclass(self):
@@ -89,7 +101,6 @@ class TestSpecificVersions(TestCase):
 
     @only_version_3(5, and_above=True)
     def test_simple_dump_and_load_dataclass(self):
-
         class C:
             pass
 

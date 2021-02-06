@@ -1,5 +1,5 @@
-from typing import Optional, Union
 from decimal import Decimal
+from typing import Optional, Union
 
 
 def default_decimal_deserializer(obj: Union[str, float, int],

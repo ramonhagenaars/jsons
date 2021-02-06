@@ -1,5 +1,6 @@
-from typing import Optional, Callable, Dict
+from typing import Optional, Callable, Dict, Tuple
 
+from jsons._common_impl import JSON_KEYS
 from jsons._dump_impl import dump
 
 
@@ -35,6 +36,16 @@ def default_dict_serializer(
     for key in obj:
         obj_ = obj[key]
         cls_ = types.get(key, None)
+
+        # If key is not a valid json type, use the hash as key and store the
+        # original key in a separate section.
+        dict_and_key = _store_and_hash(result, key,
+                                       key_transformer=key_transformer,
+                                       strip_nulls=strip_nulls, strict=strict,
+                                       types=types, **kwargs)
+        if dict_and_key:
+            result, key = dict_and_key
+
         dumped_elem = dump(obj_,
                            cls=cls_,
                            key_transformer=key_transformer,
@@ -45,4 +56,25 @@ def default_dict_serializer(
             if key_transformer:
                 key = key_transformer(key)
             result[key] = dumped_elem
+    return result
+
+
+def _store_and_hash(
+        obj: dict,
+        key: object,
+        **kwargs
+) -> Optional[Tuple[dict, int]]:
+    # Store the given key in the given dict under a special section if that
+    # key is not a valid json key. Return a hash of that key.
+    result = None
+    if not any(issubclass(type(key), json_key) for json_key in JSON_KEYS):
+        # Apparently key is not a valid json key value. Since it got into
+        # a Python dict without crashing, it must be hashable.
+        obj_ = {**obj}
+        key_hash = hash(key)
+        if '-keys' not in obj_:
+            obj_['-keys'] = {}
+        dumped_key = dump(key, **kwargs)
+        obj_['-keys'][key_hash] = dumped_key
+        result = (obj_, key_hash)
     return result

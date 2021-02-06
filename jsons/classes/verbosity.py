@@ -1,6 +1,6 @@
 try:
     from enum import Flag
-except ImportError:
+except ImportError:  # pragma: no cover
     from jsons._compatibility_impl import Flag
 
 

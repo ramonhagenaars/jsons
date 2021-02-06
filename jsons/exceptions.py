@@ -9,6 +9,7 @@ class JsonsError(Exception):
     """
     Base class for all `jsons` errors.
     """
+
     def __init__(self, message: str):
         """
         Constructor.
@@ -33,6 +34,7 @@ class ArgumentError(JsonsError, ValueError):
     Raised when serialization or deserialization went wrong caused by a wrong
     argument when serializing or deserializing.
     """
+
     def __init__(self, message: str, argument: str):
         """
         Constructor.
@@ -56,6 +58,7 @@ class DeserializationError(JsonsError):
     """
     Raised when deserialization failed for some reason.
     """
+
     def __init__(self, message: str, source: object, target: Optional[type]):
         """
         Constructor.
@@ -90,18 +93,12 @@ class SerializationError(JsonsError):
     """
 
 
-class RecursionDetectedError(SerializationError):
-    """
-    Raised when a recursive structure was detected and a stack overflow was
-    prevented during serialization.
-    """
-
-
 class DecodeError(DeserializationError, JSONDecodeError):
     """
     Raised when decoding a string or bytes to Python types failed. This error
     is actually a wrapper around `json.JSONDecodeError`.
     """
+
     def __init__(self, message: str, source: object, target: type,
                  error: JSONDecodeError):
         """
@@ -120,6 +117,7 @@ class UnfulfilledArgumentError(DeserializationError, ArgumentError):
     Raised on a deserialization failure when an argument could not be fulfilled
     by the given object attr_getter.
     """
+
     def __init__(self,
                  message: str,
                  argument: str,
@@ -142,6 +140,7 @@ class SignatureMismatchError(DeserializationError, ArgumentError):
     to a mismatch between the source's attributes and the target's accepted
     parameters. This error is raised in "strict-mode" only.
     """
+
     def __init__(self,
                  message: str,
                  argument: str,
@@ -163,6 +162,7 @@ class UnknownClassError(DeserializationError):
     Raised when jsons failed to find a type instance to deserialize to. If this
     error occurs, consider using ``jsons.announce_class``.
     """
+
     def __init__(self, message: str, source: object, target_name: str):
         """
         Constructor.
@@ -187,6 +187,7 @@ class InvalidDecorationError(JsonsError):
     """
     Raised when a jsons decorator was wrongly used.
     """
+
     def __init__(self, message: str):
         """
         Constructor.

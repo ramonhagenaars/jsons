@@ -1,5 +1,6 @@
 from datetime import datetime
 from typing import Optional
+
 from jsons._load_impl import load
 from jsons.deserializers.default_primitive import default_primitive_deserializer
 from jsons.exceptions import DeserializationError
