@@ -90,7 +90,7 @@ from datetime import datetime, date, time, timezone, timedelta
 from decimal import Decimal
 from enum import Enum
 from pathlib import PurePath
-from typing import Union, List, Tuple, Iterable, Optional, DefaultDict
+from typing import Union, List, Tuple, Iterable, Optional, DefaultDict, Dict
 from uuid import UUID
 
 from jsons._common_impl import NoneType
@@ -300,7 +300,7 @@ set_deserializer(default_timedelta_deserializer, timedelta)
 set_deserializer(default_string_deserializer, str)
 set_deserializer(default_nonetype_deserializer, NoneType)
 set_deserializer(default_primitive_deserializer, (int, float, bool))
-set_deserializer(default_mapping_deserializer, Mapping, False)
+set_deserializer(default_mapping_deserializer, (Mapping, dict, Dict), False)
 set_deserializer(default_iterable_deserializer, Iterable, False)
 set_deserializer(default_object_deserializer, object, False)
 set_deserializer(default_uuid_deserializer, UUID)
