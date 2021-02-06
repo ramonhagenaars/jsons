@@ -62,7 +62,7 @@ def get_naked_class(cls: type) -> type:
     # Python3.6: typing classes have __extra__
     # Python3.7: typing classes have __origin__
     # Return the non-generic class (e.g. dict) of a generic type (e.g. Dict).
-    return getattr(cls, '__origin__', getattr(cls, '__extra__', cls))
+    return getattr(cls, '__extra__', getattr(cls, '__origin__', cls))
 
 
 @cached
