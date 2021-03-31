@@ -81,6 +81,10 @@ list_of_tuples = jsons.load(some_dict, List[Tuple[AClass, AnotherClass]])
 
 ## Recent updates
 
+### 1.4.1
+
+- Bugfix: Types of attributes that are not in the constructor were not properly looked for. See issue #128.
+
 ### 1.4.0
 
 - Feature: DefaultDicts can now be deserialized.
