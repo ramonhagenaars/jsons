@@ -148,7 +148,7 @@ def _set_remaining_attrs(instance,
     # Set any remaining attributes on the newly created instance.
     attr_getters = attr_getters or {}
     for attr_name in remaining_attrs:
-        annotations = getattr(instance, '__annotations__', {})
+        annotations = get_type_hints(instance.__class__)
         attr_type = annotations.get(attr_name)
 
         if isinstance(remaining_attrs[attr_name], dict) \
