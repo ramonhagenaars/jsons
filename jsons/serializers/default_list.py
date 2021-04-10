@@ -1,4 +1,3 @@
-from collections.abc import Iterable
 from typing import Optional
 
 from typish import get_args
@@ -9,7 +8,7 @@ from jsons._dump_impl import dump
 
 
 def default_list_serializer(
-        obj: Iterable,
+        obj: list,
         cls: type = None,
         *,
         strict: bool = False,
@@ -17,12 +16,11 @@ def default_list_serializer(
         **kwargs) -> list:
     """
     Serialize the given ``obj`` to a list of serialized objects.  fixme: nalopen
-    :param obj: the iterable that is to be serialized.
-    :param cls: the (subscripted) type of the iterable.
+    :param obj: the list that is to be serialized.
+    :param cls: the (subscripted) type of the list.
     :param strict: a bool to determine if the serializer should be strict
     (i.e. only dumping stuff that is known to ``cls``).
-    :param tasks: the allowed number of tasks (threads or processes).
-    :param task_type: the type that is used for multitasking.
+    :param fork_inst: if given, it uses this fork of ``JsonSerializable``.
     :param kwargs: any keyword arguments that may be given to the serialization
     process.
     :return: a list of which all elements are serialized.
