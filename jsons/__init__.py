@@ -168,6 +168,7 @@ from jsons.serializers.default_decimal import default_decimal_serializer
 from jsons.serializers.default_dict import default_dict_serializer
 from jsons.serializers.default_enum import default_enum_serializer
 from jsons.serializers.default_iterable import default_iterable_serializer
+from jsons.serializers.default_list import default_list_serializer
 from jsons.serializers.default_object import default_object_serializer
 from jsons.serializers.default_path import default_path_serializer
 from jsons.serializers.default_primitive import default_primitive_serializer
@@ -232,6 +233,7 @@ __all__ = [
     default_tuple_serializer.__name__,
     default_dict_serializer.__name__,
     default_iterable_serializer.__name__,
+    default_list_serializer.__name__,
     default_enum_serializer.__name__,
     default_complex_serializer.__name__,
     default_datetime_serializer.__name__,
@@ -280,6 +282,7 @@ set_serializer(default_timezone_serializer, timezone)
 set_serializer(default_timedelta_serializer, timedelta)
 set_serializer(default_primitive_serializer, (str, int, float, bool, None))
 set_serializer(default_dict_serializer, Mapping, False)
+set_serializer(default_list_serializer, (list, List))
 set_serializer(default_iterable_serializer, Iterable, False)
 set_serializer(default_object_serializer, object, False)
 set_serializer(default_uuid_serializer, UUID)

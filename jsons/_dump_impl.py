@@ -52,7 +52,6 @@ def dump(obj: object,
         **kwargs
     }
     announce_class(cls_, fork_inst=fork_inst)
-    # kwargs['_objects'].remove(id(obj))
     return _do_dump(obj, serializer, cls, initial, kwargs_)
 
 

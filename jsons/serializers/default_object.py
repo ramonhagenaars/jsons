@@ -5,11 +5,11 @@ from typing import Optional, Callable, Union, MutableSequence, Tuple, Dict
 
 from typish import get_type, get_mro
 
+from jsons import get_serializer, announce_class
 from jsons._cache import cached
 from jsons._common_impl import get_class_name, META_ATTR, StateHolder
 from jsons._compatibility_impl import get_type_hints
 from jsons._datetime_impl import to_str
-from jsons._dump_impl import dump
 from jsons.classes import JsonSerializable
 from jsons.classes.verbosity import Verbosity
 from jsons.exceptions import SerializationError
@@ -111,26 +111,29 @@ def _do_serialize(
         fork_inst: Optional[type] = StateHolder) -> Dict[str, object]:
     result = dict()
     for attr_name, cls_ in attributes.items():
-        attr = obj.__getattribute__(attr_name)
+        attr = getattr(obj, attr_name)
+        attr_type = cls_ or type(attr)
+        announce_class(attr_type, fork_inst=fork_inst)
+        serializer = get_serializer(attr_type, fork_inst)
         try:
-            dumped_elem = dump(attr,
-                               cls=cls_,
-                               key_transformer=key_transformer,
-                               strip_nulls=strip_nulls,
-                               strip_privates=strip_privates,
-                               strip_properties=strip_properties,
-                               strip_class_variables=strip_class_variables,
-                               strip_attr=strip_attr,
-                               **kwargs)
+            dumped_elem = serializer(attr,
+                                     cls=cls_,
+                                     key_transformer=key_transformer,
+                                     strip_nulls=strip_nulls,
+                                     strip_privates=strip_privates,
+                                     strip_properties=strip_properties,
+                                     strip_class_variables=strip_class_variables,
+                                     strip_attr=strip_attr,
+                                     **kwargs)
             _store_cls_info(dumped_elem, attr, kwargs)
-        except SerializationError as err:
+        except Exception as err:
             if strict:
-                raise
+                raise SerializationError(message=err.args[0]) from err
             else:
                 fork_inst._warn('Failed to dump attribute "{}" of object of '
                                 'type "{}". Reason: {}. Ignoring the '
                                 'attribute.'
-                                .format(attr, get_class_name(cls), err.message),
+                                .format(attr, get_class_name(cls), err.args[0]),
                                 'attribute-not-serialized')
                 break
         _add_dumped_elem(result, attr_name, dumped_elem,
@@ -237,6 +240,7 @@ def _filter_attributes(
             and not _is_innerclass(attr, cls)}
 
 
+@cached
 def _get_class_props(cls: type) -> Tuple[list, list]:
     props = []
     other_cls_vars = []
@@ -313,6 +317,7 @@ def _store_cls_info(result: object, original_obj: dict, kwargs):
         result['-cls'] = cls_name
 
 
+@cached
 def _is_innerclass(attr: str, cls: type) -> bool:
     attr_obj = getattr(cls, attr, None)
     return (isinstance(attr_obj, type)
