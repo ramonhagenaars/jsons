@@ -6,7 +6,7 @@ from jsons._datetime_impl import to_str, RFC3339_DATETIME_PATTERN
 
 def default_datetime_serializer(obj: datetime,
                                 *,
-                                strip_microseconds: Optional[bool] = True,
+                                strip_microseconds: Optional[bool] = False,
                                 **kwargs) -> str:
     """
     Serialize the given datetime instance to a string. It uses the RFC3339

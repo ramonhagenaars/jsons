@@ -52,13 +52,13 @@ class TestDatetime(TestCase):
         d = datetime.datetime(year=2018, month=7, day=8, hour=21, minute=34,
                               second=10, microsecond=123456,
                               tzinfo=datetime.timezone.utc)
-        dumped = jsons.dump(d)
+        dumped = jsons.dump(d, strip_microseconds=True)
         self.assertEqual('2018-07-08T21:34:10Z', dumped)
 
     def test_dump_datetime_with_microseconds(self):
         d = datetime.datetime(year=2018, month=7, day=8, hour=21, minute=34,
                               microsecond=123456, tzinfo=datetime.timezone.utc)
-        dumped = jsons.dump(d, strip_microseconds=False)
+        dumped = jsons.dump(d)
         self.assertEqual('2018-07-08T21:34:00.123456Z', dumped)
 
     def test_dump_datetime_with_tz(self):
