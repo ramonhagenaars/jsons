@@ -28,11 +28,13 @@ Features
 Installing and using
 ********************
 
-Install with pip:
+Install with pip or conda:
 
 ::
 
    pip install jsons
+   or
+   conda install -c conda-forge jsons
 
 And then you're ready to go:
 
