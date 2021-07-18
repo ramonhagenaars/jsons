@@ -84,6 +84,7 @@ list_of_tuples = jsons.load(some_dict, List[Tuple[AClass, AnotherClass]])
 ### 1.5.0
 
 - Feature: Support for `ZoneInfo` on Python3.9+.
+- Change: microseconds are no longer stripped by default (thanks to pietrodn).
 
 ### 1.4.2
 
@@ -165,6 +166,7 @@ list_of_tuples = jsons.load(some_dict, List[Tuple[AClass, AnotherClass]])
 Special thanks to the following contributors of code, discussions or
 suggestions:
 
+[pietrodn](https://github.com/pietrodn),
 [georgeharker](https://github.com/georgeharker),
 [aecay](https://github.com/aecay),
 [bibz](https://github.com/bibz),
