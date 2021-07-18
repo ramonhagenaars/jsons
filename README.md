@@ -85,6 +85,10 @@ list_of_tuples = jsons.load(some_dict, List[Tuple[AClass, AnotherClass]])
 
 - Feature: Support for `ZoneInfo` on Python3.9+.
 
+### 1.4.2
+
+- Bugfix: get_origin did not work with python3.9+ parameterized collections (e.g. `dict[str, str]`).
+
 ### 1.4.1
 
 - Bugfix: Types of attributes that are not in the constructor were not properly looked for. See issue #128.

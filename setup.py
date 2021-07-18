@@ -27,7 +27,7 @@ setup(
         'jsons.serializers'
     ],
     install_requires=[
-        'typish>=1.9.1'
+        'typish>=1.9.2'
     ],
     python_requires='>=3.5',
     test_suite='tests',
