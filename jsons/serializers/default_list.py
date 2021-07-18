@@ -15,7 +15,7 @@ def default_list_serializer(
         fork_inst: Optional[type] = StateHolder,
         **kwargs) -> list:
     """
-    Serialize the given ``obj`` to a list of serialized objects.  fixme: nalopen
+    Serialize the given ``obj`` to a list of serialized objects.
     :param obj: the list that is to be serialized.
     :param cls: the (subscripted) type of the list.
     :param strict: a bool to determine if the serializer should be strict
