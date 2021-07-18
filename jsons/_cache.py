@@ -4,7 +4,7 @@ PRIVATE MODULE: do not import (from) it directly.
 This module contains functionality for caching functions.
 """
 from collections import deque
-from functools import lru_cache
+from functools import lru_cache, update_wrapper
 from typing import Callable
 
 
@@ -32,7 +32,9 @@ def cached(decorated: Callable):
     :param decorated: the decorated function.
     :return: a wrapped function.
     """
-    return _Wrapper(decorated)
+    wrapper = _Wrapper(decorated)
+    update_wrapper(wrapper=wrapper, wrapped=decorated)
+    return wrapper
 
 
 def clear():

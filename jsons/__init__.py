@@ -152,6 +152,7 @@ from jsons.deserializers.default_timezone import default_timezone_deserializer
 from jsons.deserializers.default_tuple import default_tuple_deserializer
 from jsons.deserializers.default_union import default_union_deserializer
 from jsons.deserializers.default_uuid import default_uuid_deserializer
+from jsons.deserializers.default_zone_info import default_zone_info_deserializer
 from jsons.exceptions import (
     JsonsError,
     ValidationError,
@@ -168,6 +169,7 @@ from jsons.serializers.default_decimal import default_decimal_serializer
 from jsons.serializers.default_dict import default_dict_serializer
 from jsons.serializers.default_enum import default_enum_serializer
 from jsons.serializers.default_iterable import default_iterable_serializer
+from jsons.serializers.default_list import default_list_serializer
 from jsons.serializers.default_object import default_object_serializer
 from jsons.serializers.default_path import default_path_serializer
 from jsons.serializers.default_primitive import default_primitive_serializer
@@ -177,6 +179,7 @@ from jsons.serializers.default_timezone import default_timezone_serializer
 from jsons.serializers.default_tuple import default_tuple_serializer
 from jsons.serializers.default_union import default_union_serializer
 from jsons.serializers.default_uuid import default_uuid_serializer
+from jsons.serializers.default_zone_info import default_zone_info_serializer
 
 KEY_TRANSFORMER_SNAKECASE = snakecase
 KEY_TRANSFORMER_CAMELCASE = camelcase
@@ -232,6 +235,7 @@ __all__ = [
     default_tuple_serializer.__name__,
     default_dict_serializer.__name__,
     default_iterable_serializer.__name__,
+    default_list_serializer.__name__,
     default_enum_serializer.__name__,
     default_complex_serializer.__name__,
     default_datetime_serializer.__name__,
@@ -280,6 +284,7 @@ set_serializer(default_timezone_serializer, timezone)
 set_serializer(default_timedelta_serializer, timedelta)
 set_serializer(default_primitive_serializer, (str, int, float, bool, None))
 set_serializer(default_dict_serializer, Mapping, False)
+set_serializer(default_list_serializer, (list, List))
 set_serializer(default_iterable_serializer, Iterable, False)
 set_serializer(default_object_serializer, object, False)
 set_serializer(default_uuid_serializer, UUID)
@@ -307,3 +312,10 @@ set_deserializer(default_uuid_deserializer, UUID)
 set_deserializer(default_complex_deserializer, complex)
 set_deserializer(default_decimal_deserializer, Decimal)
 set_deserializer(default_path_deserializer, PurePath)
+
+if default_zone_info_serializer and default_zone_info_deserializer:
+    from zoneinfo import ZoneInfo
+    __all__.append(default_zone_info_serializer)
+    __all__.append(default_zone_info_deserializer)
+    set_serializer(default_zone_info_serializer, ZoneInfo)
+    set_deserializer(default_zone_info_deserializer, ZoneInfo)
