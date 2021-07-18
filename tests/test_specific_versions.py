@@ -52,7 +52,7 @@ class TestSpecificVersions(TestCase):
         self.assertDictEqual(expected, dumped)
 
     @only_version_3(7, and_above=True)
-    def test_postponed_annoation_dataclass(self):
+    def test_postponed_annotation_dataclass(self):
         from postponed_dataclass import Wrap
 
         obj = Wrap()
@@ -144,3 +144,15 @@ class TestSpecificVersions(TestCase):
         expected2 = {'x': {}}
         dumped2 = h.dump(strict=True)
         self.assertDictEqual(expected2, dumped2)
+
+    @only_version_3(9, and_above=True)
+    def test_postponed_annoation_dataclass(self):
+        # On Python 3.9 ZoneInfo should be available.
+
+        from zoneinfo import ZoneInfo
+
+        info = ZoneInfo(key='America/Los_Angeles')
+        dumped_info = jsons.dump(info)
+        loaded_info = jsons.load(dumped_info, ZoneInfo)
+
+        self.assertEqual(info, loaded_info)

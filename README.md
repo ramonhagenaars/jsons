@@ -81,6 +81,10 @@ list_of_tuples = jsons.load(some_dict, List[Tuple[AClass, AnotherClass]])
 
 ## Recent updates
 
+### 1.5.0
+
+- Feature: Support for `ZoneInfo` on Python3.9+.
+
 ### 1.4.1
 
 - Bugfix: Types of attributes that are not in the constructor were not properly looked for. See issue #128.

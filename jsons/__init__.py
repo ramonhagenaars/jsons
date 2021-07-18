@@ -152,6 +152,7 @@ from jsons.deserializers.default_timezone import default_timezone_deserializer
 from jsons.deserializers.default_tuple import default_tuple_deserializer
 from jsons.deserializers.default_union import default_union_deserializer
 from jsons.deserializers.default_uuid import default_uuid_deserializer
+from jsons.deserializers.default_zone_info import default_zone_info_deserializer
 from jsons.exceptions import (
     JsonsError,
     ValidationError,
@@ -178,6 +179,7 @@ from jsons.serializers.default_timezone import default_timezone_serializer
 from jsons.serializers.default_tuple import default_tuple_serializer
 from jsons.serializers.default_union import default_union_serializer
 from jsons.serializers.default_uuid import default_uuid_serializer
+from jsons.serializers.default_zone_info import default_zone_info_serializer
 
 KEY_TRANSFORMER_SNAKECASE = snakecase
 KEY_TRANSFORMER_CAMELCASE = camelcase
@@ -310,3 +312,10 @@ set_deserializer(default_uuid_deserializer, UUID)
 set_deserializer(default_complex_deserializer, complex)
 set_deserializer(default_decimal_deserializer, Decimal)
 set_deserializer(default_path_deserializer, PurePath)
+
+if default_zone_info_serializer and default_zone_info_deserializer:
+    from zoneinfo import ZoneInfo
+    __all__.append(default_zone_info_serializer)
+    __all__.append(default_zone_info_deserializer)
+    set_serializer(default_zone_info_serializer, ZoneInfo)
+    set_deserializer(default_zone_info_deserializer, ZoneInfo)
