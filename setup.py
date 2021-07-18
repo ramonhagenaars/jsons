@@ -32,7 +32,8 @@ setup(
     python_requires='>=3.5',
     test_suite='tests',
     tests_require=[
-        'dataclasses;python_version=="3.6"'
+        'dataclasses;python_version=="3.6"',
+        'tzdata;python_version>="3.9"'
     ],
     zip_safe=False,
     classifiers=[
