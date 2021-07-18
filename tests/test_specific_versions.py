@@ -156,3 +156,14 @@ class TestSpecificVersions(TestCase):
         loaded_info = jsons.load(dumped_info, ZoneInfo)
 
         self.assertEqual(info, loaded_info)
+
+    @only_version_3(9, and_above=True)
+    def test_dump_load_parameterized_collections(self):
+        import version_39
+
+        c = version_39.C({'a': 1, 'b': 2}, [1, 2, 3])
+        dumped = jsons.dump(c)
+        loaded = jsons.load(dumped, version_39.C)
+
+        self.assertDictEqual({'d': {'a': 1, 'b': 2}, 'l': [1, 2, 3]}, dumped)
+        self.assertEqual(c, loaded)
