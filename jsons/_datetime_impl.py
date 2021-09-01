@@ -73,7 +73,8 @@ def _datetime_offset_str(obj: datetime, fork_inst: type) -> str:
             return '+00:00'
     offset = 'Z'
     if tzone.tzname(None) not in ('UTC', 'UTC+00:00'):
-        tdelta = tzone.utcoffset(None) or tzone.adjusted_offset
+        tdelta = tzone.utcoffset(None) or \
+                 getattr(tzone, 'adjusted_offset', tzone.utcoffset(obj))
         offset = _timedelta_offset_str(tdelta)
     return offset
 

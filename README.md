@@ -81,6 +81,10 @@ list_of_tuples = jsons.load(some_dict, List[Tuple[AClass, AnotherClass]])
 
 ## Recent updates
 
+### 1.5.1
+
+- Bugfix: `ZoneInfo` failed to dump if attached to a `datetime`.
+
 ### 1.5.0
 
 - Feature: Support for `ZoneInfo` on Python3.9+.

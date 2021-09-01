@@ -1,5 +1,6 @@
 import sys
 import uuid
+from datetime import datetime
 from pathlib import Path
 from unittest import TestCase, skipUnless
 
@@ -146,7 +147,7 @@ class TestSpecificVersions(TestCase):
         self.assertDictEqual(expected2, dumped2)
 
     @only_version_3(9, and_above=True)
-    def test_postponed_annoation_dataclass(self):
+    def test_zoneinfo(self):
         # On Python 3.9 ZoneInfo should be available.
 
         from zoneinfo import ZoneInfo
@@ -154,8 +155,12 @@ class TestSpecificVersions(TestCase):
         info = ZoneInfo(key='America/Los_Angeles')
         dumped_info = jsons.dump(info)
         loaded_info = jsons.load(dumped_info, ZoneInfo)
-
         self.assertEqual(info, loaded_info)
+
+        dt = datetime(2021, 8, 31, tzinfo=ZoneInfo("America/Los_Angeles"))
+        dumped_dt = jsons.dump(dt)
+        loaded_dt = jsons.load(dumped_dt, datetime)
+        self.assertEqual(dt, loaded_dt)
 
     @only_version_3(9, and_above=True)
     def test_dump_load_parameterized_collections(self):
