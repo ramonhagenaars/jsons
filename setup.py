@@ -33,7 +33,8 @@ setup(
     test_suite='tests',
     tests_require=[
         'dataclasses;python_version=="3.6"',
-        'tzdata;python_version>="3.9"'
+        'tzdata;python_version>="3.9"',
+        'attrs'
     ],
     zip_safe=False,
     classifiers=[

@@ -11,9 +11,10 @@
   </a>
 </p>
 
-  - *Turn Python objects into dicts or (json)strings*
+  - *Turn Python objects into dicts or (json)strings and back*
   - *No changes required to your objects*
   - *Easily customizable and extendable*
+  - *Works with dataclasses, attrs and POPOs*
 
 💗 this lib? Leave a ★ and tell your colleagues!
 
@@ -80,6 +81,10 @@ list_of_tuples = jsons.load(some_dict, List[Tuple[AClass, AnotherClass]])
 # Meta
 
 ## Recent updates
+
+# 1.6.0
+
+- Feature: Support for `attrs`.
 
 ### 1.5.1
 
