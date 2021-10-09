@@ -1,4 +1,5 @@
-from unittest import TestCase
+import sys
+from unittest import TestCase, skipIf
 
 import attr
 
@@ -6,9 +7,9 @@ import jsons
 from jsons import DeserializationError
 
 
+@skipIf(sys.version_info.minor == 5, reason='Unsupported syntax for 3.5')
 class TestAttrs(TestCase):
     def test_dump(self):
-
         @attr.s
         class C:
             a: str = attr.ib()
@@ -21,7 +22,6 @@ class TestAttrs(TestCase):
         self.assertEqual({'a': 'test', 'b': 42}, dumped)
 
     def test_load(self):
-
         @attr.s
         class C:
             a: str = attr.ib()
@@ -33,7 +33,6 @@ class TestAttrs(TestCase):
         self.assertEqual(42, loaded.b)
 
     def test_dump_auto_attribs(self):
-
         @attr.s(auto_attribs=True)
         class C:
             a: str
@@ -46,7 +45,6 @@ class TestAttrs(TestCase):
         self.assertEqual({'a': 'test', 'b': 42}, dumped)
 
     def test_load_auto_attribs(self):
-
         @attr.s(auto_attribs=True)
         class C:
             a: str
@@ -58,7 +56,6 @@ class TestAttrs(TestCase):
         self.assertEqual(42, loaded.b)
 
     def test_dump_private(self):
-
         @attr.s
         class C:
             _a: str = attr.ib()
@@ -70,7 +67,6 @@ class TestAttrs(TestCase):
         self.assertEqual({'a': 'private'}, dumped)
 
     def test_load_private(self):
-
         @attr.s
         class C:
             _a: str = attr.ib()
@@ -82,7 +78,6 @@ class TestAttrs(TestCase):
         self.assertEqual('dunder', loaded.__b__)
 
     def test_load_defaults(self):
-
         @attr.s
         class C:
             a: str = attr.ib(default='standard')
@@ -92,7 +87,6 @@ class TestAttrs(TestCase):
         self.assertEqual('standard', loaded.a)
 
     def test_load_with_validator(self):
-
         @attr.s
         class C:
             a: int = attr.ib()
@@ -112,7 +106,6 @@ class TestAttrs(TestCase):
         self.assertIn('Cannot be greater than 10', str(err.exception))
 
     def test_load_with_converter(self):
-
         @attr.s
         class C:
             a: int = attr.ib(converter=int)
@@ -126,7 +119,6 @@ class TestAttrs(TestCase):
         self.assertEqual(43, loaded.b)
 
     def test_load_without_init(self):
-
         @attr.s(init=False)
         class C:
             a: int = attr.ib()
@@ -136,7 +128,6 @@ class TestAttrs(TestCase):
         self.assertEqual(42, loaded.a)
 
     def test_load_without_init_for_some(self):
-
         @attr.s
         class C:
             a: int = attr.ib()
@@ -148,7 +139,6 @@ class TestAttrs(TestCase):
         self.assertEqual('43', loaded.b)
 
     def test_load_frozen(self):
-
         @attr.s(frozen=True)
         class C:
             a: int = attr.ib()
@@ -158,7 +148,6 @@ class TestAttrs(TestCase):
         self.assertEqual(42, loaded.a)
 
     def test_load_slots(self):
-
         @attr.s(slots=True)
         class C:
             a: int = attr.ib()
@@ -168,7 +157,6 @@ class TestAttrs(TestCase):
         self.assertEqual(42, loaded.a)
 
     def test_load_kw_only(self):
-
         @attr.s(kw_only=True)
         class C:
             a: int = attr.ib()
