@@ -4,7 +4,7 @@ from setuptools import setup
 
 here = os.path.abspath(os.path.dirname(__file__))
 meta_info = {}
-with open(os.path.join(here, 'jsons', '_meta.py'), 'r') as f:
+with open(os.path.join(here, 'jsons', '_package_info.py'), 'r') as f:
     exec(f.read(), meta_info)
 
 with open('README.md', 'r') as f:
@@ -24,18 +24,21 @@ setup(
         'jsons',
         'jsons.classes',
         'jsons.deserializers',
-        'jsons.serializers'
-    ],
-    install_requires=[
-        'typish>=1.9.2'
+        'jsons.serializers',
     ],
     python_requires='>=3.5',
-    test_suite='tests',
-    tests_require=[
-        'dataclasses;python_version=="3.6"',
-        'tzdata;python_version>="3.9"',
-        'attrs'
+    install_requires=[
+        'typish>=1.9.2',
     ],
+    extras_require={
+        'test': [
+            'dataclasses;python_version=="3.6"',
+            'tzdata;python_version>="3.9"',
+            'attrs',
+            'scons',
+        ]
+    },
+    test_suite='tests',
     zip_safe=False,
     classifiers=[
         'Intended Audience :: Developers',
@@ -48,6 +51,6 @@ setup(
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
-        'Programming Language :: Python :: 3.9'
+        'Programming Language :: Python :: 3.9',
     ]
 )
