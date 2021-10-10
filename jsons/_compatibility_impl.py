@@ -81,7 +81,7 @@ def get_type_hints(callable_: callable, fallback_ns=None):
             context_dict = sys.modules[fallback_ns].__dict__
             result = typing.get_type_hints(callable_, globalns=context_dict)
 
-    if type(callable_) is type:
+    if sys.version_info.minor >= 10 and type(callable_) is type:
         annotations_from_init = typing.get_type_hints(callable_.__init__)
         if 'return' in annotations_from_init:
             # Python3.10: 'return' is a key that holds the returning type.

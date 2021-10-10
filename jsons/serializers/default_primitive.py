@@ -1,4 +1,4 @@
-from typing import Optional, NewType
+from typing import Optional, Any
 
 from jsons.exceptions import SerializationError
 
@@ -15,8 +15,8 @@ def default_primitive_serializer(obj: object,
     result = obj
 
     cls_ = cls
-    if isinstance(cls, NewType):
-       cls_ = cls.__supertype__
+    if _is_newtype(cls):
+        cls_ = cls.__supertype__
 
     if cls_ and obj is not None and not isinstance(obj, cls_):
         try:
@@ -25,3 +25,8 @@ def default_primitive_serializer(obj: object,
             raise SerializationError('Could not cast "{}" into "{}"'
                                      .format(obj, cls_.__name__)) from err
     return result
+
+
+def _is_newtype(cls: Any) -> bool:
+    # isinstance(cls, NewType) only works as of Python3.10.
+    return hasattr(cls, '__supertype__') and 'NewType' in str(cls)
