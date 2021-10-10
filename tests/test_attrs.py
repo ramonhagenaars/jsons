@@ -3,7 +3,7 @@ from unittest import TestCase, skipIf
 
 import jsons
 from jsons import DeserializationError
-try:
+if sys.version_info.minor != 5:
     from test_resources.attrs_classes import (
         AttrsClass,
         AttrsClassAutoAttribs,
@@ -18,8 +18,6 @@ try:
         AttrsClassSlots,
         AttrsClassKwOnly,
     )
-except ImportError:
-    pass  # In case of 3.5
 
 
 @skipIf(sys.version_info.minor == 5, reason='Unsupported syntax for 3.5')
