@@ -1,4 +1,4 @@
-from typing import Optional, Any
+from typing import Optional, Any, NewType
 
 from jsons.exceptions import SerializationError
 
@@ -28,5 +28,9 @@ def default_primitive_serializer(obj: object,
 
 
 def _is_newtype(cls: Any) -> bool:
-    # isinstance(cls, NewType) only works as of Python3.10.
-    return hasattr(cls, '__supertype__') and 'NewType' in str(cls)
+    try:
+        # isinstance(cls, NewType) only works as of Python3.10.
+        result = isinstance(cls, NewType)
+    except TypeError:
+        result = hasattr(cls, '__supertype__')
+    return result
