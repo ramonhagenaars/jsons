@@ -84,6 +84,7 @@ list_of_tuples = jsons.load(some_dict, List[Tuple[AClass, AnotherClass]])
 
 # 1.6.0
 
+- Feature: Support for Python3.10.
 - Feature: Support for `attrs`.
 
 ### 1.5.1

@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, NewType
 
 from jsons.exceptions import SerializationError
 
@@ -13,10 +13,15 @@ def default_primitive_serializer(obj: object,
     :return: ``obj``.
     """
     result = obj
-    if cls and obj is not None and not isinstance(obj, cls):
+
+    cls_ = cls
+    if isinstance(cls, NewType):
+       cls_ = cls.__supertype__
+
+    if cls_ and obj is not None and not isinstance(obj, cls_):
         try:
-            result = cls(obj)
+            result = cls_(obj)
         except ValueError as err:
             raise SerializationError('Could not cast "{}" into "{}"'
-                                     .format(obj, cls.__name__)) from err
+                                     .format(obj, cls_.__name__)) from err
     return result

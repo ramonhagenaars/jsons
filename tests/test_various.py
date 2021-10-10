@@ -73,7 +73,7 @@ class TestVarious(TestCase):
                 self.uid = uid
                 self.name = name
 
-        dumped = jsons.dump(User('uid', 'name'))
+        dumped = jsons.dump(User(Uid('uid'), 'name'))
         loaded = jsons.load(dumped, User)
 
         self.assertEqual('uid', loaded.uid)
