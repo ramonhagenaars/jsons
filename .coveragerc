@@ -7,4 +7,4 @@ omit =
     */test_resources/*
     tests/*
 include =
-    barentsz/*
+    jsons/*
