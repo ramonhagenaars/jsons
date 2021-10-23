@@ -34,6 +34,7 @@ setup(
         'test': [
             'dataclasses;python_version=="3.6"',
             'tzdata;python_version>="3.9"',
+            'coverage',
             'attrs',
             'scons',
         ]
