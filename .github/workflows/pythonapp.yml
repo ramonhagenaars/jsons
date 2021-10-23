@@ -32,3 +32,20 @@ jobs:
 
       - name: Test
         run: scons test
+
+      - name: Coverage
+        run: scons coverage
+
+      - name: Generate coverage report
+        run: pytest --cov=./ --cov-report=xml
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v1
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          file: ./coverage.xml
+          directory: ./coverage/reports/
+          flags: unittests
+          env_vars: OS,PYTHON
+          name: codecov-umbrella
+          fail_ci_if_error: true
