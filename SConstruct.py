@@ -35,7 +35,7 @@ if 'doctest' in COMMAND_LINE_TARGETS:
 
 if 'coverage' in COMMAND_LINE_TARGETS:
     _exec('coverage run -m unittest discover tests')
-    _exec('coverage report -m --fail-under=100')
+    _exec('coverage report -m --fail-under=95')
 
 if 'pycodestyle' in COMMAND_LINE_TARGETS:
     _exec('pycodestyle {} -v --config=setup.cfg'.format(_SUBJECT))

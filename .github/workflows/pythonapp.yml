@@ -33,6 +33,9 @@ jobs:
       - name: Test
         run: scons test
 
+      - name: Coverage
+        run: scons coverage
+
       - name: Generate coverage report
         run: pytest --cov=./ --cov-report=xml
 
