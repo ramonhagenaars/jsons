@@ -122,7 +122,7 @@ from jsons._load_impl import (
     loads,
     loadb,
 )
-from jsons._meta import __version__
+from jsons._package_info import __version__
 from jsons._transform_impl import transform
 from jsons._validation import (
     validate,
