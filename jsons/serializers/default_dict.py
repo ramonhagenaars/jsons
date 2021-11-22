@@ -1,4 +1,4 @@
-from typing import Optional, Callable, Dict, Tuple
+from typing import Callable, Dict, Optional, Tuple
 
 from jsons._common_impl import JSON_KEYS
 from jsons._dump_impl import dump
@@ -71,10 +71,15 @@ def _store_and_hash(
         # Apparently key is not a valid json key value. Since it got into
         # a Python dict without crashing, it must be hashable.
         obj_ = {**obj}
-        key_hash = hash(key)
-        if '-keys' not in obj_:
-            obj_['-keys'] = {}
+
+        # However there may be a serializer set for it
         dumped_key = dump(key, **kwargs)
-        obj_['-keys'][key_hash] = dumped_key
-        result = (obj_, key_hash)
+        if not any(issubclass(type(dumped_key), json_key) for json_key in JSON_KEYS):
+            key_hash = hash(key)
+            if '-keys' not in obj_:
+                obj_['-keys'] = {}
+            obj_['-keys'][key_hash] = dumped_key
+            result = (obj_, key_hash)
+        else:
+            result = (obj_, dumped_key)
     return result
