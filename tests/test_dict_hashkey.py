@@ -5,10 +5,7 @@ from unittest import TestCase
 import jsons
 
 
-class Foo(NamedTuple):
-    a: int
-    b: int
-    c: int
+Foo = NamedTuple('Foo', [('a', int), ('b', int), ('c', int)])
 
 
 @dataclass
