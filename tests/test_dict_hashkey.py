@@ -15,6 +15,13 @@ class D:
     def __eq__(self, other):
         return self.a == other.a and self.b == other.b
 
+    def __init__(self, a: int, b: int):
+        self.a = a
+        self.b = b
+
+    def __eq__(self, other):
+        return self.a == other.a and self.b == other.b
+
 
 class TestDict(TestCase):
     def tearDown(cls):
