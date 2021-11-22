@@ -67,6 +67,7 @@ def default_object_serializer(
             obj, strip_privates, strip_properties, strip_class_variables,
             strip_attr, strict)
         cls = obj.__class__
+
     verbose = Verbosity.from_value(verbose)
     kwargs_ = {
         **kwargs,
@@ -110,6 +111,8 @@ def _do_serialize(
         strict: bool = False,
         fork_inst: Optional[type] = StateHolder) -> Dict[str, object]:
     result = dict()
+    is_attrs_cls = getattr(cls, '__attrs_attrs__', None) is not None
+    make_attributes_public = is_attrs_cls and not strip_privates
     for attr_name, cls_ in attributes.items():
         attr = getattr(obj, attr_name)
         attr_type = cls_ or type(attr)
@@ -136,6 +139,9 @@ def _do_serialize(
                                 .format(attr, get_class_name(cls), err.args[0]),
                                 'attribute-not-serialized')
                 break
+
+        if make_attributes_public:
+            attr_name = attr_name.lstrip('_')
         _add_dumped_elem(result, attr_name, dumped_elem,
                          strip_nulls, key_transformer)
     return result

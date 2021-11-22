@@ -66,10 +66,11 @@ def get_naked_class(cls: type) -> type:
 
 
 @cached
-def get_type_hints(func: callable, fallback_ns=None):
-    # Python3.5: get_type_hints raises on classes without explicit constructor
+def get_type_hints(callable_: callable, fallback_ns=None):
+    # Python3.5: get_type_hints raises on classes without explicit constructor.
+    # Python3.10: get_type_hints on classes does not take the constructor.
     try:
-        result = typing.get_type_hints(func)
+        result = typing.get_type_hints(callable_)
     except AttributeError:
         result = {}
     except NameError:
@@ -78,5 +79,13 @@ def get_type_hints(func: callable, fallback_ns=None):
         # to find it's context. See https://bugs.python.org/issue34776
         if fallback_ns is not None:
             context_dict = sys.modules[fallback_ns].__dict__
-            result = typing.get_type_hints(func, globalns=context_dict)
+            result = typing.get_type_hints(callable_, globalns=context_dict)
+
+    if sys.version_info.minor >= 10 and type(callable_) is type:
+        annotations_from_init = typing.get_type_hints(callable_.__init__)
+        if 'return' in annotations_from_init:
+            # Python3.10: 'return' is a key that holds the returning type.
+            del annotations_from_init['return']
+        result = {**result, **annotations_from_init}
+
     return result
