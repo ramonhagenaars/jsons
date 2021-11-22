@@ -1,4 +1,3 @@
-from dataclasses import dataclass
 from typing import Dict, NamedTuple
 from unittest import TestCase
 
@@ -9,8 +8,12 @@ Foo = NamedTuple('Foo', [('a', int), ('b', int), ('c', int)])
 
 
 class D:
-    a: int
-    b: int
+    def __init__(self, a: int, b: int):
+        self.a = a
+        self.b = b
+
+    def __eq__(self, other):
+        return self.a == other.a and self.b == other.b
 
     def __init__(self, a: int, b: int):
         self.a = a
