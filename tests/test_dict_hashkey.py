@@ -15,13 +15,6 @@ class D:
     def __eq__(self, other):
         return self.a == other.a and self.b == other.b
 
-    def __init__(self, a: int, b: int):
-        self.a = a
-        self.b = b
-
-    def __eq__(self, other):
-        return self.a == other.a and self.b == other.b
-
 
 class TestDict(TestCase):
     def tearDown(cls):
@@ -41,7 +34,7 @@ class TestDict(TestCase):
         jsons.set_serializer(foo_serializer, Foo,  True)
         jsons.set_deserializer(foo_deserializer, Foo,  True)
 
-        bar: Dict[Foo, D] = {Foo(1, 2, 3): D(a=42, b=39)}
+        bar = {Foo(1, 2, 3): D(a=42, b=39)}
         dumped = jsons.dump(bar, cls=Dict[Foo, D],
                             strict=True,
                             strip_privates=True,
@@ -56,7 +49,7 @@ class TestDict(TestCase):
         self.assertEqual(loaded, bar)
 
     def test_dict_hashkey(self):
-        bar: Dict[Foo, D] = {Foo(1, 2, 3): D(a=42, b=39)}
+        bar = {Foo(1, 2, 3): D(a=42, b=39)}
         dumped = jsons.dump(bar, cls=Dict[Foo, D],
                             strict=True,
                             strip_privates=True,
