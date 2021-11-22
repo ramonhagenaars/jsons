@@ -34,7 +34,7 @@ class TestDict(TestCase):
         jsons.set_serializer(foo_serializer, Foo,  True)
         jsons.set_deserializer(foo_deserializer, Foo,  True)
 
-        bar: Dict[Foo, D] = {Foo(1, 2, 3): D(a=42, b=39)}
+        bar = {Foo(1, 2, 3): D(a=42, b=39)}
         dumped = jsons.dump(bar, cls=Dict[Foo, D],
                             strict=True,
                             strip_privates=True,
@@ -49,7 +49,7 @@ class TestDict(TestCase):
         self.assertEqual(loaded, bar)
 
     def test_dict_hashkey(self):
-        bar: Dict[Foo, D] = {Foo(1, 2, 3): D(a=42, b=39)}
+        bar = {Foo(1, 2, 3): D(a=42, b=39)}
         dumped = jsons.dump(bar, cls=Dict[Foo, D],
                             strict=True,
                             strip_privates=True,
