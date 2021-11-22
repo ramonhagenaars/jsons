@@ -1,4 +1,3 @@
-from dataclasses import dataclass
 from typing import Dict, NamedTuple
 from unittest import TestCase
 
@@ -8,10 +7,13 @@ import jsons
 Foo = NamedTuple('Foo', [('a', int), ('b', int), ('c', int)])
 
 
-@dataclass
 class D:
-    a: int
-    b: int
+    def __init__(self, a: int, b: int):
+        self.a = a
+        self.b = b
+
+    def __eq__(self, other):
+        return self.a == other.a and self.b == other.b
 
 
 class TestDict(TestCase):
