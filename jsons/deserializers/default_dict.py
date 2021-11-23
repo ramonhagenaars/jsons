@@ -1,9 +1,10 @@
-from typing import Optional, Callable
+from typing import Callable, Optional, Tuple
 
-from typish import get_args
-
+from jsons._common_impl import JSON_KEYS
 from jsons._load_impl import load
 from jsons.exceptions import DeserializationError
+
+from typish import get_args
 
 
 def default_dict_deserializer(
@@ -25,26 +26,37 @@ def default_dict_deserializer(
     cls_args = get_args(cls)
     kwargs_ = {**kwargs, 'key_transformer': key_transformer}
 
-    obj_ = _load_hashed_keys(obj, cls, cls_args, key_transformer=key_transformer, **kwargs)
+    (obj_, had_stored_keys) = _load_hashed_keys(obj, cls, cls_args,
+                                                key_transformer=key_transformer, **kwargs)
 
     if len(cls_args) == 2:
         cls_k, cls_v = cls_args
         kwargs_k = {**kwargs_, 'cls': cls_k}
         kwargs_v = {**kwargs_, 'cls': cls_v}
-        res = {load(key_tfr(k), **kwargs_k): load(obj_[k], **kwargs_v)
-               for k in obj_}
+        if (had_stored_keys and
+                not any(issubclass(type(cls_k), json_key) for json_key in JSON_KEYS)):
+            # There were hashed keys and the key is not a json key, therefore
+            # the key must have been hashed and therefore loaded already during _load_hashed_keys
+            # double deserializing under strict will fail, so avoid doing so.
+            res = {key_tfr(k): load(obj_[k], **kwargs_v)
+                   for k in obj_}
+        else:
+            # The key was either inherently json compatible or serialized to be so, thus
+            # avoiding hashed keys
+            res = {load(key_tfr(k), **kwargs_k): load(obj_[k], **kwargs_v)
+                   for k in obj_}
     else:
         res = {key_tfr(key): load(obj_[key], **kwargs_)
                for key in obj_}
     return res
 
 
-def _load_hashed_keys(obj: dict, cls: type, cls_args: tuple, **kwargs) -> dict:
+def _load_hashed_keys(obj: dict, cls: type, cls_args: tuple, **kwargs) -> Tuple[dict, bool]:
     # Load any hashed keys and return a copy of the given obj if any hashed
     # keys are unpacked.
     result = obj
 
-    stored_keys = list(obj.get('-keys', []))
+    stored_keys = set(obj.get('-keys', set()))
     if stored_keys:
         # Apparently, there are stored hashed keys, we need to unpack them.
         if len(cls_args) != 2:
@@ -65,4 +77,4 @@ def _load_hashed_keys(obj: dict, cls: type, cls_args: tuple, **kwargs) -> dict:
             del result[key]
 
         del result['-keys']
-    return result
+    return (result, len(stored_keys) > 0)
