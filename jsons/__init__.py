@@ -275,7 +275,6 @@ __all__ = [
 ]
 
 set_serializer(default_tuple_serializer, (tuple, Tuple))
-set_serializer(default_enum_serializer, Enum)
 set_serializer(default_complex_serializer, complex)
 set_serializer(default_datetime_serializer, datetime)
 set_serializer(default_date_serializer, date)
@@ -283,6 +282,7 @@ set_serializer(default_time_serializer, time)
 set_serializer(default_timezone_serializer, timezone)
 set_serializer(default_timedelta_serializer, timedelta)
 set_serializer(default_primitive_serializer, (str, int, float, bool, None))
+set_serializer(default_enum_serializer, (Enum, IntEnum))  # must be after primitive_serializer
 set_serializer(default_dict_serializer, Mapping, False)
 set_serializer(default_list_serializer, (list, List))
 set_serializer(default_iterable_serializer, Iterable, False)
@@ -291,13 +291,11 @@ set_serializer(default_uuid_serializer, UUID)
 set_serializer(default_decimal_serializer, Decimal)
 set_serializer(default_union_serializer, (Union, Optional))
 set_serializer(default_path_serializer, PurePath)
-set_serializer(default_enum_serializer, IntEnum)  # must be after primitive_serializer
 
 set_deserializer(default_list_deserializer, (list, List))
 set_deserializer(default_tuple_deserializer, (tuple, Tuple))
 set_deserializer(default_union_deserializer, (Union, Optional))
 set_deserializer(default_defaultdict_deserializer, DefaultDict)
-set_deserializer(default_enum_deserializer, Enum)
 set_deserializer(default_datetime_deserializer, datetime)
 set_deserializer(default_date_deserializer, date)
 set_deserializer(default_time_deserializer, time)
@@ -306,6 +304,7 @@ set_deserializer(default_timedelta_deserializer, timedelta)
 set_deserializer(default_string_deserializer, str)
 set_deserializer(default_nonetype_deserializer, NoneType)
 set_deserializer(default_primitive_deserializer, (int, float, bool))
+set_deserializer(default_enum_deserializer, (Enum, IntEnum))  # must be after primitive_deserializer
 set_deserializer(default_mapping_deserializer, (Mapping, dict, Dict), False)
 set_deserializer(default_iterable_deserializer, Iterable, False)
 set_deserializer(default_object_deserializer, object, False)
@@ -313,7 +312,6 @@ set_deserializer(default_uuid_deserializer, UUID)
 set_deserializer(default_complex_deserializer, complex)
 set_deserializer(default_decimal_deserializer, Decimal)
 set_deserializer(default_path_deserializer, PurePath)
-set_deserializer(default_enum_deserializer, IntEnum)  # must be after primitive_deserializer
 
 if default_zone_info_serializer and default_zone_info_deserializer:
     from zoneinfo import ZoneInfo
