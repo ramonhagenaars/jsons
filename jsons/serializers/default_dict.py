@@ -67,19 +67,19 @@ def _store_and_hash(
     # Store the given key in the given dict under a special section if that
     # key is not a valid json key. Return a hash of that key.
     result = None
-    if not any(issubclass(type(key), json_key) for json_key in JSON_KEYS):
-        # Apparently key is not a valid json key value. Since it got into
-        # a Python dict without crashing, it must be hashable.
-        obj_ = {**obj}
-
-        # However there may be a serializer set for it
+    if not _is_valid_json_key(key):
+        # First try to dump the key, that might be enough already.
         dumped_key = dump(key, **kwargs)
-        if not any(issubclass(type(dumped_key), json_key) for json_key in JSON_KEYS):
+        result = obj, dumped_key
+        if not _is_valid_json_key(dumped_key):
+            # Apparently, this was not enough; the key is still not "jsonable".
             key_hash = hash(key)
-            if '-keys' not in obj_:
-                obj_['-keys'] = {}
+            obj_ = {**obj}
+            obj_.setdefault('-keys', {})
             obj_['-keys'][key_hash] = dumped_key
-            result = (obj_, key_hash)
-        else:
-            result = (obj_, dumped_key)
+            result = obj_, key_hash
     return result
+
+
+def _is_valid_json_key(key: object) -> bool:
+    return any(issubclass(type(key), json_key) for json_key in JSON_KEYS)
