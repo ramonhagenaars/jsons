@@ -3,7 +3,8 @@ from typing import Callable, Optional, Union
 from typish import get_args
 
 from jsons._common_impl import NoneType
-from jsons._compatibility_impl import tuple_with_ellipsis, get_union_params
+from jsons._compatibility_impl import (get_type_hints, get_union_params,
+                                       tuple_with_ellipsis)
 from jsons._load_impl import load
 from jsons.exceptions import UnfulfilledArgumentError
 
@@ -67,7 +68,10 @@ def default_namedtuple_deserializer(
 
         # _field_types has been deprecated in favor of __annotations__ in Python 3.8
         if hasattr(cls, '__annotations__'):
-            field_types = getattr(cls, '__annotations__', {})
+            # It is important to use get_type_hints so that forward references get resolved,
+            # rather than access __annotations__ directly
+            # field_types = getattr(cls, '__annotations__', {})
+            field_types = get_type_hints(cls)
         else:
             field_types = getattr(cls, '_field_types', {})
 
