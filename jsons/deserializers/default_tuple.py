@@ -70,7 +70,6 @@ def default_namedtuple_deserializer(
         if hasattr(cls, '__annotations__'):
             # It is important to use get_type_hints so that forward references get resolved,
             # rather than access __annotations__ directly
-            # field_types = getattr(cls, '__annotations__', {})
             field_types = get_type_hints(cls)
         else:
             field_types = getattr(cls, '_field_types', {})
