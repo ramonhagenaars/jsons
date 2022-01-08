@@ -41,5 +41,10 @@ jobs:
         run: |
           scons coverage
           codecov
+
+  report:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
       - name: Coverage Report
         uses: codecov/codecov-action@v1
