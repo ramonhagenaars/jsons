@@ -82,6 +82,11 @@ list_of_tuples = jsons.load(some_dict, List[Tuple[AClass, AnotherClass]])
 
 ## Recent updates
 
+### 1.6.1
+
+- Bugfix: Loading dicts with hashed keys could cause an error due to being loaded twice (thanks to georgeharker).
+- Bugfix: IntEnums were not serialized with their names when `use_enum_name=True` (thanks to georgeharker).
+
 ### 1.6.0
 
 - Feature: Support for Python3.10.

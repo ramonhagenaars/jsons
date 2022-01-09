@@ -1,4 +1,4 @@
-from typing import Optional, Callable
+from typing import Callable, Optional, Tuple
 
 from typish import get_args
 
@@ -21,30 +21,24 @@ def default_dict_deserializer(
     :param kwargs: any keyword arguments.
     :return: a deserialized dict instance.
     """
-    key_tfr = key_transformer or (lambda key: key)
     cls_args = get_args(cls)
-    kwargs_ = {**kwargs, 'key_transformer': key_transformer}
 
-    obj_ = _load_hashed_keys(obj, cls, cls_args, key_transformer=key_transformer, **kwargs)
+    obj_, keys_were_hashed = _load_hashed_keys(
+        obj, cls, cls_args, key_transformer=key_transformer, **kwargs)
 
-    if len(cls_args) == 2:
-        cls_k, cls_v = cls_args
-        kwargs_k = {**kwargs_, 'cls': cls_k}
-        kwargs_v = {**kwargs_, 'cls': cls_v}
-        res = {load(key_tfr(k), **kwargs_k): load(obj_[k], **kwargs_v)
-               for k in obj_}
-    else:
-        res = {key_tfr(key): load(obj_[key], **kwargs_)
-               for key in obj_}
-    return res
+    return _deserialize(obj_, cls_args, key_transformer, keys_were_hashed, kwargs)
 
 
-def _load_hashed_keys(obj: dict, cls: type, cls_args: tuple, **kwargs) -> dict:
+def _load_hashed_keys(
+        obj: dict,
+        cls: type,
+        cls_args: tuple,
+        **kwargs) -> Tuple[dict, bool]:
     # Load any hashed keys and return a copy of the given obj if any hashed
     # keys are unpacked.
     result = obj
 
-    stored_keys = list(obj.get('-keys', []))
+    stored_keys = set(obj.get('-keys', set()))
     if stored_keys:
         # Apparently, there are stored hashed keys, we need to unpack them.
         if len(cls_args) != 2:
@@ -65,4 +59,29 @@ def _load_hashed_keys(obj: dict, cls: type, cls_args: tuple, **kwargs) -> dict:
             del result[key]
 
         del result['-keys']
-    return result
+    return result, len(stored_keys) > 0
+
+
+def _deserialize(
+        obj: dict,
+        cls_args: tuple,
+        key_transformer: Callable[[str], str],
+        keys_were_hashed: bool,
+        kwargs: dict) -> dict:
+    key_transformer = key_transformer or (lambda key: key)
+    key_func = key_transformer
+    kwargs_ = {**kwargs, 'key_transformer': key_transformer}
+
+    if len(cls_args) == 2:
+        cls_k, cls_v = cls_args
+        kwargs_['cls'] = cls_v
+        if not keys_were_hashed:
+            # In case of cls is something like Dict[<key>, <value>], we need to
+            # ensure that the keys in the result are <key>. If the keys were
+            # hashed though, they have been loaded already.
+            kwargs_k = {**kwargs, 'cls': cls_k}
+            key_func = lambda key: load(key_transformer(key), **kwargs_k)
+    return {
+        key_func(key): load(obj[key], **kwargs_)
+        for key in obj
+    }

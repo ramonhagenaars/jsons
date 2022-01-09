@@ -88,7 +88,7 @@ Alternatively, you can make use of the `JsonSerializable` class.
 from collections.abc import Mapping
 from datetime import datetime, date, time, timezone, timedelta
 from decimal import Decimal
-from enum import Enum
+from enum import Enum, IntEnum
 from pathlib import PurePath
 from typing import Union, List, Tuple, Iterable, Optional, DefaultDict, Dict
 from uuid import UUID
@@ -275,7 +275,6 @@ __all__ = [
 ]
 
 set_serializer(default_tuple_serializer, (tuple, Tuple))
-set_serializer(default_enum_serializer, Enum)
 set_serializer(default_complex_serializer, complex)
 set_serializer(default_datetime_serializer, datetime)
 set_serializer(default_date_serializer, date)
@@ -283,6 +282,7 @@ set_serializer(default_time_serializer, time)
 set_serializer(default_timezone_serializer, timezone)
 set_serializer(default_timedelta_serializer, timedelta)
 set_serializer(default_primitive_serializer, (str, int, float, bool, None))
+set_serializer(default_enum_serializer, (Enum, IntEnum))  # must be after primitive_serializer
 set_serializer(default_dict_serializer, Mapping, False)
 set_serializer(default_list_serializer, (list, List))
 set_serializer(default_iterable_serializer, Iterable, False)
@@ -296,7 +296,6 @@ set_deserializer(default_list_deserializer, (list, List))
 set_deserializer(default_tuple_deserializer, (tuple, Tuple))
 set_deserializer(default_union_deserializer, (Union, Optional))
 set_deserializer(default_defaultdict_deserializer, DefaultDict)
-set_deserializer(default_enum_deserializer, Enum)
 set_deserializer(default_datetime_deserializer, datetime)
 set_deserializer(default_date_deserializer, date)
 set_deserializer(default_time_deserializer, time)
@@ -305,6 +304,7 @@ set_deserializer(default_timedelta_deserializer, timedelta)
 set_deserializer(default_string_deserializer, str)
 set_deserializer(default_nonetype_deserializer, NoneType)
 set_deserializer(default_primitive_deserializer, (int, float, bool))
+set_deserializer(default_enum_deserializer, (Enum, IntEnum))  # must be after primitive_deserializer
 set_deserializer(default_mapping_deserializer, (Mapping, dict, Dict), False)
 set_deserializer(default_iterable_deserializer, Iterable, False)
 set_deserializer(default_object_deserializer, object, False)
