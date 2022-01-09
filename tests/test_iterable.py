@@ -45,3 +45,21 @@ class TestIterable(TestCase):
 
         with self.assertRaises(SerializationError):
             jsons.dump(t, Tuple[int, str, int], strict=True)  # Not enough types.
+
+    def test_dump_with_tasks(self):
+        class _Task:
+            def __init__(self, target, args):
+                self.target = target
+                self.args = args
+
+            def start(self):
+                return self.target(*self.args)
+
+            def join(self):
+                ...
+
+        input = (1, 2, 3, 4)
+
+        output = jsons.dump(input, strict=True, tasks=2, task_type=_Task)
+
+        self.assertListEqual([1, 2, 3, 4], output)
