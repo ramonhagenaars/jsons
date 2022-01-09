@@ -1,5 +1,3 @@
-from jsons.exceptions import JsonsError
-
 try:
     from zoneinfo import ZoneInfo
 
@@ -10,8 +8,6 @@ try:
         :param obj: a serialized ZoneInfo object.
         :return: an instance of ZoneInfo.
         """
-        if not ZoneInfo:
-            raise JsonsError('ZoneInfo is not available.')
         return ZoneInfo(obj['key'])
 
 except ImportError:
