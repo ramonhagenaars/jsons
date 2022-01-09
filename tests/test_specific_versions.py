@@ -108,7 +108,6 @@ class TestSpecificVersions(TestCase):
 
         self.assertEqual(T, Tuplicitous(a=1, b=2, c=Tuplicity(a=99, b=100)))
 
-
     @only_version_3(6, and_above=True)
     def test_dump_dataclass_with_optional(self):
         from version_with_dataclasses import DataclassWithOptional
@@ -189,3 +188,11 @@ class TestSpecificVersions(TestCase):
 
         self.assertDictEqual({'d': {'a': 1, 'b': 2}, 'l': [1, 2, 3]}, dumped)
         self.assertEqual(c, loaded)
+
+    @only_version_3(10, and_above=True)
+    def test_get_type_hints_for_class(self):
+        from test_resources.simple_class_with_hints import C
+
+        hints = get_type_hints(C)
+
+        self.assertDictEqual({"x": int}, hints)
