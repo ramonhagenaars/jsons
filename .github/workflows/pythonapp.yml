@@ -13,9 +13,13 @@ jobs:
             '3.7',
             '3.8',
             '3.9',
-#            '3.10'  FIXME: uncomment as soon as it is available.
+            '3.10',
         ]
-        os: [ ubuntu-latest, macOS-latest, windows-latest ]
+        os: [
+            ubuntu-latest,
+#            macOS-latest,  FIXME: seems to not work at the moment.
+            windows-latest
+        ]
     name: Python ${{ matrix.python-version }} on ${{ matrix.os }}
     steps:
       - uses: actions/checkout@master
@@ -37,5 +41,10 @@ jobs:
         run: |
           scons coverage
           codecov
+
+  report:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
       - name: Coverage Report
         uses: codecov/codecov-action@v1
