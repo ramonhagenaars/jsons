@@ -184,3 +184,17 @@ class TestList(TestCase):
 
             self.assertIn('500', warn_msg)
             self.assertEqual(999, len(loaded))
+
+    def test_propagation_of_fork_inst(self):
+        class C:
+            def __init__(self, x: int):
+                self.x = x
+
+        def c_deserializer(obj, *_, **__) -> C:
+            return C(obj['x'] * 2)
+
+        fork = jsons.fork(name='fork_inst_propagation')
+        jsons.set_deserializer(c_deserializer, C, fork_inst=fork)
+        cs = jsons.loads('[{"x":2},{"x":3}]', List[C], fork_inst=fork)
+        self.assertEqual(4, cs[0].x)
+        self.assertEqual(6, cs[1].x)
