@@ -24,7 +24,7 @@ jobs:
     steps:
       - uses: actions/checkout@master
       - name: Setup python
-        uses: actions/setup-python@v1
+        uses: actions/setup-python@v3
         with:
           python-version: ${{ matrix.python-version }}
           architecture: x64
