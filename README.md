@@ -82,6 +82,10 @@ list_of_tuples = jsons.load(some_dict, List[Tuple[AClass, AnotherClass]])
 
 ## Recent updates
 
+### 1.6.2
+
+- Bugfix: `fork_inst`s were not propagated in `default_list_deserializer` (thanks to patrickguenther).
+
 ### 1.6.1
 
 - Bugfix: Loading dicts with hashed keys could cause an error due to being loaded twice (thanks to georgeharker).
@@ -182,6 +186,8 @@ list_of_tuples = jsons.load(some_dict, List[Tuple[AClass, AnotherClass]])
 Special thanks to the following contributors of code, discussions or
 suggestions:
 
+[patrickguenther](https://github.com/patrickguenther),
+[davetapley](https://github.com/davetapley),
 [pietrodn](https://github.com/pietrodn),
 [georgeharker](https://github.com/georgeharker),
 [aecay](https://github.com/aecay),
