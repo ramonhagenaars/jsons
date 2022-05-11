@@ -56,7 +56,7 @@ def _do_load(
     result = []
     for index, elem in enumerate(obj):
         try:
-            result.append(load(elem, cls=cls, tasks=1, **kwargs))
+            result.append(load(elem, cls=cls, tasks=1, fork_inst=fork_inst, **kwargs))
         except DeserializationError as err:
             new_msg = ('Could not deserialize element at index %s. %s' %
                        (index, err.message))

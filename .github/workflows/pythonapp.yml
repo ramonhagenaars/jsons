@@ -17,14 +17,14 @@ jobs:
         ]
         os: [
             ubuntu-latest,
-#            macOS-latest,  FIXME: seems to not work at the moment.
+            macOS-latest,
             windows-latest
         ]
     name: Python ${{ matrix.python-version }} on ${{ matrix.os }}
     steps:
       - uses: actions/checkout@master
       - name: Setup python
-        uses: actions/setup-python@v1
+        uses: actions/setup-python@v3
         with:
           python-version: ${{ matrix.python-version }}
           architecture: x64
