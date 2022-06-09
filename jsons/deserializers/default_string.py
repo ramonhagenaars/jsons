@@ -17,6 +17,9 @@ def default_string_deserializer(obj: str,
     :param kwargs: any keyword arguments.
     :return: the deserialized obj.
     """
+    target_is_str = cls is str and not kwargs.get('_inferred_cls')
+    if target_is_str:
+        return str(obj)
     try:
         result = load(obj, datetime, **kwargs)
     except DeserializationError:

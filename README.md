@@ -82,6 +82,10 @@ list_of_tuples = jsons.load(some_dict, List[Tuple[AClass, AnotherClass]])
 
 ## Recent updates
 
+### 1.6.3
+
+- Bugfix: a string was sometimes unintentionally parsed into a datetime.
+
 ### 1.6.2
 
 - Bugfix: `fork_inst`s were not propagated in `default_list_deserializer` (thanks to patrickguenther).
