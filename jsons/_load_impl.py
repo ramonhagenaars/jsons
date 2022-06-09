@@ -79,6 +79,7 @@ def load(
         return json_obj
     if isinstance(cls, str):
         cls = get_cls_from_str(cls, json_obj, fork_inst)
+    original_cls = cls
     cls, meta_hints = _check_and_get_cls_and_meta_hints(
         json_obj, cls, fork_inst, kwargs.get('_inferred_cls', False))
 
@@ -88,12 +89,13 @@ def load(
     initial = kwargs.get('_initial', True)
 
     kwargs_ = {
+        'meta_hints': meta_hints,  # Overridable by kwargs.
+        **kwargs,
         'strict': strict,
         'fork_inst': fork_inst,
         'attr_getters': attr_getters,
-        'meta_hints': meta_hints,
         '_initial': False,
-        **kwargs
+        '_inferred_cls': cls is not original_cls,
     }
 
     return _do_load(json_obj, deserializer, cls, initial, **kwargs_)
