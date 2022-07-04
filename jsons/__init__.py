@@ -90,7 +90,7 @@ from datetime import datetime, date, time, timezone, timedelta
 from decimal import Decimal
 from enum import Enum, IntEnum
 from pathlib import PurePath
-from typing import Union, List, Tuple, Iterable, Optional, DefaultDict, Dict
+from typing import Union, List, Tuple, Iterable, Optional, DefaultDict, Dict, Literal
 from uuid import UUID
 
 from jsons._common_impl import NoneType
@@ -153,6 +153,7 @@ from jsons.deserializers.default_tuple import default_tuple_deserializer
 from jsons.deserializers.default_union import default_union_deserializer
 from jsons.deserializers.default_uuid import default_uuid_deserializer
 from jsons.deserializers.default_zone_info import default_zone_info_deserializer
+from jsons.deserializers.default_literal import default_literal_deserializer
 from jsons.exceptions import (
     JsonsError,
     ValidationError,
@@ -180,6 +181,7 @@ from jsons.serializers.default_tuple import default_tuple_serializer
 from jsons.serializers.default_union import default_union_serializer
 from jsons.serializers.default_uuid import default_uuid_serializer
 from jsons.serializers.default_zone_info import default_zone_info_serializer
+from jsons.serializers.default_literal import default_literal_serializer
 
 KEY_TRANSFORMER_SNAKECASE = snakecase
 KEY_TRANSFORMER_CAMELCASE = camelcase
@@ -249,6 +251,7 @@ __all__ = [
     default_uuid_serializer.__name__,
     default_union_serializer.__name__,
     default_path_serializer.__name__,
+    default_literal_serializer.__name__,
 
     # Deserializers:
     default_list_deserializer.__name__,
@@ -272,6 +275,7 @@ __all__ = [
     default_uuid_deserializer.__name__,
     default_decimal_deserializer.__name__,
     default_path_deserializer.__name__,
+    default_literal_deserializer.__name__,
 ]
 
 set_serializer(default_tuple_serializer, (tuple, Tuple))
@@ -291,6 +295,7 @@ set_serializer(default_uuid_serializer, UUID)
 set_serializer(default_decimal_serializer, Decimal)
 set_serializer(default_union_serializer, (Union, Optional))
 set_serializer(default_path_serializer, PurePath)
+set_serializer(default_literal_serializer, Literal)
 
 set_deserializer(default_list_deserializer, (list, List))
 set_deserializer(default_tuple_deserializer, (tuple, Tuple))
@@ -312,6 +317,7 @@ set_deserializer(default_uuid_deserializer, UUID)
 set_deserializer(default_complex_deserializer, complex)
 set_deserializer(default_decimal_deserializer, Decimal)
 set_deserializer(default_path_deserializer, PurePath)
+set_deserializer(default_literal_deserializer, Literal)
 
 if default_zone_info_serializer and default_zone_info_deserializer:
     from zoneinfo import ZoneInfo
