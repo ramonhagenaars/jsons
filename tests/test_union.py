@@ -86,6 +86,27 @@ class TestUnion(TestCase):
         with self.assertRaises(SerializationError):
             jsons.dump(A(1), Union[B], strict=True)
 
+    def test_dump_union_syntax(self):
+        class A:
+            def __init__(self, x: int | float):
+                self.x = x
+
+        dumped = jsons.dump(A(1))
+        expected = {'x': 1}
+        self.assertDictEqual(expected, dumped)
+
+        dumped2 = jsons.dump(A(1), strict=True)
+        expected2 = {'x': 1}
+        self.assertDictEqual(expected2, dumped2)
+
+        dumped = jsons.dump(A(2.0))
+        expected = {'x': 2.0}
+        self.assertDictEqual(expected, dumped)
+
+        dumped2 = jsons.dump(A(2.0), strict=True)
+        expected2 = {'x': 2.0}
+        self.assertDictEqual(expected2, dumped2)
+
     def test_fail(self):
         with self.assertRaises(SerializationError) as err:
             jsons.dump('nope', Union[int, float])
@@ -125,6 +146,18 @@ class TestUnion(TestCase):
         # Test Union with invalid value.
         with self.assertRaises(DeserializationError):
             jsons.load({'x': 'no match in the union'}, C).x
+
+    def test_load_union_syntax(self):
+        class A:
+            def __init__(self, x: int | float):
+                self.x = x
+
+        self.assertEqual(1, jsons.load({'x': 1}, A).x)
+        self.assertEqual(2.0, jsons.load({'x': 2.0}, A).x)
+
+        # Test Union with invalid value.
+        with self.assertRaises(DeserializationError):
+            jsons.load({'x': 'no match in the union'}, A).x
 
     def test_load_none(self):
         class C:
