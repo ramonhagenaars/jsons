@@ -4,6 +4,7 @@ PRIVATE MODULE: do not import (from) it directly.
 This module contains functionality for setting and getting serializers and
 deserializers.
 """
+import types
 from typing import Optional, Dict, Sequence, Union
 
 from jsons._cache import cached
@@ -156,4 +157,7 @@ def _get_parents(cls: type, lizers: list) -> list:
                 parents.append(cls_)
         except (TypeError, AttributeError):
             pass  # Some types do not support `issubclass` (e.g. Union).
+    if not parents and isinstance(naked_cls, types.UnionType) and \
+            Union in lizers:
+        parents = [Union]
     return parents
