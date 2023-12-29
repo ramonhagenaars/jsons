@@ -106,7 +106,7 @@ Here is an example:
     def my_custom_datetime_deserializer(obj: Union[int, float],
                                         cls: type = datetime,
                                         **kwargs) -> datetime:
-        return datetime.fromtimestamp(ts)
+        return datetime.fromtimestamp(obj)
 
 Note: the type hints are *not* required.
 
