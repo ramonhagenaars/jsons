@@ -315,7 +315,7 @@ set_deserializer(default_path_deserializer, PurePath)
 
 if default_zone_info_serializer and default_zone_info_deserializer:
     from zoneinfo import ZoneInfo
-    __all__.append(default_zone_info_serializer)
-    __all__.append(default_zone_info_deserializer)
+    __all__.append(default_zone_info_serializer.__name__)
+    __all__.append(default_zone_info_deserializer.__name__)
     set_serializer(default_zone_info_serializer, ZoneInfo)
     set_deserializer(default_zone_info_deserializer, ZoneInfo)
